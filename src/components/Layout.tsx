@@ -15,7 +15,8 @@ import {
   User2,
   Wallet2,
   Users,
-  X
+  X,
+  Settings
 } from 'lucide-react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useEffect, useRef, useState, useCallback } from 'react';
@@ -25,6 +26,7 @@ import { useTheme } from '../contexts/ThemeContext';
 import { BANK_COLOR_PALETTE, DEFAULT_BANK_COLOR, normalizeColor, applyColorTheme } from '../utils/colors';
 import { getFirstName } from '../utils/formatters';
 import type { ApiProfileResponse } from '../types/api';
+import '../styles/layout-new.css';
 
 const navItems = [
   { label: 'Inicio', path: '/dashboard', icon: LayoutDashboard },
@@ -347,10 +349,10 @@ export default function Layout() {
   };
 
   return (
-    <div className="app-shell">
+    <div className="layout-new-app-shell">
       {/* Botão hambúrguer para mobile */}
       <button 
-        className="mobile-menu-toggle"
+        className="layout-new-mobile-toggle"
         onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
         aria-label="Abrir menu"
       >
@@ -360,340 +362,232 @@ export default function Layout() {
       {/* Backdrop para mobile */}
       {mobileMenuOpen && (
         <div 
-          className="mobile-sidebar-backdrop"
+          className="layout-new-mobile-backdrop"
           onClick={() => setMobileMenuOpen(false)}
         />
       )}
 
-      <div className="sidebar-wrapper">
+      <div className="layout-new-sidebar-wrapper">
         <button 
-          className="sidebar-toggle"
+          className="layout-new-sidebar-toggle"
           onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
           title={sidebarCollapsed ? 'Expandir barra lateral' : 'Recolher barra lateral'}
         >
           {sidebarCollapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
         </button>
-        <aside className={`sidebar ${sidebarCollapsed ? 'collapsed' : ''} ${mobileMenuOpen ? 'mobile-open' : ''}`}>
-        <div className="brand">
-          <div className="brand-logo">RC</div>
-          <div>
-            <h1>Real Comando</h1>
+        
+        <aside className={`layout-new-sidebar ${sidebarCollapsed ? 'collapsed' : ''} ${mobileMenuOpen ? 'mobile-open' : ''}`}>
+          {/* Brand Header */}
+          <div className="layout-new-brand">
+            <div className="layout-new-brand-logo">
+              <span>💰</span>
+            </div>
+            <div className="layout-new-brand-text">
+              <h2>Real Comando</h2>
+              <p>Sistema de Gestão</p>
+            </div>
+            <button 
+              className="layout-new-theme-toggle" 
+              onClick={() => {
+                toggleTheme();
+              }} 
+              title={theme === 'dark' ? 'Modo claro' : 'Modo escuro'}
+            >
+              {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
+            </button>
           </div>
-          <button 
-            className="theme-toggle" 
-            onClick={() => {
-              toggleTheme();
-              // Não fechar o menu no mobile ao alternar tema, pois é um botão pequeno
-            }} 
-            title={theme === 'dark' ? 'Modo claro' : 'Modo escuro'}
-          >
-            {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
-          </button>
-        </div>
 
-        <div className="plan-selection" ref={selectorRef}>
-          <button 
-            className="plan-status" 
-            onClick={() => !sidebarCollapsed && setSelectorOpen((prev) => !prev)}
-            disabled={sidebarCollapsed}
-          >
-            <div className="status-badge">
-              <span className="status-dot" style={{ background: selectedBanco?.cor ?? DEFAULT_BANK_COLOR }} />
-              <div>
-                <p className="plan-title">{selectedBanco?.nome ?? 'Selecione uma banca'}</p>
-                <p className="plan-desc">{selectedBanco?.descricao}</p>
+          {/* Banca Selection */}
+          <div className="layout-new-banca-selection" ref={selectorRef}>
+            <button 
+              className="layout-new-banca-button" 
+              onClick={() => !sidebarCollapsed && setSelectorOpen((prev) => !prev)}
+              disabled={sidebarCollapsed}
+            >
+              <div className="layout-new-banca-badge">
+                <span 
+                  className="layout-new-banca-dot" 
+                  style={{ background: selectedBanco?.cor ?? DEFAULT_BANK_COLOR }} 
+                />
+                <div className="layout-new-banca-info">
+                  <p className="layout-new-banca-title">{selectedBanco?.nome ?? 'Selecione uma banca'}</p>
+                  {!sidebarCollapsed && (
+                    <p className="layout-new-banca-desc">{selectedBanco?.descricao}</p>
+                  )}
+                </div>
+              </div>
+              {!sidebarCollapsed && <ChevronDown size={16} />}
+            </button>
+
+            {selectorOpen && !sidebarCollapsed && (
+              <div className="layout-new-banca-popover">
+                <p className="layout-new-banca-popover-title">Bancas Ativas</p>
+                <div className="layout-new-banca-list">
+                  {bancas.map((banca) => (
+                    <button
+                      key={banca.id}
+                      type="button"
+                      className={`layout-new-banca-item ${selectedBanco?.id === banca.id ? 'active' : ''}`}
+                      onClick={() => {
+                        setSelectedBanco(banca);
+                        setSelectorOpen(false);
+                        setMobileMenuOpen(false);
+                        void fetchBancas();
+                      }}
+                    >
+                      <span 
+                        className="layout-new-banca-item-dot" 
+                        style={{ background: banca.cor }} 
+                      />
+                      <span className="layout-new-banca-item-text">
+                        <strong>{banca.nome}</strong>
+                        <small>{banca.descricao}</small>
+                      </span>
+                    </button>
+                  ))}
+                </div>
+                <button
+                  type="button"
+                  className="layout-new-banca-new"
+                  onClick={() => {
+                    setSelectorOpen(false);
+                    setCreateError('');
+                    setCreateForm({ nome: '', descricao: '', saldo: '', cor: BANK_COLOR_PALETTE[0] });
+                    setCreateModal(true);
+                    setMobileMenuOpen(false);
+                  }}
+                >
+                  <span>+</span> Nova Banca
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Navigation */}
+          <nav className="layout-new-nav">
+            {navItems.map((item) => (
+              <NavLink
+                key={item.path}
+                to={item.path}
+                className={({ isActive }) => `layout-new-nav-item ${isActive ? 'active' : ''}`}
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <item.icon className="layout-new-nav-icon" size={16} />
+                {!sidebarCollapsed && <span>{item.label}</span>}
+              </NavLink>
+            ))}
+          </nav>
+
+          {/* Plano Card */}
+          {loadingConsumo ? (
+            <div className="layout-new-plano-card loading">
+              <div className="layout-new-plano-header">
+                <p className="layout-new-plano-title">PLANO</p>
+                <p className="layout-new-plano-sub">Limite Diário</p>
+              </div>
+              <div className="layout-new-plano-value">
+                <Loader2 size={20} className="layout-new-spinner" />
+                <div className="layout-new-plano-pill">
+                  <Clock size={13} />
+                </div>
+              </div>
+              <div className="layout-new-plano-progress">
+                <div className="layout-new-plano-progress-fill loading" />
+              </div>
+              <div className="layout-new-plano-hint">
+                <RefreshCw size={12} />
+                <span>Reseta todo dia às 00:00</span>
               </div>
             </div>
-            {!sidebarCollapsed && <ChevronDown size={16} />}
-          </button>
-
-          {selectorOpen && !sidebarCollapsed && (
-            <div className="plan-popover">
-              <p className="plan-popover-title">Bancas Ativas</p>
-              <div className="plan-list">
-                {bancas.map((banca) => (
-                  <button
-                    key={banca.id}
-                    type="button"
-                    className={`plan-item ${selectedBanco?.id === banca.id ? 'active' : ''}`}
-                  onClick={() => {
-                      setSelectedBanco(banca);
-                      setSelectorOpen(false);
-                      setMobileMenuOpen(false);
-                      // Recarregar bancas para garantir que a cor está atualizada
-                      void fetchBancas();
-                    }}
-                  >
-                    <span className="plan-item-dot" style={{ background: banca.cor }} />
-                    <span className="plan-item-text">
-                      <strong>{banca.nome}</strong>
-                      <small>{banca.descricao}</small>
-                    </span>
-                  </button>
-                ))}
+          ) : consumoPlano ? (
+            <div className="layout-new-plano-card">
+              <div className="layout-new-plano-header">
+                <p className="layout-new-plano-title">PLANO</p>
+                <p className="layout-new-plano-sub">Limite Diário</p>
               </div>
-              <button
-                type="button"
-                className="plan-new"
+              <div className="layout-new-plano-value">
+                <div className="layout-new-plano-numbers">
+                  <strong>{consumoPlano.consumo.apostasHoje}</strong>
+                  <span>de {consumoPlano.consumo.limite}</span>
+                </div>
+                <div className="layout-new-plano-pill">
+                  <Clock size={13} />
+                  {profile?.plano.nome ?? consumoPlano.plano.nome}
+                </div>
+              </div>
+              <div className="layout-new-plano-progress">
+                <div 
+                  className="layout-new-plano-progress-fill" 
+                  style={{ 
+                    width: `${Math.min(consumoPlano.consumo.porcentagem, 100)}%`
+                  }} 
+                />
+              </div>
+              <div className="layout-new-plano-hint">
+                <RefreshCw size={12} />
+                <span>Reseta todo dia às 00:00</span>
+              </div>
+            </div>
+          ) : null}
+
+          {/* Profile Box */}
+          <div className="layout-new-profile-box">
+            <div className="layout-new-profile-info">
+              <div className="layout-new-profile-avatar">
+                <User2 size={18} />
+              </div>
+              <div className="layout-new-profile-details">
+                <p className="layout-new-profile-name">
+                  {profile ? getFirstName(profile.nomeCompleto) : (
+                    <Loader2 size={14} className="layout-new-spinner" />
+                  )}
+                </p>
+                {!sidebarCollapsed && (
+                  <p className="layout-new-profile-email">
+                    {profile?.email ?? (
+                      <Loader2 size={12} className="layout-new-spinner" />
+                    )}
+                  </p>
+                )}
+              </div>
+            </div>
+            <div className="layout-new-profile-actions">
+              {!sidebarCollapsed && (
+                <button 
+                  className="layout-new-profile-action-btn"
+                  onClick={() => {
+                    void navigate('/perfil');
+                    setMobileMenuOpen(false);
+                  }}
+                  title="Configurações"
+                >
+                  <Settings size={16} />
+                </button>
+              )}
+              <button 
+                className="layout-new-profile-logout-btn"
                 onClick={() => {
-                  setSelectorOpen(false);
-                  setCreateError('');
-                  setCreateForm({ nome: '', descricao: '', saldo: '', cor: BANK_COLOR_PALETTE[0] });
-                  setCreateModal(true);
+                  localStorage.removeItem('token');
                   setMobileMenuOpen(false);
+                  void navigate('/login');
                 }}
+                title="Sair"
               >
-                <span>+</span> Nova Banca
+                <LogOut size={16} />
               </button>
             </div>
-          )}
-        </div>
-
-        <nav className="nav">
-          {navItems.map((item) => (
-            <NavLink
-              key={item.path}
-              to={item.path}
-              className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              <span className="nav-icon">
-                <item.icon size={16} />
-              </span>
-              <span>{item.label}</span>
-            </NavLink>
-          ))}
-        </nav>
-
-        {loadingConsumo ? (
-          <div className="plan-card compact loading-skeleton">
-            <div style={{ marginBottom: '12px' }}>
-              <p className="plan-card-title">PLANO</p>
-              <p className="plan-card-sub">Limite Diário</p>
-            </div>
-            <div className="plan-card-value" style={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              justifyContent: 'space-between', 
-              gap: '12px',
-              marginBottom: '12px'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Loader2 size={20} className="loading-spinner" />
-              </div>
-              <div className="plan-pill" style={{ 
-                opacity: 0.5,
-                background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(139, 92, 246, 0.25) 100%)',
-                border: '1px solid rgba(139, 92, 246, 0.3)',
-                padding: '6px 12px',
-                borderRadius: '10px'
-              }}>
-                <Clock size={13} />
-              </div>
-            </div>
-            <div className="progress-track thick" style={{
-              marginBottom: '10px',
-              borderRadius: '10px',
-              overflow: 'hidden',
-              height: '6px',
-              background: 'rgba(139, 92, 246, 0.1)'
-            }}>
-              <div className="progress-fill loading-progress" />
-            </div>
-            <div className="plan-hints" style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              fontSize: '0.7rem',
-              opacity: 0.5
-            }}>
-              <RefreshCw size={12} />
-              <span>Reseta todo dia às 00:00</span>
-            </div>
           </div>
-        ) : consumoPlano ? (
-          <div className="plan-card compact">
-            <div style={{ marginBottom: '12px' }}>
-              <p className="plan-card-title">PLANO</p>
-              <p className="plan-card-sub">Limite Diário</p>
-            </div>
-            <div className="plan-card-value" style={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              justifyContent: 'space-between', 
-              gap: '12px',
-              marginBottom: '12px'
-            }}>
-              <div style={{ 
-                display: 'flex', 
-                alignItems: 'baseline', 
-                gap: '6px',
-                flex: 1
-              }}>
-                <strong style={{ 
-                  fontSize: '1.75rem',
-                  fontWeight: 700,
-                  background: 'linear-gradient(135deg, var(--primary) 0%, #8b5cf6 100%)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text'
-                }}>{consumoPlano.consumo.apostasHoje}</strong>
-                <span style={{ 
-                  fontSize: '0.9rem',
-                  opacity: 0.7,
-                  fontWeight: 500
-                }}>de {consumoPlano.consumo.limite}</span>
-              </div>
-              <div className="plan-pill" style={{
-                background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(139, 92, 246, 0.25) 100%)',
-                border: '1px solid rgba(139, 92, 246, 0.3)',
-                padding: '6px 12px',
-                borderRadius: '10px',
-                fontWeight: 600,
-                fontSize: '0.75rem',
-                color: '#a78bfa',
-                backdropFilter: 'blur(10px)',
-                WebkitBackdropFilter: 'blur(10px)'
-              }}>
-                <Clock size={13} style={{ opacity: 0.9 }} />
-                {profile?.plano.nome ?? consumoPlano.plano.nome}
-              </div>
-            </div>
-            <div className="progress-track thick" style={{
-              marginBottom: '10px',
-              borderRadius: '10px',
-              overflow: 'hidden',
-              height: '6px',
-              background: 'rgba(139, 92, 246, 0.1)'
-            }}>
-              <div 
-                className="progress-fill" 
-                style={{ 
-                  width: `${Math.min(consumoPlano.consumo.porcentagem, 100)}%`,
-                  background: 'linear-gradient(90deg, #8b5cf6 0%, #a78bfa 50%, #c4b5fd 100%)',
-                  height: '100%',
-                  borderRadius: '10px',
-                  transition: 'width 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
-                  boxShadow: '0 0 10px rgba(139, 92, 246, 0.4)'
-                }} 
-              />
-            </div>
-            <div className="plan-hints" style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              fontSize: '0.7rem',
-              color: 'var(--muted)',
-              opacity: 0.8
-            }}>
-              <RefreshCw size={12} style={{ opacity: 0.6 }} />
-              <span>Reseta todo dia às 00:00</span>
-            </div>
-          </div>
-        ) : null}
-
-        <div className="profile-box">
-          <div style={{ 
-            display: 'flex', 
-            alignItems: 'center', 
-            gap: '10px',
-            marginBottom: '10px'
-          }}>
-            <div style={{
-              width: '40px',
-              height: '40px',
-              borderRadius: '12px',
-              background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.2) 0%, rgba(139, 92, 246, 0.35) 100%)',
-              border: '1px solid rgba(139, 92, 246, 0.3)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              flexShrink: 0,
-              backdropFilter: 'blur(10px)',
-              WebkitBackdropFilter: 'blur(10px)'
-            }}>
-              <User2 size={18} style={{ color: '#a78bfa' }} />
-            </div>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <p style={{ 
-                margin: 0, 
-                fontWeight: 700, 
-                fontSize: '0.95rem',
-                color: 'var(--text)',
-                letterSpacing: '-0.01em',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap'
-              }}>
-                {profile ? getFirstName(profile.nomeCompleto) : (
-                  <Loader2 size={14} className="loading-spinner" style={{ display: 'inline-block' }} />
-                )}
-              </p>
-              <p style={{ 
-                margin: '4px 0 0', 
-                color: 'var(--muted)', 
-                fontSize: '0.75rem',
-                opacity: 0.8,
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap'
-              }}              >
-                {profile?.email ?? (
-                  <Loader2 size={12} className="loading-spinner" style={{ display: 'inline-block' }} />
-                )}
-              </p>
-            </div>
-          </div>
-          <button 
-            className="btn ghost" 
-            style={{ 
-              width: '100%',
-              padding: '10px 14px',
-              borderRadius: '12px',
-              border: '1px solid rgba(239, 68, 68, 0.2)',
-              background: 'linear-gradient(135deg, rgba(239, 68, 68, 0.08) 0%, rgba(239, 68, 68, 0.12) 100%)',
-              color: '#ef4444',
-              fontWeight: 600,
-              fontSize: '0.85rem',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '8px',
-              transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-              backdropFilter: 'blur(10px)',
-              WebkitBackdropFilter: 'blur(10px)'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = 'linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(239, 68, 68, 0.2) 100%)';
-              e.currentTarget.style.borderColor = 'rgba(239, 68, 68, 0.4)';
-              e.currentTarget.style.transform = 'translateY(-1px)';
-              e.currentTarget.style.boxShadow = '0 4px 12px rgba(239, 68, 68, 0.2)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = 'linear-gradient(135deg, rgba(239, 68, 68, 0.08) 0%, rgba(239, 68, 68, 0.12) 100%)';
-              e.currentTarget.style.borderColor = 'rgba(239, 68, 68, 0.2)';
-              e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = 'none';
-            }}
-            onClick={() => {
-              localStorage.removeItem('token');
-              setMobileMenuOpen(false);
-              void navigate('/login');
-            }}
-          >
-            <LogOut size={16} />
-            Sair
-          </button>
-        </div>
-      </aside>
+        </aside>
       </div>
 
-      <div className="app-main">
-        <main className="app-body">
+      {/* Main Content */}
+      <div className="layout-new-main">
+        <main className="layout-new-body">
           <Outlet />
         </main>
       </div>
 
+      {/* Create Banca Modal */}
       <Modal isOpen={createModal} onClose={() => setCreateModal(false)} title="Criar Nova Banca">
         <div className="edit-banca-form">
           <div className="field">
@@ -749,5 +643,3 @@ export default function Layout() {
     </div>
   );
 }
-
-
