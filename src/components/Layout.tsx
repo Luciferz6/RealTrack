@@ -34,8 +34,7 @@ const navItems = [
   { label: 'Financeiro', path: '/financeiro', icon: Wallet2 },
   { label: 'Gráficos', path: '/analise', icon: BarChart2 },
   { label: 'Apostas', path: '/atualizar', icon: RefreshCw },
-  { label: 'Tipsters', path: '/tipsters', icon: Users },
-  { label: 'Perfil', path: '/perfil', icon: User2 }
+  { label: 'Tipsters', path: '/tipsters', icon: Users }
 ];
 
 interface SidebarBanco {
