@@ -49,14 +49,14 @@ export default function TelegramStatus() {
     const authenticateTelegram = async () => {
       if (isTelegram && window.Telegram?.WebApp?.initData) {
         try {
-          const { data } = await api.post('/auth/telegram', {
+          const { data } = await api.post<{ token?: string }>('/auth/telegram', {
             initData: window.Telegram.WebApp.initData
           });
-          if (data.token) {
+          if (typeof data.token === 'string') {
             localStorage.setItem('token', data.token);
             setAuthenticated(true);
           }
-        } catch (err) {
+        } catch (err: unknown) {
           console.error('Erro ao autenticar via Telegram:', err);
           setError('Erro ao autenticar. Verifique se sua conta está vinculada ao Telegram.');
         }
@@ -71,26 +71,10 @@ export default function TelegramStatus() {
       }
     };
 
-    authenticateTelegram();
+    void authenticateTelegram();
   }, [isTelegram]);
 
-  useEffect(() => {
-    if (isTelegram && authenticated) {
-      window.Telegram.WebApp.ready();
-      window.Telegram.WebApp.expand();
-      window.Telegram.WebApp.MainButton.setText('Salvar Status');
-      window.Telegram.WebApp.MainButton.show();
-      window.Telegram.WebApp.MainButton.onClick(handleSave);
-    }
-  }, [isTelegram, authenticated, handleSave]);
-
-  useEffect(() => {
-    if (betId && authenticated) {
-      fetchAposta();
-    }
-  }, [betId, authenticated]);
-
-  const fetchAposta = async () => {
+  const fetchAposta = useCallback(async () => {
     try {
       setLoading(true);
       const { data: apostas } = await api.get<ApiBetWithBank[]>('/apostas');
@@ -108,7 +92,13 @@ export default function TelegramStatus() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [betId]);
+
+  useEffect(() => {
+    if (betId && authenticated) {
+      void fetchAposta();
+    }
+  }, [betId, authenticated, fetchAposta]);
 
   const handleSave = useCallback(async () => {
     if (!betId || !aposta) return;
@@ -123,7 +113,7 @@ export default function TelegramStatus() {
       setSaving(true);
       setError('');
 
-      const payload: any = {
+      const payload: { status: string; retornoObtido?: number | null } = {
         status: status
       };
 
@@ -137,15 +127,12 @@ export default function TelegramStatus() {
 
       // Atualizar mensagem do Telegram se messageId e chatId estiverem disponíveis
       if (messageId && chatId) {
-        try {
-          await api.post(`/telegram/update-bet-message/${betId}`, {
-            messageId,
-            chatId
-          });
-        } catch (err) {
+        void api.post(`/telegram/update-bet-message/${betId}`, {
+          messageId,
+          chatId
+        }).catch((err: unknown) => {
           console.warn('Erro ao atualizar mensagem do Telegram:', err);
-          // Não bloquear o fluxo se falhar ao atualizar o Telegram
-        }
+        });
       }
 
       // Disparar evento para atualizar a página principal que mostra as apostas
@@ -168,6 +155,16 @@ export default function TelegramStatus() {
       setSaving(false);
     }
   }, [betId, aposta, status, retornoObtido, isTelegram, saving, messageId, chatId]);
+
+  useEffect(() => {
+    if (isTelegram && authenticated) {
+      window.Telegram.WebApp.ready();
+      window.Telegram.WebApp.expand();
+      window.Telegram.WebApp.MainButton.setText('Salvar Status');
+      window.Telegram.WebApp.MainButton.show();
+      window.Telegram.WebApp.MainButton.onClick(() => void handleSave());
+    }
+  }, [isTelegram, authenticated, handleSave]);
 
   if (!authenticated || loading) {
     return (

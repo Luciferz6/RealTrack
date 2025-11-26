@@ -8,7 +8,8 @@ export function initSentry(): void {
   // Obter DSN do Sentry das variáveis de ambiente
   // DSN padrão fornecido pelo usuário (pode ser sobrescrito por variável de ambiente)
   const defaultDsn = 'https://67e89bd0834d47319940c09f28acc80b@o4510418265964544.ingest.de.sentry.io/4510418271076432';
-  const sentryDsn = import.meta.env.VITE_SENTRY_DSN ?? defaultDsn;
+  const envDsn: unknown = import.meta.env.VITE_SENTRY_DSN;
+  const sentryDsn = typeof envDsn === 'string' ? envDsn : defaultDsn;
   
   // Inicializar se tiver DSN (funciona em dev e produção)
   if (!sentryDsn) {
@@ -17,9 +18,22 @@ export function initSentry(): void {
   }
 
   try {
-    Sentry.init({
+    const envMode: unknown = import.meta.env.MODE;
+    const environment = typeof envMode === 'string' ? envMode : 'production';
+    (Sentry.init as (options: {
+      dsn: string;
+      environment: string;
+      sendDefaultPii: boolean;
+      integrations: unknown[];
+      tracesSampleRate: number;
+      replaysSessionSampleRate: number;
+      replaysOnErrorSampleRate: number;
+      beforeSend: (event: unknown, hint: { originalException?: unknown }) => unknown;
+      ignoreErrors: string[];
+      release?: string;
+    }) => void)({
       dsn: sentryDsn,
-      environment: import.meta.env.MODE || 'production',
+      environment,
       
       // Enviar dados padrão de PII (IP, etc) - como no exemplo fornecido
       sendDefaultPii: true,
@@ -42,10 +56,11 @@ export function initSentry(): void {
       replaysOnErrorSampleRate: 1.0, // 100% das sessões com erro
 
       // Filtros de erros
-      beforeSend(event, hint) {
+      beforeSend(event: unknown, hint: { originalException?: unknown }) {
         // Ignorar erros conhecidos que não são relevantes
-        if (event.exception) {
-          const error = hint.originalException;
+        const eventObj = event as { exception?: unknown };
+        if (eventObj.exception && hint.originalException) {
+          const error = hint.originalException as Error | string;
           
           // Ignorar erros de bloqueio de cliente (AdBlock, etc)
           if (
@@ -62,7 +77,7 @@ export function initSentry(): void {
           }
         }
 
-        return event;
+        return event as { exception?: unknown };
       },
 
       // Ignorar URLs específicas
@@ -73,7 +88,7 @@ export function initSentry(): void {
       ],
 
       // Configurações de release (opcional)
-      release: import.meta.env.VITE_APP_VERSION || undefined,
+      release: typeof import.meta.env.VITE_APP_VERSION === 'string' ? import.meta.env.VITE_APP_VERSION : undefined,
     });
 
     console.log('Sentry inicializado com sucesso');

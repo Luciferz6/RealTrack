@@ -195,7 +195,7 @@ export default function Perfil() {
   };
 
   const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text).then(() => {
+    void navigator.clipboard.writeText(text).then(() => {
       alert('ID copiado para a área de transferência!');
     }).catch(() => {
       alert('Erro ao copiar ID');
@@ -206,7 +206,8 @@ export default function Perfil() {
     if (!profile) return;
     
     // Nome do bot do Telegram (pode ser configurado via variável de ambiente)
-    const botUsername = import.meta.env.VITE_TELEGRAM_BOT_USERNAME || 'RealComando_bot';
+    const envBot: unknown = import.meta.env.VITE_TELEGRAM_BOT_USERNAME;
+    const botUsername = typeof envBot === 'string' ? envBot : 'RealComando_bot';
     const telegramUrl = `https://t.me/${botUsername}?start=${profile.id}`;
     
     // Abre o bot do Telegram em uma nova aba
@@ -235,7 +236,8 @@ export default function Perfil() {
     if (!profile) return;
     
     // Nome do bot de suporte do Telegram (pode ser configurado via variável de ambiente)
-    const supportBotUsername = import.meta.env.VITE_TELEGRAM_SUPPORT_BOT_USERNAME || 'RealComandoSuporte_bot';
+    const envSupportBot: unknown = import.meta.env.VITE_TELEGRAM_SUPPORT_BOT_USERNAME;
+    const supportBotUsername = typeof envSupportBot === 'string' ? envSupportBot : 'RealComandoSuporte_bot';
     // Enviar o userId como parâmetro para o bot reconhecer a conta vinculada
     const telegramUrl = `https://t.me/${supportBotUsername}?start=support_${profile.id}`;
     
@@ -460,7 +462,7 @@ export default function Perfil() {
                 marginBottom: '20px',
                 border: '1px solid var(--perfil-panel-border)'
               }}>
-                <form className="filters-panel" style={{ gridTemplateColumns: '1fr', gap: '16px' }} onSubmit={(e) => { e.preventDefault(); handleUpdateProfile(); }}>
+                <form className="filters-panel" style={{ gridTemplateColumns: '1fr', gap: '16px' }} onSubmit={(e) => { e.preventDefault(); void handleUpdateProfile(); }}>
                   <div className="field" style={{ marginBottom: 0 }}>
                     <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.875rem', color: 'var(--muted)' }}>
                       <User size={14} />
@@ -496,7 +498,7 @@ export default function Perfil() {
 
             <button
                 type="button"
-                onClick={(e) => { e.preventDefault(); handleUpdateProfile(); }}
+                onClick={(e) => { e.preventDefault(); void handleUpdateProfile(); }}
                 className="btn primary btn-press" 
                 style={{ 
                   width: '100%',
@@ -820,7 +822,7 @@ export default function Perfil() {
 
               <button
                 type="button"
-                onClick={(e) => { e.preventDefault(); handleChangePassword(e); }}
+                onClick={(e) => { e.preventDefault(); void handleChangePassword(e); }}
                 className="btn primary btn-press"
                 style={{ 
                   width: '100%',
@@ -998,7 +1000,7 @@ export default function Perfil() {
                   <input
                     type="text"
                     className="input-focus"
-                    value={profile.telegramId || 'Não vinculado'}
+                    value={profile.telegramId ?? 'Não vinculado'}
                     readOnly
                     style={{
                       paddingLeft: '12px'

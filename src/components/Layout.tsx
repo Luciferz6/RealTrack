@@ -191,7 +191,8 @@ export default function Layout() {
       const detail = event.detail;
 
       if (detail?.id && typeof detail.cor === 'string' && selectedBanco?.id === detail.id) {
-        setSelectedBanco((prev) => (prev ? { ...prev, cor: detail.cor! } : null));
+        const cor = detail.cor;
+        setSelectedBanco((prev) => (prev ? { ...prev, cor } : null));
       }
 
       void fetchBancas();
@@ -555,7 +556,7 @@ export default function Layout() {
                 WebkitBackdropFilter: 'blur(10px)'
               }}>
                 <Clock size={13} style={{ opacity: 0.9 }} />
-                {profile?.plano.nome || consumoPlano.plano.nome || 'Plano'}
+                {profile?.plano.nome ?? consumoPlano.plano.nome}
               </div>
             </div>
             <div className="progress-track thick" style={{
@@ -636,10 +637,8 @@ export default function Layout() {
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
                 whiteSpace: 'nowrap'
-              }}>
-                {profile?.email ? (
-                  profile.email
-                ) : (
+              }}              >
+                {profile?.email ?? (
                   <Loader2 size={12} className="loading-spinner" style={{ display: 'inline-block' }} />
                 )}
               </p>

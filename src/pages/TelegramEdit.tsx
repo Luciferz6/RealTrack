@@ -85,7 +85,7 @@ const normalizeEsporte = (esporteFromDb: string): string => {
     const espNormalized = esp.toLowerCase().replace(/[🏀⚽🏈🎾⚾🏒🏇🥌🎮]/gu, '').trim();
     return espNormalized === normalized || espNormalized.includes(normalized) || normalized.includes(espNormalized);
   });
-  return esporteEncontrado || esporteFromDb;
+  return esporteEncontrado ?? esporteFromDb;
 };
 
 export default function TelegramEdit() {
@@ -98,8 +98,8 @@ export default function TelegramEdit() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [authenticated, setAuthenticated] = useState(false);
-  const [bancas, setBancas] = useState<Array<{ id: string; nome: string }>>([]);
-  const [tipsters, setTipsters] = useState<Array<{ id: string; nome: string }>>([]);
+  const [bancas, setBancas] = useState<{ id: string; nome: string }[]>([]);
+  const [tipsters, setTipsters] = useState<{ id: string; nome: string }[]>([]);
 
   // Log inicial para debug e garantir que algo apareça
   useEffect(() => {
@@ -193,16 +193,16 @@ export default function TelegramEdit() {
       if (telegramWebApp?.initData) {
         try {
           console.log('Tentando autenticar com initData...');
-          const { data } = await api.post('/auth/telegram', {
+          const { data } = await api.post<{ token?: string }>('/auth/telegram', {
             initData: telegramWebApp.initData
           });
           console.log('✅ Autenticação bem-sucedida');
-          if (data.token) {
+          if (typeof data.token === 'string') {
             localStorage.setItem('token', data.token);
             setAuthenticated(true);
             setLoading(false);
           }
-        } catch (err) {
+        } catch (err: unknown) {
           console.error('❌ Erro ao autenticar via Telegram:', err);
           setError('Erro ao autenticar. Verifique se sua conta está vinculada ao Telegram.');
           setLoading(false);
@@ -223,7 +223,7 @@ export default function TelegramEdit() {
       }
     };
 
-    authenticateTelegram();
+    void authenticateTelegram();
   }, [telegramReady]);
 
   // Carregar bancas e tipsters após autenticação
@@ -245,13 +245,7 @@ export default function TelegramEdit() {
     }
   }, [authenticated]);
 
-  useEffect(() => {
-    if (betId && authenticated) {
-      fetchAposta();
-    }
-  }, [betId, authenticated]);
-
-  const fetchAposta = async () => {
+  const fetchAposta = useCallback(async () => {
     try {
       setLoading(true);
       const { data: apostas } = await api.get<ApiBetWithBank[]>('/apostas');
@@ -286,7 +280,14 @@ export default function TelegramEdit() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [betId]);
+
+  useEffect(() => {
+    if (betId && authenticated) {
+      void fetchAposta();
+    }
+  }, [betId, authenticated, fetchAposta]);
+
 
   const handleSave = useCallback(async () => {
     if (!betId || !aposta) return;
@@ -338,7 +339,7 @@ export default function TelegramEdit() {
         }
       }
 
-      const payload: Record<string, any> = {
+      const payload: Record<string, unknown> = {
         bancaId: formData.bancaId,
         esporte,
         jogo,
@@ -382,15 +383,12 @@ export default function TelegramEdit() {
 
       // Atualizar mensagem do Telegram se messageId e chatId estiverem disponíveis
       if (messageId && chatId) {
-        try {
-          await api.post(`/telegram/update-bet-message/${betId}`, {
-            messageId,
-            chatId
-          });
-        } catch (err) {
+        void api.post(`/telegram/update-bet-message/${betId}`, {
+          messageId,
+          chatId
+        }).catch((err: unknown) => {
           console.warn('Erro ao atualizar mensagem do Telegram:', err);
-          // Não bloquear o fluxo se falhar ao atualizar o Telegram
-        }
+        });
       }
 
       // Disparar evento para atualizar a página principal que mostra as apostas
@@ -413,7 +411,7 @@ export default function TelegramEdit() {
     } finally {
       setSaving(false);
     }
-  }, [betId, aposta, formData, saving]);
+  }, [betId, aposta, formData, saving, messageId, chatId]);
 
   // Configurar Telegram WebApp após handleSave estar definido
   useEffect(() => {
@@ -422,7 +420,7 @@ export default function TelegramEdit() {
       window.Telegram.WebApp.expand();
       window.Telegram.WebApp.MainButton.setText('Salvar Alterações');
       window.Telegram.WebApp.MainButton.show();
-      window.Telegram.WebApp.MainButton.onClick(handleSave);
+      window.Telegram.WebApp.MainButton.onClick(() => void handleSave());
     }
   }, [authenticated, handleSave]);
 

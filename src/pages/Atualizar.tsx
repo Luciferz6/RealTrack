@@ -19,7 +19,7 @@ import { useBancas } from '../hooks/useBancas';
 // Tesseract será carregado dinamicamente apenas quando necessário (biblioteca pesada ~2MB)
 import { type ApiBetWithBank, type ApiError, type ApiUploadTicketResponse } from '../types/api';
 
-const VITE_API_URL = import.meta.env.VITE_API_URL;
+const VITE_API_URL: unknown = import.meta.env.VITE_API_URL;
 const API_BASE_URL = (typeof VITE_API_URL === 'string' && VITE_API_URL.length > 0 ? VITE_API_URL : 'http://localhost:3001/api').replace(/\/$/, '');
 
 const STATUS_WITH_RETURNS = ['Ganha', 'Meio Ganha', 'Cashout'];
@@ -245,7 +245,7 @@ export default function Atualizar() {
 
         // Para status que têm retorno, já enviar um valor calculado, senão omitir o campo
         if (STATUS_WITH_RETURNS.includes(status)) {
-          (payload as any).retornoObtido = valorApostado * odd;
+          payload.retornoObtido = valorApostado * odd;
         }
 
         promises.push(api.post('/apostas', payload));
@@ -254,7 +254,6 @@ export default function Atualizar() {
       // Enviar em lotes para não sobrecarregar
       const chunkSize = 20;
       for (let i = 0; i < promises.length; i += chunkSize) {
-        // eslint-disable-next-line no-await-in-loop
         await Promise.all(promises.slice(i, i + chunkSize));
       }
 
@@ -1391,8 +1390,8 @@ export default function Atualizar() {
               <tbody>
                 {filteredApostas.map((aposta) => (
                   <tr key={aposta.id}>
-                    <td>{aposta.casaDeAposta || '-'}</td>
-                    <td>{aposta.tipster || '-'}</td>
+                    <td>{aposta.casaDeAposta ?? '-'}</td>
+                    <td>{aposta.tipster ?? '-'}</td>
                     <td>{formatDate(aposta.dataJogo)}</td>
                     <td>{aposta.esporte}</td>
                     <td>{aposta.jogo}</td>

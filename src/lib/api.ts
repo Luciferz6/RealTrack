@@ -24,14 +24,19 @@ const pendingRequests = new Map<string, Promise<unknown>>();
 // Função para gerar chave de cache baseada na URL e parâmetros
 const getCacheKey = (config: InternalAxiosRequestConfig): string => {
   let params = '';
-  const rawParams = config.params;
+  const rawParams: unknown = config.params;
 
   if (rawParams instanceof URLSearchParams) {
     params = rawParams.toString();
   } else if (typeof rawParams === 'string') {
     params = rawParams;
-  } else if (rawParams && typeof rawParams === 'object') {
-    params = new URLSearchParams(rawParams as Record<string, string>).toString();
+  } else if (rawParams && typeof rawParams === 'object' && !Array.isArray(rawParams)) {
+    const record: Record<string, string> = {};
+    const entries = Object.entries(rawParams as Record<string, unknown>);
+    for (const [key, value] of entries) {
+      record[key] = String(value);
+    }
+    params = new URLSearchParams(record).toString();
   }
 
   return `${config.method?.toUpperCase()}:${config.url}${params ? `?${params}` : ''}`;
@@ -97,7 +102,8 @@ api.interceptors.response.use(
     const cacheKey = (config as InternalAxiosRequestConfig & { __cacheKey?: string }).__cacheKey;
     
     // Salvar no cache se for GET e não tiver sido marcado para não cachear
-    if (cacheKey && shouldCache(config.url, config.method) && !config.headers?.['x-no-cache']) {
+    const headers = config.headers as Record<string, string> | undefined;
+    if (cacheKey && shouldCache(config.url, config.method) && !headers?.['x-no-cache']) {
       cache.set(cacheKey, {
         data: response.data,
         timestamp: Date.now(),
@@ -116,7 +122,10 @@ api.interceptors.response.use(
     return response;
   },
   (error: AxiosError<{ retryAfter?: number; error?: string }>) => {
-    const config = error.config as InternalAxiosRequestConfig | undefined;
+    if (!(error instanceof Error)) {
+      return Promise.reject(new Error('Unknown error occurred'));
+    }
+    const config = error.config;
 
     // Retry automático para erros 5xx (apenas uma vez)
     if (
