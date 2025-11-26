@@ -1,0 +1,91 @@
+.glass {
+  background: var(--color-bg-glass) !important;
+  backdrop-filter: blur(40px) saturate(200%) !important;
+  -webkit-backdrop-filter: blur(40px) saturate(200%) !important;
+  border-radius: 20px;
+  border: 1px solid var(--color-border-card) !important;
+  box-shadow: var(--color-shadow-md-dark) !important;
+  padding: 20px;
+  transition: 0.3s ease;
+  position: relative;
+  isolation: isolate;
+}
+
+.glass-card {
+  background: var(--color-bg-glass-card) !important;
+  backdrop-filter: blur(40px) saturate(200%) !important;
+  -webkit-backdrop-filter: blur(40px) saturate(200%) !important;
+  border-radius: 20px;
+  border: 1px solid var(--color-border-card) !important;
+  box-shadow: var(--color-shadow-md-dark) !important;
+  padding: 24px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  isolation: isolate;
+}
+
+[data-theme='dark'] .glass-card {
+  background: var(--color-bg-glass-card-dark) !important;
+  border: 1px solid var(--color-border-card-dark) !important;
+  box-shadow: var(--color-shadow-glass-card-dark) !important;
+}
+
+[data-theme='dark'] .glass-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--color-secondary-dark), transparent);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.glass-card:hover {
+  box-shadow: 0 12px 40px rgba(138, 43, 226, 0.35);
+  border-color: var(--color-secondary-darker-dark);
+}
+
+[data-theme='dark'] .glass-card:hover {
+  background: var(--color-bg-hover-dark-alt) !important;
+  border-color: var(--color-border-nav-icon-active-dark) !important;
+  box-shadow: var(--color-shadow-glass-card-hover-dark) !important;
+  transform: translateY(-4px);
+}
+
+[data-theme='dark'] .glass-card:hover::before {
+  opacity: 1;
+}
+
+.glass-button {
+  background: var(--color-bg-glass-button);
+  color: var(--color-text-white);
+  padding: 12px 20px;
+  border-radius: 18px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  box-shadow: var(--color-shadow-glass-button);
+  transition: 0.25s ease;
+}
+
+.glass-button:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--color-shadow-glass-button-hover);
+}
+
+.grid {
+  display: grid;
+  gap: 24px;
+}
+
+.grid-2 {
+  grid-template-columns: repeat(2, 1fr);
+  align-items: stretch;
+}
+
+.grid-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+

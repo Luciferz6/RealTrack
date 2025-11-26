@@ -1,0 +1,137 @@
+import axios, { AxiosHeaders, type AxiosInstance, type InternalAxiosRequestConfig } from 'axios';
+
+const DEFAULT_BASE_URL = 'http://localhost:3001/api';
+const envBaseUrl = typeof import.meta.env.VITE_API_URL === 'string' ? import.meta.env.VITE_API_URL : undefined;
+const baseURL = (envBaseUrl && envBaseUrl.length > 0 ? envBaseUrl : DEFAULT_BASE_URL).replace(/\/$/, '');
+
+// Cache em memória para requisições GET
+interface CacheEntry {
+  data: unknown;
+  timestamp: number;
+  headers?: Record<string, string>;
+}
+
+const cache = new Map<string, CacheEntry>();
+
+// Deduplicação de requisições simultâneas
+const pendingRequests = new Map<string, Promise<unknown>>();
+
+// Função para gerar chave de cache baseada na URL e parâmetros
+const getCacheKey = (config: InternalAxiosRequestConfig): string => {
+  const params = config.params ? new URLSearchParams(config.params).toString() : '';
+  return `${config.method?.toUpperCase()}:${config.url}${params ? `?${params}` : ''}`;
+};
+
+// Função para verificar se endpoint deve usar cache
+const shouldCache = (url: string | undefined, method: string | undefined): boolean => {
+  if (!url || method?.toUpperCase() !== 'GET') return false;
+  // Endpoints que não devem ser cacheados (dados dinâmicos)
+  const noCacheEndpoints = ['/analise/dashboard', '/analise/performance'];
+  return !noCacheEndpoints.some(endpoint => url.includes(endpoint));
+};
+
+const api: AxiosInstance = axios.create({
+  baseURL,
+  timeout: 70000, // 70 segundos de timeout para uploads/análises mais demorados
+});
+
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token');
+  if (token) {
+    if (config.headers instanceof AxiosHeaders) {
+      config.headers.set('Authorization', `Bearer ${token}`);
+    } else {
+      const existing = config.headers as Record<string, string | number | boolean> | undefined;
+      const normalizedHeaders: Record<string, string | number | boolean> = existing ? { ...existing } : {};
+      normalizedHeaders.Authorization = `Bearer ${token}`;
+      config.headers = normalizedHeaders as typeof config.headers;
+    }
+  }
+
+  // Marcar cache key no config para uso posterior
+  if (shouldCache(config.url, config.method)) {
+    const cacheKey = getCacheKey(config);
+    (config as InternalAxiosRequestConfig & { __cacheKey?: string }).__cacheKey = cacheKey;
+  }
+
+  return config;
+});
+
+
+// Função para invalidar cache de um endpoint específico (útil após POST/PUT/DELETE)
+export const invalidateCache = (url: string, method: string = 'GET') => {
+  const cacheKey = `${method.toUpperCase()}:${url}`;
+  cache.delete(cacheKey);
+  pendingRequests.delete(cacheKey);
+};
+
+// Função para limpar todo o cache
+export const clearCache = () => {
+  cache.clear();
+  pendingRequests.clear();
+};
+
+// Nota: Cache e deduplicação são implementados através de interceptors
+// O cache salva dados após cada resposta GET bem-sucedida
+// A deduplicação pode ser implementada em hooks específicos (useTipsters, useBancas já têm)
+
+// Interceptor de resposta para salvar cache e tratar rate limiting e erros
+api.interceptors.response.use(
+  (response) => {
+    const config = response.config;
+    const cacheKey = (config as InternalAxiosRequestConfig & { __cacheKey?: string }).__cacheKey;
+    
+    // Salvar no cache se for GET e não tiver sido marcado para não cachear
+    if (cacheKey && shouldCache(config.url, config.method) && !config.headers?.['x-no-cache']) {
+      cache.set(cacheKey, {
+        data: response.data,
+        timestamp: Date.now(),
+        headers: response.headers as Record<string, string>,
+      });
+
+      // Limpar cache antigo (manter apenas últimos 50 itens)
+      if (cache.size > 50) {
+        const entries = Array.from(cache.entries());
+        entries.sort((a, b) => b[1].timestamp - a[1].timestamp);
+        cache.clear();
+        entries.slice(0, 50).forEach(([key, value]) => cache.set(key, value));
+      }
+    }
+
+    return response;
+  },
+  (error) => {
+    const config = error.config as InternalAxiosRequestConfig | undefined;
+
+    // Retry automático para erros 5xx (apenas uma vez)
+    if (error.response?.status >= 500 && error.response?.status < 600 && config && !(config as InternalAxiosRequestConfig & { __retryCount?: number }).__retryCount) {
+      (config as InternalAxiosRequestConfig & { __retryCount?: number }).__retryCount = 1;
+      return new Promise((resolve, reject) => {
+        setTimeout(() => {
+          api.request(config)
+            .then(resolve)
+            .catch(reject);
+        }, 1000); // Aguardar 1 segundo antes de tentar novamente
+      });
+    }
+
+    // Tratar rate limiting
+    if (error.response?.status === 429) {
+      const retryAfter = error.response?.data?.retryAfter || 60;
+      const message = error.response?.data?.error || 'Muitas requisições. Aguarde alguns minutos.';
+      
+      console.warn(`Rate limit atingido. Aguarde ${retryAfter} segundos.`);
+      
+      // Mostrar notificação ao usuário (se houver sistema de notificações)
+      if (typeof window !== 'undefined') {
+        // Você pode adicionar uma biblioteca de notificações aqui
+        alert(`${message}\n\nTente novamente em ${Math.ceil(retryAfter / 60)} minuto(s).`);
+      }
+    }
+    
+    return Promise.reject(error);
+  }
+);
+
+export default api;
+
