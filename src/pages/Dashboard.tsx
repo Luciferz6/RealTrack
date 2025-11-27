@@ -682,24 +682,6 @@ export default function Dashboard() {
                 </div>
               )}
             </ResponsiveContainer>
-            
-            <div className="dashboard-new-chart-stats">
-              <div>
-                <p className="dashboard-new-chart-stat-label">Melhor Dia</p>
-                <p className="dashboard-new-chart-stat-value">{formatCurrency(melhorDia.valor)}</p>
-                <p className="dashboard-new-chart-stat-date">{melhorDia.data}</p>
-              </div>
-              <div>
-                <p className="dashboard-new-chart-stat-label">Média Diária</p>
-                <p className="dashboard-new-chart-stat-value">{formatCurrency(mediaDiaria)}</p>
-                <p className="dashboard-new-chart-stat-period">Últimos {periodoGrafico} dias</p>
-              </div>
-              <div>
-                <p className="dashboard-new-chart-stat-label">Crescimento</p>
-                <p className="dashboard-new-chart-stat-value">{formatPercent(crescimentoPercentual)}</p>
-                <p className="dashboard-new-chart-stat-growth">vs. inicial</p>
-              </div>
-            </div>
           </div>
           
           {SHOW_RANKING_TIPSTERS && (
