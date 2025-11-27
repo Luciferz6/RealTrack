@@ -702,7 +702,7 @@ export default function Dashboard() {
             <div className="dashboard-new-chart-header">
               <div>
                 <h3 className="dashboard-new-chart-title">Performance Recente</h3>
-                <p className="dashboard-new-chart-subtitle">Últimas 7 apostas</p>
+                <p className="dashboard-new-chart-subtitle">Últimas 5 apostas</p>
               </div>
               <TrendingUp size={20} className="dashboard-new-trending-icon" />
             </div>
@@ -710,7 +710,7 @@ export default function Dashboard() {
             <div className="dashboard-new-recent-performance">
               {apostasRecentes && apostasRecentes.length > 0 ? (
                 <div className="dashboard-new-recent-list">
-                  {apostasRecentes.slice(0, 7).map((aposta, index) => (
+                  {apostasRecentes.slice(0, 5).map((aposta, index) => (
                     <div key={aposta.id || index} className="dashboard-new-recent-item">
                       <div className="dashboard-new-recent-status">
                         <div className={`dashboard-new-recent-indicator ${aposta.status === 'GANHOU' ? 'win' : 'loss'}`}></div>
