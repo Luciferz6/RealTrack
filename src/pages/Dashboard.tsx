@@ -242,26 +242,68 @@ export default function Dashboard() {
   }, [lucroAcumulado, periodoGrafico]);
 
   // Preparar dados para ranking de tipsters
+  const roiReferencia = useMemo(() => {
+    return resumoPorEsporte[0]?.roi ?? metricas.roi;
+  }, [resumoPorEsporte, metricas.roi]);
+
+  const taxaReferencia = useMemo(() => {
+    return resumoPorEsporte[0]?.aproveitamento ?? metricas.taxaAcerto;
+  }, [resumoPorEsporte, metricas.taxaAcerto]);
+
+  const descricaoPadraoTipster = useMemo(() => {
+    if (resumoPorCasa.length === 0) {
+      return 'Tipster profissional';
+    }
+    const melhorCasa = [...resumoPorCasa].sort((a, b) => b.lucro - a.lucro)[0];
+    return `Especialista em ${melhorCasa.casa}`;
+  }, [resumoPorCasa]);
+
   const rankingTipsters = useMemo(() => {
-    return lucroPorTipster
+    const reais = lucroPorTipster
       .map(item => {
         const tipster = tipsters.find(t => t.nome === item.tipster);
         if (!tipster) return null;
         
         // Calcular ROI e taxa de acerto do tipster (simplificado - usando dados do resumo)
-        const resumoEsporte = resumoPorEsporte.find(r => r.esporte); // Simplificado
         return {
           nome: item.tipster,
           lucro: item.lucro,
-          roi: metricas.roi, // Simplificado - usar dados reais se disponível
-          taxa: metricas.taxaAcerto, // Simplificado
-          descricao: 'Tipster profissional'
+          roi: roiReferencia,
+          taxa: taxaReferencia,
+          descricao: descricaoPadraoTipster
         };
       })
       .filter((item): item is NonNullable<typeof item> => item !== null)
       .sort((a, b) => b.lucro - a.lucro)
       .slice(0, 5);
-  }, [lucroPorTipster, tipsters, resumoPorEsporte, metricas]);
+      
+    const placeholders = [
+      {
+        nome: 'TIPSTER FICTÍCIO A',
+        descricao: descricaoPadraoTipster,
+        lucro: 450,
+        roi: Math.max(roiReferencia - 8, 10),
+        taxa: Math.max(taxaReferencia - 6, 15)
+      },
+      {
+        nome: 'TIPSTER FICTÍCIO B',
+        descricao: 'Analista de mercados emergentes',
+        lucro: 320,
+        roi: Math.max(roiReferencia - 12, 8),
+        taxa: Math.max(taxaReferencia - 10, 12)
+      }
+    ];
+    
+    const resultado = [...reais];
+    let placeholderIndex = 0;
+    
+    while (resultado.length < 3 && placeholderIndex < placeholders.length) {
+      resultado.push(placeholders[placeholderIndex]);
+      placeholderIndex += 1;
+    }
+    
+    return resultado;
+  }, [lucroPorTipster, tipsters, roiReferencia, taxaReferencia, descricaoPadraoTipster]);
 
   const roiStatus = useMemo(() => {
     if (metricas.roi >= 50) return 'Ótimo';
