@@ -21,6 +21,32 @@ textarea:focus {
   box-shadow: none !important;
 }
 
+/* Override bank-color variables on focus to prevent purple glow */
+button:focus *,
+.btn:focus *,
+input:focus *,
+select:focus *,
+textarea:focus * {
+  --bank-color: inherit !important;
+  --bank-color-light: inherit !important;
+  --bank-color-accent: inherit !important;
+  --bank-color-dark: inherit !important;
+}
+
+/* Aggressive removal of any purple box-shadow or border */
+*[style*="box-shadow: var(--bank-color"],
+*[style*="border-color: var(--bank-color"],
+*[style*="border: var(--bank-color"] {
+  box-shadow: none !important;
+  border-color: inherit !important;
+}
+
+/* Remove any focus-visible purple glow */
+*:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
 :root {
   /* Variáveis de background FIXAS - não mudam com cor da banca */
   --bg: var(--color-bg-primary) !important;
