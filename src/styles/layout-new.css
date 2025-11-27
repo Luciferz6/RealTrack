@@ -212,14 +212,78 @@
     left: 0;
     top: 0;
     height: 100vh;
+    height: 100dvh;
+    width: 85vw;
+    max-width: 18rem;
     z-index: 999;
     transform: translateX(-100%);
     transition: transform 0.3s ease;
     background: #1e1b4b; /* purple-950 solid */
+    overflow-y: auto;
   }
 
   .layout-new-sidebar.mobile-open {
     transform: translateX(0);
+  }
+
+  .layout-new-sidebar.collapsed {
+    width: 85vw;
+    max-width: 18rem;
+  }
+
+  .layout-new-sidebar.collapsed .layout-new-brand-text,
+  .layout-new-sidebar.collapsed .layout-new-theme-toggle,
+  .layout-new-sidebar.collapsed .layout-new-banca-info,
+  .layout-new-sidebar.collapsed .layout-new-nav-item span,
+  .layout-new-sidebar.collapsed .layout-new-profile-details,
+  .layout-new-sidebar.collapsed .layout-new-profile-action-btn {
+    display: block;
+  }
+
+  .layout-new-sidebar.collapsed .layout-new-brand,
+  .layout-new-sidebar.collapsed .layout-new-banca-selection,
+  .layout-new-sidebar.collapsed .layout-new-nav,
+  .layout-new-sidebar.collapsed .layout-new-profile-box {
+    padding: 1rem;
+  }
+
+  .layout-new-sidebar.collapsed .layout-new-banca-button,
+  .layout-new-sidebar.collapsed .layout-new-nav-item {
+    justify-content: flex-start;
+    padding: 0.75rem 1rem;
+  }
+
+  .layout-new-sidebar.collapsed .layout-new-banca-badge,
+  .layout-new-sidebar.collapsed .layout-new-profile-info {
+    justify-content: flex-start;
+  }
+
+  .layout-new-sidebar.collapsed .layout-new-plano-card {
+    margin: 1rem;
+    padding: 1rem;
+  }
+
+  .layout-new-sidebar.collapsed .layout-new-plano-header,
+  .layout-new-sidebar.collapsed .layout-new-plano-hint,
+  .layout-new-sidebar.collapsed .layout-new-plano-pill {
+    display: flex;
+  }
+
+  .layout-new-sidebar.collapsed .layout-new-plano-numbers {
+    flex-direction: row;
+    align-items: baseline;
+  }
+
+  .layout-new-sidebar.collapsed .layout-new-plano-numbers strong {
+    font-size: 1.75rem;
+  }
+
+  .layout-new-sidebar.collapsed .layout-new-plano-numbers span {
+    font-size: 0.9rem;
+  }
+
+  .layout-new-sidebar.collapsed .layout-new-profile-actions {
+    justify-content: flex-start;
   }
 }
 
