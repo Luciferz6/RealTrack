@@ -805,7 +805,7 @@ export default function Dashboard() {
             <div className="recreate-sports-breakdown">
               {resumoPorEsporte && resumoPorEsporte.length > 0 ? (
                 <div className="recreate-sports-grid">
-                  {resumoPorEsporte.map((esporte, index) => (
+                  {resumoPorEsporte.slice(0, 4).map((esporte, index) => (
                     <div 
                       key={esporte.esporte || index} 
                       className={`recreate-sport-card ${expandedSport === esporte.esporte ? 'expanded' : ''}`}
@@ -923,7 +923,7 @@ export default function Dashboard() {
             <div className="recreate-sports-breakdown">
               {resumoPorCasa && resumoPorCasa.length > 0 ? (
                 <div className="recreate-sports-grid">
-                  {resumoPorCasa.map((casa, index) => (
+                  {resumoPorCasa.slice(0, 4).map((casa, index) => (
                     <div 
                       key={casa.casa || index} 
                       className={`recreate-sport-card ${expandedCasa === casa.casa ? 'expanded' : ''}`}
