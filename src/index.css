@@ -4,6 +4,23 @@
 @import './styles/components/cards.css';
 @import './styles/pages/index.css';
 
+/* Remove purple glow from ALL buttons globally */
+button:focus,
+.btn:focus,
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none !important;
+  box-shadow: none !important;
+  border-color: inherit !important;
+}
+
+/* Remove purple glow from all interactive elements */
+*:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
 :root {
   /* Variáveis de background FIXAS - não mudam com cor da banca */
   --bg: var(--color-bg-primary) !important;
