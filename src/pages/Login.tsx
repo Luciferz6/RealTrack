@@ -49,7 +49,7 @@ export default function Login() {
       {/* Left Panel - Hero */}
       <div className="lg:w-1/2 p-8 lg:p-16 flex flex-col justify-between relative z-10">
         {/* Logo & Title */}
-        <div>
+        <div className="flex-grow flex flex-col justify-end mb-8">
           <div className="flex items-center gap-3 mb-16">
             <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/30">
               <Target className="text-white" size={24} strokeWidth={2.5} />
@@ -75,7 +75,7 @@ export default function Login() {
 
         {/* Bottom Section */}
         <div className="hidden lg:block">
-          <div className="grid grid-cols-3 gap-6 pt-8 border-t border-slate-800/50">
+          <div className="grid grid-cols-3 gap-6 border-t border-slate-800/50">
             <div>
               <div className="text-emerald-400 text-2xl mb-1">15.7k+</div>
               <div className="text-slate-500 text-sm">Apostadores</div>
@@ -99,7 +99,7 @@ export default function Login() {
           <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 to-transparent rounded-3xl blur-3xl" />
           
           {/* Login Card */}
-          <div className="relative bg-slate-950/95 backdrop-blur-2xl border border-slate-800/60 rounded-2xl p-8 lg:p-10 shadow-2xl">
+          <div className="relative bg-slate-900/90 backdrop-blur-2xl border border-slate-800/50 rounded-2xl p-8 lg:p-10 shadow-2xl">
             {/* Header */}
             <div className="mb-8">
               <h2 className="text-white text-2xl mb-2">Acessar conta</h2>
