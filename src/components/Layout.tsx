@@ -253,6 +253,7 @@ export default function Layout() {
       const apiError = error as { response?: { status?: number } };
       if (apiError.response?.status === 401) {
         localStorage.removeItem('token');
+        sessionStorage.removeItem('token');
         void navigate('/login');
       }
     }
@@ -567,6 +568,7 @@ export default function Layout() {
                 className="layout-new-profile-logout-btn"
                 onClick={() => {
                   localStorage.removeItem('token');
+                  sessionStorage.removeItem('token');
                   setMobileMenuOpen(false);
                   void navigate('/login');
                 }}

@@ -1,6 +1,7 @@
 import { lazy, Suspense } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import Layout from './components/Layout';
+import ProtectedRoute from './components/ProtectedRoute';
 import { PerfilProvider } from './contexts/PerfilContext';
 
 // Lazy load de todas as páginas para reduzir bundle inicial
@@ -49,7 +50,7 @@ function App() {
         <Route index element={<Navigate to="/login" replace />} />
         <Route path="/login" element={<Login />} />
         <Route path="/cadastro" element={<Cadastro />} />
-        <Route element={<Layout />}>
+        <Route element={<ProtectedRoute><Layout /></ProtectedRoute>}>
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/bancas" element={<Bancas />} />
           <Route path="/financeiro" element={<Financeiro />} />
@@ -59,8 +60,10 @@ function App() {
           <Route path="/tipsters" element={<Tipsters />} />
         </Route>
         {/* Rotas do Telegram Web App (sem Layout) */}
-        <Route path="/telegram/edit" element={<TelegramEdit />} />
-        <Route path="/telegram/status" element={<TelegramStatus />} />
+        <Route element={<ProtectedRoute><div /></ProtectedRoute>}>
+          <Route path="/telegram/edit" element={<TelegramEdit />} />
+          <Route path="/telegram/status" element={<TelegramStatus />} />
+        </Route>
       </Routes>
       </Suspense>
     </PerfilProvider>

@@ -13,6 +13,7 @@ export default function Login() {
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [lembrarMe, setLembrarMe] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const emailInputRef = useRef<HTMLInputElement>(null);
@@ -28,7 +29,11 @@ export default function Login() {
       const { data } = await api.post<LoginResponse>('/auth/login', { email, senha });
       
       if (data.token) {
-        localStorage.setItem('token', data.token);
+        if (lembrarMe) {
+          localStorage.setItem('token', data.token);
+        } else {
+          sessionStorage.setItem('token', data.token);
+        }
         void navigate('/dashboard');
       }
     } catch (err) {
@@ -49,18 +54,18 @@ export default function Login() {
       {/* Left Panel - Hero */}
       <div className="lg:w-1/2 p-8 lg:p-16 flex flex-col justify-between relative z-10">
         {/* Logo & Title */}
-        <div>
+        <div className="pt-20">
           <div className="flex items-center gap-3 mb-16">
             <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/30">
               <Target className="text-white" size={24} strokeWidth={2.5} />
             </div>
             <div>
               <div className="text-white text-xl">Real Comando</div>
-              <div className="text-emerald-400 text-xs tracking-wider">MANAGEMENT</div>
+              <div className="text-emerald-400 text-xs tracking-wider">Planilha Esportiva</div>
             </div>
           </div>
 
-          <div className="max-w-xl">
+          <div className="max-w-xl pt-10">
             <h1 className="text-white text-5xl lg:text-6xl mb-6 leading-tight">
               Domine o jogo das
               <span className="block text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-400 mt-2">
@@ -68,7 +73,7 @@ export default function Login() {
               </span>
             </h1>
             <p className="text-slate-400 text-lg leading-relaxed">
-              Plataforma completa de análise, gestão e otimização de resultados. Transforme dados em lucros consistentes.
+              Plataforma completa de análise, gestão e otimização de resultados.
             </p>
           </div>
         </div>
@@ -184,6 +189,8 @@ export default function Login() {
                 <label className="flex items-center gap-2 cursor-pointer group">
                   <input
                     type="checkbox"
+                    checked={lembrarMe}
+                    onChange={(e) => setLembrarMe(e.target.checked)}
                     className="w-4 h-4 rounded bg-slate-950 border-slate-700 text-emerald-500 focus:ring-emerald-500 focus:ring-offset-0 cursor-pointer"
                   />
                   <span className="text-slate-400 text-sm group-hover:text-slate-300 transition-colors">
