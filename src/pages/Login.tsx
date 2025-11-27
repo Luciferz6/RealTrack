@@ -41,7 +41,7 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-950 via-slate-950 to-slate-950 flex flex-col lg:flex-row relative overflow-hidden" style={{ transform: 'scale(1.1)', transformOrigin: 'top left' }}>
+    <div className="min-h-screen bg-gradient-to-br from-emerald-950 via-slate-950 to-slate-950 flex flex-col lg:flex-row relative overflow-hidden" style={{ transform: 'scale(1.05)', transformOrigin: 'top left', width: '95vw', height: '95vh' }}>
       {/* Decorative Elements */}
       <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-500/5 rounded-full blur-3xl" />
       <div className="absolute bottom-0 left-0 w-96 h-96 bg-emerald-600/5 rounded-full blur-3xl" />
@@ -125,7 +125,7 @@ export default function Login() {
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="voce@exemplo.com"
                     className="w-full bg-slate-950/50 border border-slate-700/50 text-white rounded-xl pl-11 pr-4 py-3.5 text-sm placeholder:text-slate-600 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/20 transition-all"
-                    style={{ color: '#ffffff !important', backgroundColor: '#0f172a !important' }}
+                    style={{ color: '#ffffff !important', backgroundColor: '#0f172a !important', WebkitTextFillColor: '#ffffff !important' }}
                     required
                     autoComplete="email"
                   />
@@ -149,7 +149,7 @@ export default function Login() {
                     onChange={(e) => setSenha(e.target.value)}
                     placeholder="••••••••••"
                     className="w-full bg-slate-950/50 border border-slate-700/50 text-white rounded-xl pl-11 pr-11 py-3.5 text-sm placeholder:text-slate-600 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/20 transition-all"
-                    style={{ color: '#ffffff !important', backgroundColor: '#0f172a !important' }}
+                    style={{ color: '#ffffff !important', backgroundColor: '#0f172a !important', WebkitTextFillColor: '#ffffff !important' }}
                     required
                     autoComplete="current-password"
                   />
