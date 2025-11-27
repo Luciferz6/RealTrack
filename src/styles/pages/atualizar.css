@@ -199,10 +199,6 @@
 
 /* Responsive */
 @media (max-width: 768px) {
-  .atualizar-page .stat-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  
   .atualizar-page .form-grid {
     grid-template-columns: 1fr;
   }
@@ -214,12 +210,6 @@
   .atualizar-page table {
     display: block;
     overflow-x: auto;
-  }
-}
-
-@media (max-width: 480px) {
-  .atualizar-page .stat-grid {
-    grid-template-columns: 1fr;
   }
 }
 

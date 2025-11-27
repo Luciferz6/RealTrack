@@ -120,10 +120,6 @@
 
 /* Responsive */
 @media (max-width: 768px) {
-  .bancas-page .stat-grid {
-    grid-template-columns: 1fr;
-  }
-  
   .bancas-page .stats-modal-grid {
     grid-template-columns: 1fr;
   }

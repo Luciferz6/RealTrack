@@ -148,10 +148,6 @@
 
 /* Responsive */
 @media (max-width: 768px) {
-  .financeiro-page .stat-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  
   .financeiro-page .saldo-casa-grid {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -163,10 +159,6 @@
 }
 
 @media (max-width: 480px) {
-  .financeiro-page .stat-grid {
-    grid-template-columns: 1fr;
-  }
-  
   .financeiro-page .saldo-casa-grid {
     grid-template-columns: 1fr;
   }

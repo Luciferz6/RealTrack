@@ -3,22 +3,23 @@
    ============================================ */
 
 /* Grid padrão para stat cards - igual ao Dashboard */
+/* Sobrescreve estilos antigos do index.css */
 .stat-grid {
-  display: grid;
-  grid-template-columns: repeat(1, 1fr);
-  gap: 1.5rem;
-  margin-bottom: 1.5rem;
+  display: grid !important;
+  grid-template-columns: repeat(1, 1fr) !important;
+  gap: 1.5rem !important;
+  margin-bottom: 1.5rem !important;
 }
 
 @media (min-width: 768px) {
   .stat-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, 1fr) !important;
   }
 }
 
 @media (min-width: 1024px) {
   .stat-grid {
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(4, 1fr) !important;
   }
 }
 
@@ -163,21 +164,39 @@
 /* ============================================
    GLASS CARD - Card com efeito glass
    Estilo igual ao dashboard-new-chart-card
+   Sobrescreve glass.css para manter consistência
    ============================================ */
 
 .glass-card {
-  background: rgba(51, 65, 85, 0.5); /* slate-800/50 */
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(71, 85, 105, 0.5);
-  border-radius: 1rem;
-  padding: 1.5rem;
-  transition: all 0.2s;
+  background: rgba(51, 65, 85, 0.5) !important; /* slate-800/50 */
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+  border: 1px solid rgba(71, 85, 105, 0.5) !important;
+  border-radius: 1rem !important;
+  padding: 1.5rem !important;
+  transition: all 0.2s !important;
   position: relative;
+  box-shadow: none !important;
+}
+
+[data-theme='dark'] .glass-card {
+  background: rgba(51, 65, 85, 0.5) !important;
+  border: 1px solid rgba(71, 85, 105, 0.5) !important;
+  box-shadow: none !important;
+}
+
+[data-theme='dark'] .glass-card::before {
+  display: none !important;
+}
+
+.glass-card:hover {
+  transform: none !important;
+  box-shadow: none !important;
+  border-color: rgba(71, 85, 105, 0.7) !important;
 }
 
 [data-theme='light'] .glass-card {
-  background: rgba(241, 245, 249, 0.8);
-  border-color: rgba(148, 163, 184, 0.3);
+  background: rgba(241, 245, 249, 0.8) !important;
+  border-color: rgba(148, 163, 184, 0.3) !important;
 }
 

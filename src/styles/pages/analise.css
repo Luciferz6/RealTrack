@@ -191,20 +191,12 @@
 }
 
 @media (max-width: 768px) {
-  .analise-page .stat-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  
   .analise-page .bookmakers-grid {
     grid-template-columns: 1fr;
   }
 }
 
 @media (max-width: 480px) {
-  .analise-page .stat-grid {
-    grid-template-columns: 1fr;
-  }
-  
   .analise-page .sports-grid {
     grid-template-columns: repeat(2, 1fr);
   }
