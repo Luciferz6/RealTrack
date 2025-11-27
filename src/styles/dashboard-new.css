@@ -1,3 +1,22 @@
+/* Remove purple glow from all buttons */
+.dashboard-new-date-filter-btn:focus,
+.dashboard-new-filter-btn:focus,
+.dashboard-new-time-btn:focus,
+.dashboard-new-hero-details-btn:focus,
+.dashboard-new-tipster-view-all:focus {
+  outline: none;
+  box-shadow: none;
+  border-color: rgba(71, 85, 105, 0.5);
+}
+
+/* Remove purple glow from inputs and selects */
+.dashboard-new-search-input:focus,
+.dashboard-new-period-select:focus {
+  outline: none;
+  box-shadow: none;
+  border-color: rgba(71, 85, 105, 0.5);
+}
+
 /* Dashboard Novo - Estilos baseados no design moderno da imagem */
 
 .dashboard-new {
