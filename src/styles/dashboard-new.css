@@ -436,12 +436,12 @@
 }
 
 .dashboard-new-chart-card--large {
-  grid-column: span 2;
+  grid-column: span 1;
 }
 
 @media (min-width: 1024px) {
   .dashboard-new-chart-card--large {
-    grid-column: span 3;
+    grid-column: span 2;
   }
 }
 
