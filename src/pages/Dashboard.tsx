@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { LineChart, Line, ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianGrid } from 'recharts';
-import { Filter, TrendingUp, ArrowUpRight, Calendar, Trophy } from 'lucide-react';
+import { Filter, TrendingUp, ArrowUpRight, Trophy, Plus, Download } from 'lucide-react';
 import FilterPopover from '../components/FilterPopover';
 import DateInput from '../components/DateInput';
 import { CASAS_APOSTAS } from '../constants/casasApostas';
@@ -338,8 +338,12 @@ export default function Dashboard() {
           
           <div className="dashboard-new-header-actions">
             <button className="dashboard-new-date-filter-btn">
-              <Calendar size={16} />
-              <span>Últimos 30 dias</span>
+              <Plus size={16} />
+              <span>Nova Aposta</span>
+            </button>
+            <button className="dashboard-new-date-filter-btn">
+              <Download size={16} />
+              <span>Importar Dados</span>
             </button>
             
             <div className="filter-trigger-wrapper">
