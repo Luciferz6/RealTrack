@@ -1,3 +1,7 @@
+/* ============================================
+   GLASS - Estilos base para efeito glassmorphism
+   ============================================ */
+
 .glass {
   background: var(--color-bg-glass) !important;
   backdrop-filter: blur(40px) saturate(200%) !important;
@@ -11,52 +15,14 @@
   isolation: isolate;
 }
 
-.glass-card {
-  background: var(--color-bg-glass-card) !important;
-  backdrop-filter: blur(40px) saturate(200%) !important;
-  -webkit-backdrop-filter: blur(40px) saturate(200%) !important;
-  border-radius: 20px;
-  border: 1px solid var(--color-border-card) !important;
-  box-shadow: var(--color-shadow-md-dark) !important;
-  padding: 24px;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-  isolation: isolate;
-}
+/* ============================================
+   GLASS CARD - Estilos padronizados
+   NOTA: Os estilos principais e padronizados estão em cards.css
+   Este arquivo mantém apenas compatibilidade básica.
+   cards.css é carregado depois e sobrescreve estilos conflitantes.
+   ============================================ */
 
-[data-theme='dark'] .glass-card {
-  background: var(--color-bg-glass-card-dark) !important;
-  border: 1px solid var(--color-border-card-dark) !important;
-  box-shadow: var(--color-shadow-glass-card-dark) !important;
-}
-
-[data-theme='dark'] .glass-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--color-secondary-dark), transparent);
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.glass-card:hover {
-  box-shadow: 0 12px 40px rgba(138, 43, 226, 0.35);
-  border-color: var(--color-secondary-darker-dark);
-}
-
-[data-theme='dark'] .glass-card:hover {
-  background: var(--color-bg-hover-dark-alt) !important;
-  border-color: var(--color-border-nav-icon-active-dark) !important;
-  box-shadow: var(--color-shadow-glass-card-hover-dark) !important;
-  transform: translateY(-4px);
-}
-
-[data-theme='dark'] .glass-card:hover::before {
-  opacity: 1;
-}
+/* Removidos estilos duplicados - ver cards.css para estilos padronizados */
 
 .glass-button {
   background: var(--color-bg-glass-button);
