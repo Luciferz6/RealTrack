@@ -77,16 +77,16 @@ export default function Login() {
         <div className="hidden lg:block">
           <div className="grid grid-cols-3 gap-6 pb-8 border-b border-slate-800/50">
             <div>
-              <div className="text-emerald-400 text-2xl mb-1">15.7k+</div>
-              <div className="text-slate-500 text-sm">Apostadores</div>
+              <div className="text-emerald-400 text-2xl mb-1">24/7</div>
+              <div className="text-slate-500 text-sm">Bot Suporte</div>
             </div>
             <div>
               <div className="text-emerald-400 text-2xl mb-1">87%</div>
               <div className="text-slate-500 text-sm">Taxa de Sucesso</div>
             </div>
             <div>
-              <div className="text-emerald-400 text-2xl mb-1">R$ 24M</div>
-              <div className="text-slate-500 text-sm">Volume Total</div>
+              <div className="text-emerald-400 text-2xl mb-1">5+</div>
+              <div className="text-slate-500 text-sm">Usuários Ativos</div>
             </div>
           </div>
         </div>
