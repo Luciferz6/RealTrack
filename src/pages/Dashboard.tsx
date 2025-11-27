@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { AreaChart, Area, ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianGrid } from 'recharts';
-import { Filter, TrendingUp, ArrowUpRight, Search, Bell, Calendar, Trophy } from 'lucide-react';
+import { Filter, TrendingUp, ArrowUpRight, Calendar, Trophy } from 'lucide-react';
 import FilterPopover from '../components/FilterPopover';
 import DateInput from '../components/DateInput';
 import { CASAS_APOSTAS } from '../constants/casasApostas';
@@ -288,20 +288,6 @@ export default function Dashboard() {
           </div>
           
           <div className="dashboard-new-header-actions">
-            <div className="dashboard-new-search">
-              <Search className="dashboard-new-search-icon" size={20} />
-              <input
-                type="text"
-                placeholder="Buscar..."
-                className="dashboard-new-search-input"
-              />
-            </div>
-            
-            <button className="dashboard-new-notification-btn">
-              <Bell size={20} />
-              <span className="dashboard-new-notification-dot"></span>
-            </button>
-            
             <button className="dashboard-new-date-filter-btn">
               <Calendar size={16} />
               <span>Últimos 30 dias</span>
