@@ -735,245 +735,6 @@ export default function Dashboard() {
             </div>
           </div>
           
-          {/* Layout Lado a Lado: Por Esporte e Por Casa de Apostas */}
-          <div className="recreate-side-by-side-layout">
-            {/* Por Esporte Card */}
-            <div className="dashboard-new-chart-card recreate-sport-card-half">
-              <div className="dashboard-new-chart-header">
-                <div>
-                  <h3 className="dashboard-new-chart-title">Por Esporte</h3>
-                  <p className="dashboard-new-chart-subtitle">Acompanhe seus resultados por categoria</p>
-                </div>
-              </div>
-              
-              <div className="recreate-sports-breakdown">
-                {resumoPorEsporte && resumoPorEsporte.length > 0 ? (
-                  <div className="recreate-sports-grid">
-                    {resumoPorEsporte.map((esporte, index) => (
-                      <div 
-                        key={esporte.esporte || index} 
-                        className={`recreate-sport-card ${expandedSport === esporte.esporte ? 'expanded' : ''}`}
-                      >
-                        <button
-                          onClick={() => setExpandedSport(expandedSport === esporte.esporte ? null : esporte.esporte)}
-                          className="recreate-sport-button"
-                        >
-                          <div className="recreate-sport-main">
-                            <div className={`recreate-sport-icon ${esporte.roi >= 0 ? 'positive' : 'negative'}`}>
-                              ⚽
-                            </div>
-                            <div className="recreate-sport-info">
-                              <div className="recreate-sport-name">{esporte.esporte || 'Outros'}</div>
-                              <div className="recreate-sport-subtitle">{esporte.apostas || 0} apostas • {formatPercent(esporte.aproveitamento)}% vitórias</div>
-                            </div>
-                          </div>
-
-                          <div className="recreate-sport-metrics">
-                            <div className="recreate-sport-roi">
-                              <div className={`recreate-sport-roi-value ${esporte.roi >= 0 ? 'positive' : 'negative'}`}>
-                                {esporte.roi >= 0 ? '+' : ''}{formatPercent(esporte.roi)}
-                              </div>
-                              <div className="recreate-sport-roi-label">ROI</div>
-                            </div>
-
-                            <div className="recreate-sport-profit">
-                              <div className={`recreate-sport-profit-value ${esporte.lucro >= 0 ? 'positive' : 'negative'}`}>
-                                {esporte.lucro >= 0 ? '+' : ''}{formatCurrency(esporte.lucro)}
-                              </div>
-                              <div className="recreate-sport-profit-label">Lucro</div>
-                            </div>
-
-                            <div className={`recreate-sport-expand ${expandedSport === esporte.esporte ? 'rotated' : ''}`}>
-                              <span className="recreate-sport-expand-icon">▼</span>
-                            </div>
-                          </div>
-                        </button>
-
-                        {expandedSport === esporte.esporte && (
-                          <div className="recreate-sport-expanded">
-                            {/* Stats Summary */}
-                            <div className="recreate-stats-grid">
-                              <div className="recreate-stat-item">
-                                <div className="recreate-stat-label">Apostas</div>
-                                <div className="recreate-stat-value">{esporte.apostas}</div>
-                              </div>
-                              <div className="recreate-stat-item">
-                                <div className="recreate-stat-label">Verdes</div>
-                                <div className="recreate-stat-value positive">{esporte.ganhas}</div>
-                                <div className="recreate-stat-subtitle">{formatPercent(esporte.aproveitamento)}%</div>
-                              </div>
-                              <div className="recreate-stat-item">
-                                <div className="recreate-stat-label">Apostado</div>
-                                <div className="recreate-stat-value">{formatCurrency(esporte.stakeMedia * esporte.apostas)}</div>
-                              </div>
-                              <div className="recreate-stat-item">
-                                <div className="recreate-stat-label">ROI</div>
-                                <div className={`recreate-stat-value ${esporte.roi >= 0 ? 'positive' : 'negative'}`}>
-                                  {esporte.roi >= 0 ? '+' : ''}{formatPercent(esporte.roi)}
-                                </div>
-                              </div>
-                            </div>
-
-                            {/* Recent Activity */}
-                            <div className="recreate-recent-activity">
-                              <h3 className="recreate-activity-title">Atividade Recente</h3>
-                              
-                              <div className="recreate-activity-table">
-                                {/* Table Header */}
-                                <div className="recreate-table-header">
-                                  <div className="recreate-header-col">Descrição</div>
-                                  <div className="recreate-header-col">Aposta</div>
-                                  <div className="recreate-header-col">Lucro</div>
-                                  <div className="recreate-header-col">Status</div>
-                                </div>
-
-                                {/* Sample Table Rows */}
-                                <div className="recreate-table-row">
-                                  <div className="recreate-table-desc">Exemplo de aposta - {esporte.esporte}</div>
-                                  <div className="recreate-table-amount">R$ 50,00</div>
-                                  <div className={`recreate-table-profit ${esporte.roi >= 0 ? 'positive' : 'negative'}`}>
-                                    {esporte.roi >= 0 ? '+' : '-'}R$ 25,00
-                                  </div>
-                                  <div className="recreate-table-status">
-                                    <span className={`recreate-status-badge ${esporte.roi >= 0 ? 'win' : 'loss'}`}>
-                                      {esporte.roi >= 0 ? 'Ganhou' : 'Perdeu'}
-                                    </span>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="dashboard-new-empty-state">
-                    <p className="dashboard-new-empty-text">Nenhum dado por esporte disponível</p>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Por Casa de Apostas Card */}
-            <div className="dashboard-new-chart-card recreate-sport-card-half">
-              <div className="dashboard-new-chart-header">
-                <div>
-                  <h3 className="dashboard-new-chart-title">Por Casa de Apostas</h3>
-                  <p className="dashboard-new-chart-subtitle">Acompanhe seus resultados por casa</p>
-                </div>
-              </div>
-              
-              <div className="recreate-sports-breakdown">
-                {resumoPorCasa && resumoPorCasa.length > 0 ? (
-                  <div className="recreate-sports-grid">
-                    {resumoPorCasa.map((casa, index) => (
-                      <div 
-                        key={casa.casa || index} 
-                        className={`recreate-sport-card ${expandedCasa === casa.casa ? 'expanded' : ''}`}
-                      >
-                        <button
-                          onClick={() => setExpandedCasa(expandedCasa === casa.casa ? null : casa.casa)}
-                          className="recreate-sport-button"
-                        >
-                          <div className="recreate-sport-main">
-                            <div className={`recreate-sport-icon ${casa.roi >= 0 ? 'positive' : 'negative'}`}>
-                              🏢
-                            </div>
-                            <div className="recreate-sport-info">
-                              <div className="recreate-sport-name">{casa.casa || 'Outros'}</div>
-                              <div className="recreate-sport-subtitle">{casa.apostas || 0} apostas • {formatPercent(casa.aproveitamento)}% vitórias</div>
-                            </div>
-                          </div>
-
-                          <div className="recreate-sport-metrics">
-                            <div className="recreate-sport-roi">
-                              <div className={`recreate-sport-roi-value ${casa.roi >= 0 ? 'positive' : 'negative'}`}>
-                                {casa.roi >= 0 ? '+' : ''}{formatPercent(casa.roi)}
-                              </div>
-                              <div className="recreate-sport-roi-label">ROI</div>
-                            </div>
-
-                            <div className="recreate-sport-profit">
-                              <div className={`recreate-sport-profit-value ${casa.lucro >= 0 ? 'positive' : 'negative'}`}>
-                                {casa.lucro >= 0 ? '+' : ''}{formatCurrency(casa.lucro)}
-                              </div>
-                              <div className="recreate-sport-profit-label">Lucro</div>
-                            </div>
-
-                            <div className={`recreate-sport-expand ${expandedCasa === casa.casa ? 'rotated' : ''}`}>
-                              <span className="recreate-sport-expand-icon">▼</span>
-                            </div>
-                          </div>
-                        </button>
-
-                        {expandedCasa === casa.casa && (
-                          <div className="recreate-sport-expanded">
-                            {/* Stats Summary */}
-                            <div className="recreate-stats-grid">
-                              <div className="recreate-stat-item">
-                                <div className="recreate-stat-label">Apostas</div>
-                                <div className="recreate-stat-value">{casa.apostas}</div>
-                              </div>
-                              <div className="recreate-stat-item">
-                                <div className="recreate-stat-label">Verdes</div>
-                                <div className="recreate-stat-value positive">{casa.ganhas}</div>
-                                <div className="recreate-stat-subtitle">{formatPercent(casa.aproveitamento)}%</div>
-                              </div>
-                              <div className="recreate-stat-item">
-                                <div className="recreate-stat-label">Apostado</div>
-                                <div className="recreate-stat-value">{formatCurrency(casa.stakeMedia * casa.apostas)}</div>
-                              </div>
-                              <div className="recreate-stat-item">
-                                <div className="recreate-stat-label">ROI</div>
-                                <div className={`recreate-stat-value ${casa.roi >= 0 ? 'positive' : 'negative'}`}>
-                                  {casa.roi >= 0 ? '+' : ''}{formatPercent(casa.roi)}
-                                </div>
-                              </div>
-                            </div>
-
-                            {/* Recent Activity */}
-                            <div className="recreate-recent-activity">
-                              <h3 className="recreate-activity-title">Atividade Recente</h3>
-                              
-                              <div className="recreate-activity-table">
-                                {/* Table Header */}
-                                <div className="recreate-table-header">
-                                  <div className="recreate-header-col">Descrição</div>
-                                  <div className="recreate-header-col">Aposta</div>
-                                  <div className="recreate-header-col">Lucro</div>
-                                  <div className="recreate-header-col">Status</div>
-                                </div>
-
-                                {/* Sample Table Rows */}
-                                <div className="recreate-table-row">
-                                  <div className="recreate-table-desc">Exemplo de aposta - {casa.casa}</div>
-                                  <div className="recreate-table-amount">R$ 50,00</div>
-                                  <div className={`recreate-table-profit ${casa.roi >= 0 ? 'positive' : 'negative'}`}>
-                                    {casa.roi >= 0 ? '+' : '-'}R$ 25,00
-                                  </div>
-                                  <div className="recreate-table-status">
-                                    <span className={`recreate-status-badge ${casa.roi >= 0 ? 'win' : 'loss'}`}>
-                                      {casa.roi >= 0 ? 'Ganhou' : 'Perdeu'}
-                                    </span>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="dashboard-new-empty-state">
-                    <p className="dashboard-new-empty-text">Nenhum dado por casa de apostas disponível</p>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-          
           {SHOW_RANKING_TIPSTERS && (
             <div className="dashboard-new-chart-card">
               <div className="dashboard-new-chart-header">
@@ -1028,6 +789,245 @@ export default function Dashboard() {
               </button>
             </div>
           )}
+        </div>
+        
+        {/* Layout Lado a Lado: Por Esporte e Por Casa de Apostas */}
+        <div className="recreate-side-by-side-layout">
+          {/* Por Esporte Card */}
+          <div className="dashboard-new-chart-card recreate-sport-card-half">
+            <div className="dashboard-new-chart-header">
+              <div>
+                <h3 className="dashboard-new-chart-title">Por Esporte</h3>
+                <p className="dashboard-new-chart-subtitle">Acompanhe seus resultados por categoria</p>
+              </div>
+            </div>
+            
+            <div className="recreate-sports-breakdown">
+              {resumoPorEsporte && resumoPorEsporte.length > 0 ? (
+                <div className="recreate-sports-grid">
+                  {resumoPorEsporte.map((esporte, index) => (
+                    <div 
+                      key={esporte.esporte || index} 
+                      className={`recreate-sport-card ${expandedSport === esporte.esporte ? 'expanded' : ''}`}
+                    >
+                      <button
+                        onClick={() => setExpandedSport(expandedSport === esporte.esporte ? null : esporte.esporte)}
+                        className="recreate-sport-button"
+                      >
+                        <div className="recreate-sport-main">
+                          <div className={`recreate-sport-icon ${esporte.roi >= 0 ? 'positive' : 'negative'}`}>
+                            ⚽
+                          </div>
+                          <div className="recreate-sport-info">
+                            <div className="recreate-sport-name">{esporte.esporte || 'Outros'}</div>
+                            <div className="recreate-sport-subtitle">{esporte.apostas || 0} apostas • {formatPercent(esporte.aproveitamento)}% vitórias</div>
+                          </div>
+                        </div>
+
+                        <div className="recreate-sport-metrics">
+                          <div className="recreate-sport-roi">
+                            <div className={`recreate-sport-roi-value ${esporte.roi >= 0 ? 'positive' : 'negative'}`}>
+                              {esporte.roi >= 0 ? '+' : ''}{formatPercent(esporte.roi)}
+                            </div>
+                            <div className="recreate-sport-roi-label">ROI</div>
+                          </div>
+
+                          <div className="recreate-sport-profit">
+                            <div className={`recreate-sport-profit-value ${esporte.lucro >= 0 ? 'positive' : 'negative'}`}>
+                              {esporte.lucro >= 0 ? '+' : ''}{formatCurrency(esporte.lucro)}
+                            </div>
+                            <div className="recreate-sport-profit-label">Lucro</div>
+                          </div>
+
+                          <div className={`recreate-sport-expand ${expandedSport === esporte.esporte ? 'rotated' : ''}`}>
+                            <span className="recreate-sport-expand-icon">▼</span>
+                          </div>
+                        </div>
+                      </button>
+
+                      {expandedSport === esporte.esporte && (
+                        <div className="recreate-sport-expanded">
+                          {/* Stats Summary */}
+                          <div className="recreate-stats-grid">
+                            <div className="recreate-stat-item">
+                              <div className="recreate-stat-label">Apostas</div>
+                              <div className="recreate-stat-value">{esporte.apostas}</div>
+                            </div>
+                            <div className="recreate-stat-item">
+                              <div className="recreate-stat-label">Verdes</div>
+                              <div className="recreate-stat-value positive">{esporte.ganhas}</div>
+                              <div className="recreate-stat-subtitle">{formatPercent(esporte.aproveitamento)}%</div>
+                            </div>
+                            <div className="recreate-stat-item">
+                              <div className="recreate-stat-label">Apostado</div>
+                              <div className="recreate-stat-value">{formatCurrency(esporte.stakeMedia * esporte.apostas)}</div>
+                            </div>
+                            <div className="recreate-stat-item">
+                              <div className="recreate-stat-label">ROI</div>
+                              <div className={`recreate-stat-value ${esporte.roi >= 0 ? 'positive' : 'negative'}`}>
+                                {esporte.roi >= 0 ? '+' : ''}{formatPercent(esporte.roi)}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Recent Activity */}
+                          <div className="recreate-recent-activity">
+                            <h3 className="recreate-activity-title">Atividade Recente</h3>
+                            
+                            <div className="recreate-activity-table">
+                              {/* Table Header */}
+                              <div className="recreate-table-header">
+                                <div className="recreate-header-col">Descrição</div>
+                                <div className="recreate-header-col">Aposta</div>
+                                <div className="recreate-header-col">Lucro</div>
+                                <div className="recreate-header-col">Status</div>
+                              </div>
+
+                              {/* Sample Table Rows */}
+                              <div className="recreate-table-row">
+                                <div className="recreate-table-desc">Exemplo de aposta - {esporte.esporte}</div>
+                                <div className="recreate-table-amount">R$ 50,00</div>
+                                <div className={`recreate-table-profit ${esporte.roi >= 0 ? 'positive' : 'negative'}`}>
+                                  {esporte.roi >= 0 ? '+' : '-'}R$ 25,00
+                                </div>
+                                <div className="recreate-table-status">
+                                  <span className={`recreate-status-badge ${esporte.roi >= 0 ? 'win' : 'loss'}`}>
+                                    {esporte.roi >= 0 ? 'Ganhou' : 'Perdeu'}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="dashboard-new-empty-state">
+                  <p className="dashboard-new-empty-text">Nenhum dado por esporte disponível</p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Por Casa de Apostas Card */}
+          <div className="dashboard-new-chart-card recreate-sport-card-half">
+            <div className="dashboard-new-chart-header">
+              <div>
+                <h3 className="dashboard-new-chart-title">Por Casa de Apostas</h3>
+                <p className="dashboard-new-chart-subtitle">Acompanhe seus resultados por casa</p>
+              </div>
+            </div>
+            
+            <div className="recreate-sports-breakdown">
+              {resumoPorCasa && resumoPorCasa.length > 0 ? (
+                <div className="recreate-sports-grid">
+                  {resumoPorCasa.map((casa, index) => (
+                    <div 
+                      key={casa.casa || index} 
+                      className={`recreate-sport-card ${expandedCasa === casa.casa ? 'expanded' : ''}`}
+                    >
+                      <button
+                        onClick={() => setExpandedCasa(expandedCasa === casa.casa ? null : casa.casa)}
+                        className="recreate-sport-button"
+                      >
+                        <div className="recreate-sport-main">
+                          <div className={`recreate-sport-icon ${casa.roi >= 0 ? 'positive' : 'negative'}`}>
+                            🏢
+                          </div>
+                          <div className="recreate-sport-info">
+                            <div className="recreate-sport-name">{casa.casa || 'Outros'}</div>
+                            <div className="recreate-sport-subtitle">{casa.apostas || 0} apostas • {formatPercent(casa.aproveitamento)}% vitórias</div>
+                          </div>
+                        </div>
+
+                        <div className="recreate-sport-metrics">
+                          <div className="recreate-sport-roi">
+                            <div className={`recreate-sport-roi-value ${casa.roi >= 0 ? 'positive' : 'negative'}`}>
+                              {casa.roi >= 0 ? '+' : ''}{formatPercent(casa.roi)}
+                            </div>
+                            <div className="recreate-sport-roi-label">ROI</div>
+                          </div>
+
+                          <div className="recreate-sport-profit">
+                            <div className={`recreate-sport-profit-value ${casa.lucro >= 0 ? 'positive' : 'negative'}`}>
+                              {casa.lucro >= 0 ? '+' : ''}{formatCurrency(casa.lucro)}
+                            </div>
+                            <div className="recreate-sport-profit-label">Lucro</div>
+                          </div>
+
+                          <div className={`recreate-sport-expand ${expandedCasa === casa.casa ? 'rotated' : ''}`}>
+                            <span className="recreate-sport-expand-icon">▼</span>
+                          </div>
+                        </div>
+                      </button>
+
+                      {expandedCasa === casa.casa && (
+                        <div className="recreate-sport-expanded">
+                          {/* Stats Summary */}
+                          <div className="recreate-stats-grid">
+                            <div className="recreate-stat-item">
+                              <div className="recreate-stat-label">Apostas</div>
+                              <div className="recreate-stat-value">{casa.apostas}</div>
+                            </div>
+                            <div className="recreate-stat-item">
+                              <div className="recreate-stat-label">Verdes</div>
+                              <div className="recreate-stat-value positive">{casa.ganhas}</div>
+                              <div className="recreate-stat-subtitle">{formatPercent(casa.aproveitamento)}%</div>
+                            </div>
+                            <div className="recreate-stat-item">
+                              <div className="recreate-stat-label">Apostado</div>
+                              <div className="recreate-stat-value">{formatCurrency(casa.stakeMedia * casa.apostas)}</div>
+                            </div>
+                            <div className="recreate-stat-item">
+                              <div className="recreate-stat-label">ROI</div>
+                              <div className={`recreate-stat-value ${casa.roi >= 0 ? 'positive' : 'negative'}`}>
+                                {casa.roi >= 0 ? '+' : ''}{formatPercent(casa.roi)}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Recent Activity */}
+                          <div className="recreate-recent-activity">
+                            <h3 className="recreate-activity-title">Atividade Recente</h3>
+                            
+                            <div className="recreate-activity-table">
+                              {/* Table Header */}
+                              <div className="recreate-table-header">
+                                <div className="recreate-header-col">Descrição</div>
+                                <div className="recreate-header-col">Aposta</div>
+                                <div className="recreate-header-col">Lucro</div>
+                                <div className="recreate-header-col">Status</div>
+                              </div>
+
+                              {/* Sample Table Rows */}
+                              <div className="recreate-table-row">
+                                <div className="recreate-table-desc">Exemplo de aposta - {casa.casa}</div>
+                                <div className="recreate-table-amount">R$ 50,00</div>
+                                <div className={`recreate-table-profit ${casa.roi >= 0 ? 'positive' : 'negative'}`}>
+                                  {casa.roi >= 0 ? '+' : '-'}R$ 25,00
+                                </div>
+                                <div className="recreate-table-status">
+                                  <span className={`recreate-status-badge ${casa.roi >= 0 ? 'win' : 'loss'}`}>
+                                    {casa.roi >= 0 ? 'Ganhou' : 'Perdeu'}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="dashboard-new-empty-state">
+                  <p className="dashboard-new-empty-text">Nenhum dado por casa de apostas disponível</p>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </div>
