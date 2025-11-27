@@ -33,6 +33,14 @@ const injectBuildInfo = () => {
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), injectBuildInfo()],
+  css: {
+    postcss: {
+      plugins: [
+        require('tailwindcss'),
+        require('autoprefixer'),
+      ],
+    },
+  },
   build: {
     // Limpar o diretório de output antes de cada build
     emptyOutDir: true,

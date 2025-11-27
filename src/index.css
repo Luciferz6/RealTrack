@@ -3,6 +3,9 @@
 @import './styles/colors.css';
 @import './styles/components/cards.css';
 @import './styles/pages/index.css';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 /* Remove purple glow from ALL buttons globally - MAXIMUM SPECIFICITY */
 html body button:focus,
