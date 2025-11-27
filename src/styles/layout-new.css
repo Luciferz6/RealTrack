@@ -217,10 +217,21 @@
     z-index: 999;
     transform: translateX(-100%);
     transition: transform 0.3s ease;
+    background: #1e1b4b; /* purple-950 solid */
   }
 
   .layout-new-sidebar.mobile-open {
     transform: translateX(0);
+  }
+}
+
+[data-theme='light'] .layout-new-sidebar {
+  background: linear-gradient(to bottom, rgba(88, 28, 135, 0.2), rgba(241, 245, 249, 0.4));
+}
+
+@media (max-width: 768px) {
+  [data-theme='light'] .layout-new-sidebar {
+    background: #f1f5f9; /* slate-100 solid */
   }
 }
 
