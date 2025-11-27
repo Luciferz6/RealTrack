@@ -69,6 +69,8 @@ interface DashboardResponse {
   resumoPorCasa: ResumoCasaItem[];
 }
 
+const SHOW_RANKING_TIPSTERS = false;
+
 export default function Dashboard() {
   const [filtersOpen, setFiltersOpen] = useState(false);
   const { tipsters } = useTipsters();
@@ -647,58 +649,60 @@ export default function Dashboard() {
             </div>
           </div>
           
-          <div className="dashboard-new-chart-card">
-            <div className="dashboard-new-chart-header">
-              <div>
-                <h3 className="dashboard-new-chart-title">Ranking de Tipsters</h3>
-                <p className="dashboard-new-chart-subtitle">Top performers</p>
+          {SHOW_RANKING_TIPSTERS && (
+            <div className="dashboard-new-chart-card">
+              <div className="dashboard-new-chart-header">
+                <div>
+                  <h3 className="dashboard-new-chart-title">Ranking de Tipsters</h3>
+                  <p className="dashboard-new-chart-subtitle">Top performers</p>
+                </div>
+                <Trophy size={24} className="dashboard-new-trophy-icon" />
               </div>
-              <Trophy size={24} className="dashboard-new-trophy-icon" />
-            </div>
-            
-            <div className="dashboard-new-tipster-list">
-              {rankingTipsters.length > 0 ? (
-                rankingTipsters.map((tipster, index) => (
-                  <div key={tipster.nome} className="dashboard-new-tipster-item">
-                    <div className="dashboard-new-tipster-gradient"></div>
-                    <div className="dashboard-new-tipster-content">
-                      <div className="dashboard-new-tipster-header">
-                        <div className="dashboard-new-tipster-rank">
-                          #{index + 1}
+              
+              <div className="dashboard-new-tipster-list">
+                {rankingTipsters.length > 0 ? (
+                  rankingTipsters.map((tipster, index) => (
+                    <div key={tipster.nome} className="dashboard-new-tipster-item">
+                      <div className="dashboard-new-tipster-gradient"></div>
+                      <div className="dashboard-new-tipster-content">
+                        <div className="dashboard-new-tipster-header">
+                          <div className="dashboard-new-tipster-rank">
+                            #{index + 1}
+                          </div>
+                          <div className="dashboard-new-tipster-info">
+                            <h4 className="dashboard-new-tipster-name">{tipster.nome}</h4>
+                            <p className="dashboard-new-tipster-desc">{tipster.descricao}</p>
+                          </div>
+                          <div className="dashboard-new-tipster-profit">
+                            <p className="dashboard-new-tipster-profit-value">{formatCurrency(tipster.lucro)}</p>
+                            <p className="dashboard-new-tipster-profit-label">Lucro total</p>
+                          </div>
                         </div>
-                        <div className="dashboard-new-tipster-info">
-                          <h4 className="dashboard-new-tipster-name">{tipster.nome}</h4>
-                          <p className="dashboard-new-tipster-desc">{tipster.descricao}</p>
-                        </div>
-                        <div className="dashboard-new-tipster-profit">
-                          <p className="dashboard-new-tipster-profit-value">{formatCurrency(tipster.lucro)}</p>
-                          <p className="dashboard-new-tipster-profit-label">Lucro total</p>
-                        </div>
-                      </div>
-                      
-                      <div className="dashboard-new-tipster-metrics">
-                        <div className="dashboard-new-tipster-metric">
-                          <p className="dashboard-new-tipster-metric-label">ROI</p>
-                          <p className="dashboard-new-tipster-metric-value">{formatPercent(tipster.roi)}</p>
-                        </div>
-                        <div className="dashboard-new-tipster-metric">
-                          <p className="dashboard-new-tipster-metric-label">Taxa</p>
-                          <p className="dashboard-new-tipster-metric-value">{formatPercent(tipster.taxa)}</p>
+                        
+                        <div className="dashboard-new-tipster-metrics">
+                          <div className="dashboard-new-tipster-metric">
+                            <p className="dashboard-new-tipster-metric-label">ROI</p>
+                            <p className="dashboard-new-tipster-metric-value">{formatPercent(tipster.roi)}</p>
+                          </div>
+                          <div className="dashboard-new-tipster-metric">
+                            <p className="dashboard-new-tipster-metric-label">Taxa</p>
+                            <p className="dashboard-new-tipster-metric-value">{formatPercent(tipster.taxa)}</p>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                ))
-              ) : (
-                <p className="dashboard-new-empty-text">Nenhum tipster encontrado</p>
-              )}
+                  ))
+                ) : (
+                  <p className="dashboard-new-empty-text">Nenhum tipster encontrado</p>
+                )}
+              </div>
+              
+              <button className="dashboard-new-tipster-view-all">
+                <TrendingUp size={16} />
+                Ver Todos os Tipsters
+              </button>
             </div>
-            
-            <button className="dashboard-new-tipster-view-all">
-              <TrendingUp size={16} />
-              Ver Todos os Tipsters
-            </button>
-          </div>
+          )}
         </div>
       </div>
     </div>
