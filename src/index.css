@@ -1179,6 +1179,74 @@
   --sidebar-ring: oklch(.439 0 0);
 }
 
+/* ============================================
+   CARDS - Estilos essenciais para o funcionamento
+   ============================================ */
+
+.card {
+  background: rgba(51, 65, 85, 0.5) !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+  border: 1px solid rgba(71, 85, 105, 0.5) !important;
+  border-radius: 1rem !important;
+  padding: 1.5rem !important;
+  transition: all 0.2s !important;
+  color: white !important;
+}
+
+.card:hover {
+  border-color: rgba(71, 85, 105, 0.7) !important;
+}
+
+/* Animações */
+.fade-up {
+  animation: fadeUp 0.5s ease-out !important;
+}
+
+.card-hover {
+  transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+}
+
+.card-hover:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 25px rgba(139, 92, 246, 0.3) !important;
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Grid layouts */
+.grid-2 {
+  display: grid !important;
+  grid-template-columns: repeat(1, 1fr) !important;
+  gap: 1.5rem !important;
+}
+
+@media (min-width: 768px) {
+  .grid-2 {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
+/* Light theme */
+[data-theme='light'] .card {
+  background: rgba(241, 245, 249, 0.8) !important;
+  color: #1e293b !important;
+  border-color: rgba(226, 232, 240, 0.8) !important;
+}
+
+[data-theme='light'] .card:hover {
+  border-color: rgba(226, 232, 240, 1) !important;
+}
+
 html {
   font-size: var(--font-size);
 }
