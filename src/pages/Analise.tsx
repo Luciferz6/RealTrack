@@ -6,11 +6,11 @@ import { chartTheme } from '../utils/chartTheme';
 import { formatCurrency, formatPercent } from '../utils/formatters';
 import EmptyState from '../components/ui/EmptyState';
 import Skeleton from '../components/ui/Skeleton';
-import AnaliseFilters from '../components/analise/AnaliseFilters';
+import { AnaliseFilters as AnaliseFiltersComponent } from '../components/analise/AnaliseFilters';
 import AnaliseRoiChart from '../components/analise/AnaliseRoiChart';
 import AnaliseOddsChart from '../components/analise/AnaliseOddsChart';
 import useAnaliseData from '../hooks/useAnaliseData';
-import type { AnaliseFilters } from '../types/AnaliseFilters';
+import type { AnaliseFilters as AnaliseFiltersType } from '../types/AnaliseFilters';
 import type { AnaliseHeatmapData } from '../types/AnaliseData';
 import type { RoiChartPoint } from '../types/RoiChartPoint';
 import type { OddsChartPoint } from '../types/OddsChartPoint';
@@ -26,7 +26,7 @@ const defaultDistribuicaoOdds: OddsChartPoint[] = [
   { faixa: '3.01-5.00', quantidade: 0 },
   { faixa: '5.01+', quantidade: 0 },
 ];
-const initialFilters: AnaliseFilters = {
+const initialFilters: AnaliseFiltersType = {
   status: '',
   tipster: '',
   casa: '',
@@ -39,9 +39,8 @@ const initialFilters: AnaliseFilters = {
 };
 
 export default function Analise() {
-  const [filters, setFilters] = useState<AnaliseFilters>(initialFilters);
+  const [filters, setFilters] = useState<AnaliseFiltersType>(initialFilters);
   const { data, isLoading } = useAnaliseData(filters);
-  const [bookmakersExpanded, setBookmakersExpanded] = useState(false);
 
   // Sincronizar dados derivados com o hook de análise
   const evolucaoRoiMensal = useMemo(() => data.evolucaoRoiMensal, [data.evolucaoRoiMensal]);
@@ -112,7 +111,7 @@ export default function Analise() {
         title="Gráficos"
         subtitle="Visualize suas métricas e acompanhe evolução"
         actions={
-          <AnaliseFilters value={filters} onChange={setFilters} />
+          <AnaliseFiltersComponent value={filters} onChange={setFilters} />
         }
       />
 
@@ -267,63 +266,6 @@ export default function Analise() {
               </div>
             ))}
           </div>
-        </div>
-      </div>
-
-      <div className="grid-2">
-        <div className="card">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-            <h3 style={{ marginTop: 0 }}>Comparação de Bookmakers</h3>
-            {comparacaoBookmakers.length > 0 && (
-              <button
-                type="button"
-                className="btn ghost"
-                style={{ padding: '4px 10px', fontSize: '0.8rem' }}
-                onClick={() => setBookmakersExpanded(prev => !prev)}
-              >
-                {bookmakersExpanded ? 'Recolher' : 'Expandir'}
-              </button>
-            )}
-          </div>
-          {comparacaoBookmakers.length > 0 ? (
-            <div
-              style={{
-                maxHeight: bookmakersExpanded ? 'none' : '360px',
-                overflowY: bookmakersExpanded ? 'visible' : 'auto',
-                paddingRight: '10px',
-                marginTop: 8
-              }}
-            >
-              {comparacaoBookmakers.slice(0, 50).map((bookmaker, index) => (
-                <div
-                  key={bookmaker.casa}
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    padding: '12px 0',
-                    borderBottom: index < comparacaoBookmakers.length - 1 ? '1px solid var(--border)' : 'none'
-                  }}
-                >
-                  <div>
-                    <p style={{ margin: 0, fontWeight: 600 }}>{bookmaker.casa}</p>
-                    <p className="card-desc" style={{ margin: 0, marginTop: 4 }}>
-                      Investido: {formatCurrency(bookmaker.investido)} | ROI: {formatPercent(bookmaker.roi)}
-                    </p>
-                  </div>
-                  <span style={{ fontWeight: 600, color: bookmaker.resultado >= 0 ? 'var(--color-success)' : 'var(--color-danger)' }}>
-                    {formatCurrency(bookmaker.resultado)}
-                  </span>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <EmptyState title="Sem dados" description="Adicione apostas para visualizar comparações." />
-          )}
-        </div>
-        <div className="card">
-          <h3 style={{ marginTop: 0 }}>Histórico de Apostas</h3>
-          <EmptyState title="Sem resultados" description="Nenhuma aposta encontrada para os filtros selecionados." />
         </div>
       </div>
     </div>
