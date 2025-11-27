@@ -112,7 +112,19 @@ html body .dashboard-new-chart-card {
   color: var(--text);
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
-  font-size: 80%;
+  font-size: 70%;
+}
+
+/* Maintain original scale for login and registration pages */
+body:has(.login-page),
+body:has(.cadastro-page) {
+  font-size: 100% !important;
+}
+
+/* Alternative approach - target by route paths */
+body[data-route="/login"],
+body[data-route="/cadastro"] {
+  font-size: 100% !important;
 }
 
 /* Variáveis do tema dark - consolidado em uma única declaração */
