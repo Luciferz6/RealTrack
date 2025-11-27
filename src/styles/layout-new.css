@@ -32,15 +32,15 @@
 
 .layout-new-mobile-backdrop {
   display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.15);
-  z-index: 9998;
 }
 
 @media (max-width: 768px) {
   .layout-new-mobile-backdrop {
     display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.15);
+    z-index: 9998;
   }
 }
 
@@ -51,6 +51,12 @@
   display: flex;
   height: 100vh;
   align-items: stretch;
+}
+
+@media (max-width: 768px) {
+  .layout-new-sidebar-wrapper {
+    z-index: 9999;
+  }
 }
 
 .layout-new-sidebar-toggle {
@@ -824,6 +830,14 @@
   flex: 1;
   overflow: auto;
   background: #0f172a; /* slate-950 */
+  position: relative;
+  z-index: 1;
+}
+
+@media (max-width: 768px) {
+  .layout-new-main {
+    z-index: 1;
+  }
 }
 
 .layout-new-body {
