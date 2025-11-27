@@ -43,15 +43,17 @@
 
 .grid {
   display: grid;
-  gap: 24px;
+  gap: 1.5rem; /* Mesmo espaçamento do Dashboard */
 }
 
 .grid-2 {
   grid-template-columns: repeat(2, 1fr);
   align-items: stretch;
+  gap: 1.5rem; /* Mesmo espaçamento do Dashboard */
 }
 
 .grid-3 {
   grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem; /* Mesmo espaçamento do Dashboard */
 }
 

@@ -1179,13 +1179,13 @@ button {
 
 [data-theme='dark'] .btn.ghost {
   color: var(--text);
-  border-color: rgba(139, 92, 246, 0.3);
+  border-color: rgba(71, 85, 105, 0.5);
 }
 
 [data-theme='dark'] .btn.ghost:hover {
-  background: var(--color-bg-hover-dark-alt);
-  border-color: var(--color-border-nav-icon-active-dark);
-  box-shadow: var(--color-shadow-button-secondary-dark);
+  background: rgba(51, 65, 85, 0.5);
+  border-color: rgba(71, 85, 105, 0.7);
+  box-shadow: none;
 }
 
 /* Botões de ação perigosa (vermelho) - funciona com estilos inline */
@@ -1307,15 +1307,34 @@ button {
 .grid-2,
 .grid-3 {
   display: grid;
-  gap: 18px;
+  gap: 1.5rem !important; /* Mesmo espaçamento do Dashboard */
 }
 
 .grid-2 {
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: repeat(2, 1fr);
+  align-items: stretch;
+}
+
+@media (max-width: 768px) {
+  .grid-2 {
+    grid-template-columns: 1fr;
+  }
 }
 
 .grid-3 {
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
+}
+
+@media (max-width: 1024px) {
+  .grid-3 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .grid-3 {
+    grid-template-columns: 1fr;
+  }
 }
 
 table {
