@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Filter, Plus, Wallet, Pencil, Trash2 } from 'lucide-react';
 import PageHeader from '../components/PageHeader';
-import StatCard from '../components/StatCard';
 import EmptyState from '../components/EmptyState';
 import Modal from '../components/Modal';
 import FilterPopover from '../components/FilterPopover';
@@ -11,6 +10,7 @@ import api from '../lib/api';
 import { useBancas } from '../hooks/useBancas';
 import { formatCurrency, formatDate, formatDateDisplay, normalizeDisplayToISO, getTodayDateISO, toISODate } from '../utils/formatters';
 import { type ApiFinancialTransaction, type ApiFinancialSummary, type ApiError } from '../types/api';
+import '../styles/dashboard-new.css';
 import '../styles/pages/financeiro.css';
 
 interface FinanceiroFilters {
@@ -502,43 +502,61 @@ export default function Financeiro() {
         </div>
       )}
 
-      <div className='stat-grid' style={{ gridTemplateColumns: 'repeat(5, 1fr)' }}>
-        <StatCard 
-          title='Total Depositado' 
-          value={formatCurrency(statsData.totalDepositado)} 
-          helper={`${statsData.totalDepositos} ${statsData.totalDepositos === 1 ? 'depósito' : 'depósitos'}`} 
-          icon={<Wallet size={20} />}
-          color="emerald"
-        />
-        <StatCard 
-          title='Total Sacado' 
-          value={formatCurrency(statsData.totalSacado)} 
-          helper={`${statsData.totalSaques} ${statsData.totalSaques === 1 ? 'saque' : 'saques'}`} 
-          icon={<Wallet size={20} />}
-          color="red"
-        />
-        <StatCard 
-          title='Resultado de Apostas' 
-          value={formatCurrency(statsData.resultadoApostas)} 
-          helper={`${statsData.apostasConcluidas} ${statsData.apostasConcluidas === 1 ? 'aposta concluída' : 'apostas concluídas'}`} 
-          icon={<Wallet size={20} />}
-          color="blue"
-        />
-        <StatCard 
-          title='Apostas Pendentes' 
-          value={formatCurrency(statsData.valorApostasPendentes)} 
-          helper={`${statsData.apostasPendentes} ${statsData.apostasPendentes === 1 ? 'aposta' : 'apostas'} aguardando resultado`} 
-          icon={<Wallet size={20} />}
-          color="amber"
-        />
-        <StatCard 
-          title='Saldo Atual' 
-          value={formatCurrency(statsData.saldoAtual)} 
-          helper='Saldo total ajustado' 
-          icon={<Wallet size={20} />}
-          color="purple"
-        />
-      </div>
+      <div className="dashboard-new-hero-stats" style={{ marginBottom: '24px' }}>
+          {/* Card Unificado Principal */}
+          <div className="dashboard-new-hero-main">
+            <div className="dashboard-new-hero-main-header">
+              <div>
+                <p className="dashboard-new-hero-label">Saldo Atual</p>
+                <h2 className="dashboard-new-hero-value">{formatCurrency(statsData.saldoAtual)}</h2>
+              </div>
+              <div className="dashboard-new-hero-badge">
+                <Wallet size={16} />
+                <span>Financeiro</span>
+              </div>
+            </div>
+            
+            <div className="dashboard-new-hero-main-footer">
+              <div>
+                <p className="dashboard-new-hero-footer-label">Total Depositado</p>
+                <p className="dashboard-new-hero-footer-value">{formatCurrency(statsData.totalDepositado)}</p>
+              </div>
+              <div>
+                <p className="dashboard-new-hero-footer-label">Total Sacado</p>
+                <p className="dashboard-new-hero-footer-value">{formatCurrency(statsData.totalSacado)}</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Cards Laterais */}
+          <div className="dashboard-new-hero-card dashboard-new-hero-card--blue">
+            <div className="dashboard-new-hero-card-header">
+              <div className="dashboard-new-hero-card-icon dashboard-new-hero-card-icon--blue">
+                <Wallet size={24} />
+              </div>
+              <span className="dashboard-new-hero-card-badge dashboard-new-hero-card-badge--blue">
+                {statsData.apostasConcluidas} {statsData.apostasConcluidas === 1 ? 'aposta' : 'apostas'}
+              </span>
+            </div>
+            <p className="dashboard-new-hero-card-label">Resultado de Apostas</p>
+            <h3 className="dashboard-new-hero-card-value">{formatCurrency(statsData.resultadoApostas)}</h3>
+            <p className="dashboard-new-hero-card-subtitle">Apostas concluídas</p>
+          </div>
+
+          <div className="dashboard-new-hero-card dashboard-new-hero-card--amber">
+            <div className="dashboard-new-hero-card-header">
+              <div className="dashboard-new-hero-card-icon dashboard-new-hero-card-icon--amber">
+                <Wallet size={24} />
+              </div>
+              <span className="dashboard-new-hero-card-badge dashboard-new-hero-card-badge--amber">
+                {statsData.apostasPendentes} {statsData.apostasPendentes === 1 ? 'aposta' : 'apostas'}
+              </span>
+            </div>
+            <p className="dashboard-new-hero-card-label">Apostas Pendentes</p>
+            <h3 className="dashboard-new-hero-card-value">{formatCurrency(statsData.valorApostasPendentes)}</h3>
+            <p className="dashboard-new-hero-card-subtitle">Aguardando resultado</p>
+          </div>
+        </div>
 
       <div className="card" style={{ marginBottom: 24 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>

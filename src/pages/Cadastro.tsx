@@ -78,8 +78,8 @@ export default function Cadastro() {
             </div>
           </div>
 
-          <div className="max-w-xl pt-10">
-            <h1 className="text-white text-5xl lg:text-6xl mb-6 leading-tight">
+          <div className="max-w-2xl pt-10">
+            <h1 className="text-white text-5xl lg:text-6xl mb-6">
               Comece sua jornada
               <span className="block text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-400 mt-2">
                 nas apostas esportivas
@@ -91,24 +91,7 @@ export default function Cadastro() {
           </div>
         </div>
 
-        {/* Bottom Section */}
-        <div className="hidden lg:block">
-          <div className="grid grid-cols-3 gap-6 pb-8 border-b border-slate-800/50">
-            <div>
-              <div className="text-emerald-400 text-2xl mb-1">24/7</div>
-              <div className="text-slate-500 text-sm">Bot Suporte</div>
-            </div>
-            <div>
-              <div className="text-emerald-400 text-2xl mb-1">90%</div>
-              <div className="text-slate-500 text-sm">Taxa de Sucesso</div>
-            </div>
-            <div>
-              <div className="text-emerald-400 text-2xl mb-1">5+</div>
-              <div className="text-slate-500 text-sm">Usuários Ativos</div>
-            </div>
-          </div>
-        </div>
-      </div>
+              </div>
 
       {/* Right Panel - Register Form */}
       <div className="lg:w-1/2 flex items-center justify-center p-8 relative z-10">
@@ -129,7 +112,7 @@ export default function Cadastro() {
               {/* Name */}
               <div>
                 <label htmlFor="name" className="block text-slate-300 mb-2.5 text-sm">
-                  Nome completo
+                  Apelido
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
@@ -141,7 +124,7 @@ export default function Cadastro() {
                     type="text"
                     value={nomeCompleto}
                     onChange={(e) => setNomeCompleto(e.target.value)}
-                    placeholder="Seu nome completo"
+                    placeholder="Seu apelido"
                     className="w-full bg-black border border-slate-700/50 text-white rounded-xl pl-11 pr-4 py-3.5 text-sm placeholder:text-slate-600 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/20 transition-all"
                     style={{ 
                       color: '#ffffff !important', 

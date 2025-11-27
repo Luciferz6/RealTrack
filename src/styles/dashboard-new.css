@@ -338,6 +338,14 @@
   border-color: rgba(239, 68, 68, 0.4);
 }
 
+.dashboard-new-hero-card--amber {
+  border-color: rgba(245, 158, 11, 0.2); /* amber-500/20 */
+}
+
+.dashboard-new-hero-card--amber:hover {
+  border-color: rgba(245, 158, 11, 0.4);
+}
+
 .dashboard-new-hero-card-header {
   display: flex;
   align-items: center;
@@ -369,6 +377,11 @@
   color: #f87171; /* red-400 */
 }
 
+.dashboard-new-hero-card-icon--amber {
+  background: rgba(245, 158, 11, 0.1);
+  color: #fbbf24; /* amber-400 */
+}
+
 .dashboard-new-hero-card-badge {
   font-size: 0.875rem;
   padding: 0.25rem 0.75rem;
@@ -389,6 +402,11 @@
 .dashboard-new-hero-card-badge--red {
   background: rgba(239, 68, 68, 0.1);
   color: #f87171;
+}
+
+.dashboard-new-hero-card-badge--amber {
+  background: rgba(245, 158, 11, 0.1);
+  color: #fbbf24;
 }
 
 .dashboard-new-hero-card-label {
