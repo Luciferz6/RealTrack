@@ -75,23 +75,6 @@ export class AuthManager {
   }
 
   /**
-   * Verifica se precisa refresh do token
-   */
-  static shouldRefreshToken(): boolean {
-    const token = this.getAccessToken();
-    if (!token) return true;
-
-    try {
-      const payload = this.parseJWT(token);
-      const now = Math.floor(Date.now() / 1000);
-      // Refresh se faltar menos de 5 minutos
-      return payload.exp - now < 300;
-    } catch {
-      return true;
-    }
-  }
-
-  /**
    * Implementação server-side (httpOnly cookies)
    */
   private static getServerSideToken(): string | null {
@@ -150,77 +133,21 @@ export class AuthManager {
       throw new Error('Failed to parse JWT');
     }
   }
-
-  /**
-   * Refresh token automático
-   */
-  static async refreshToken(): Promise<boolean> {
-    if (import.meta.env.PROD) {
-      try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/refresh`, {
-          method: 'POST',
-          credentials: 'include',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
-
-        if (response.ok) {
-          // Backend sets new cookies automatically
-          return true;
-        }
-      } catch (error) {
-        console.error('Failed to refresh token:', error);
-      }
-      return false;
-    } else {
-      // Fallback desenvolvimento
-      const refreshToken = localStorage.getItem(this.REFRESH_TOKEN_KEY);
-      if (!refreshToken) return false;
-
-      try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/refresh`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${refreshToken}`,
-          },
-        });
-
-        if (response.ok) {
-          const tokens = await response.json();
-          this.setTokens(tokens);
-          return true;
-        }
-      } catch (error) {
-        console.error('Failed to refresh token:', error);
-      }
-      return false;
-    }
-  }
 }
 
 /**
  * Hook para gerenciar autenticação em componentes React
  */
-export function useAuth() {
+  export function useAuth() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const checkAuth = async () => {
       if (AuthManager.isTokenValid()) {
-        // Verificar se precisa refresh
-        if (AuthManager.shouldRefreshToken()) {
-          const refreshed = await AuthManager.refreshToken();
-          setIsAuthenticated(refreshed);
-        } else {
-          setIsAuthenticated(true);
-        }
+        setIsAuthenticated(true);
       } else {
-        // Tentar refresh se token inválido
-        const refreshed = await AuthManager.refreshToken();
-        setIsAuthenticated(refreshed);
+        setIsAuthenticated(false);
       }
       setIsLoading(false);
     };
@@ -243,6 +170,5 @@ export function useAuth() {
     isLoading,
     login,
     logout,
-    refreshToken: () => AuthManager.refreshToken(),
   };
 }

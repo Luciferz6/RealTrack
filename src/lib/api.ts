@@ -133,39 +133,6 @@ api.interceptors.response.use(
     }
     const config = error.config;
 
-    // Tratar erro 401 - tentar refresh token uma vez
-    if (error.response?.status === 401 && config) {
-      const retryConfig = config as InternalAxiosRequestConfig & { __tokenRefreshed?: boolean };
-      
-      // Se ainda não tentou refresh
-      if (!retryConfig.__tokenRefreshed) {
-        try {
-          const refreshed = await AuthManager.refreshToken();
-          if (refreshed) {
-            retryConfig.__tokenRefreshed = true;
-            // Atualizar token no header
-            const newToken = AuthManager.getAccessToken();
-            if (newToken) {
-              if (retryConfig.headers instanceof AxiosHeaders) {
-                retryConfig.headers.set('Authorization', `Bearer ${newToken}`);
-              } else {
-                const headers = retryConfig.headers as Record<string, string>;
-                headers.Authorization = `Bearer ${newToken}`;
-              }
-            }
-            return api.request(retryConfig);
-          }
-        } catch (refreshError) {
-          console.error('Token refresh failed:', refreshError);
-          // Limpar tokens e redirecionar para login
-          AuthManager.clearTokens();
-          if (typeof window !== 'undefined') {
-            window.location.href = '/login';
-          }
-        }
-      }
-    }
-
     // Retry automático para erros 5xx (apenas uma vez)
     if (
       error.response?.status !== undefined &&
