@@ -57,16 +57,8 @@ const api: AxiosInstance = axios.create({
 });
 
 api.interceptors.request.use(async (config) => {
-  // Verificar se precisa refresh do token
-  if (AuthManager.shouldRefreshToken()) {
-    try {
-      await AuthManager.refreshToken();
-    } catch (error) {
-      console.warn('Failed to refresh token:', error);
-      // Continuar com token atual se refresh falhar
-    }
-  }
-
+  // Removido refresh automático para evitar problemas com cookies
+  
   const token = AuthManager.getAccessToken();
   if (token) {
     if (config.headers instanceof AxiosHeaders) {
