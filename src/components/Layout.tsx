@@ -23,6 +23,7 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import api from '../lib/api';
 import Modal from './Modal';
 import { useTheme } from '../contexts/ThemeContext';
+import { AuthManager } from '../lib/auth';
 import { BANK_COLOR_PALETTE, DEFAULT_BANK_COLOR, normalizeColor, applyColorTheme } from '../utils/colors';
 import { getFirstName } from '../utils/formatters';
 import type { ApiProfileResponse } from '../types/api';
@@ -248,11 +249,10 @@ export default function Layout() {
       setProfile(data);
     } catch (error) {
       console.error('Erro ao carregar perfil do usuário:', error);
-      // Se houver erro de autenticação, redirecionar para login
+      // Se houver erro de autenticação, limpar tokens e redirecionar para login
       const apiError = error as { response?: { status?: number } };
       if (apiError.response?.status === 401) {
-        localStorage.removeItem('token');
-        sessionStorage.removeItem('token');
+        AuthManager.clearTokens();
         void navigate('/login');
       }
     }
@@ -566,8 +566,7 @@ export default function Layout() {
               <button 
                 className="layout-new-profile-logout-btn"
                 onClick={() => {
-                  localStorage.removeItem('token');
-                  sessionStorage.removeItem('token');
+                  AuthManager.clearTokens();
                   setMobileMenuOpen(false);
                   void navigate('/login');
                 }}

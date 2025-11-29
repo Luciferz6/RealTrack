@@ -4,6 +4,7 @@ import axios, {
   type AxiosInstance,
   type InternalAxiosRequestConfig,
 } from 'axios';
+import { AuthManager } from './auth';
 
 const DEFAULT_BASE_URL = 'http://localhost:3001/api';
 const envBaseUrl = typeof import.meta.env.VITE_API_URL === 'string' ? import.meta.env.VITE_API_URL : undefined;
@@ -55,8 +56,18 @@ const api: AxiosInstance = axios.create({
   timeout: 70000, // 70 segundos de timeout para uploads/análises mais demorados
 });
 
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+api.interceptors.request.use(async (config) => {
+  // Verificar se precisa refresh do token
+  if (AuthManager.shouldRefreshToken()) {
+    try {
+      await AuthManager.refreshToken();
+    } catch (error) {
+      console.warn('Failed to refresh token:', error);
+      // Continuar com token atual se refresh falhar
+    }
+  }
+
+  const token = AuthManager.getAccessToken();
   if (token) {
     if (config.headers instanceof AxiosHeaders) {
       config.headers.set('Authorization', `Bearer ${token}`);
@@ -66,6 +77,11 @@ api.interceptors.request.use((config) => {
       normalizedHeaders.Authorization = `Bearer ${token}`;
       config.headers = normalizedHeaders as typeof config.headers;
     }
+  }
+
+  // Em produção, incluir credentials para httpOnly cookies
+  if (import.meta.env.PROD) {
+    config.withCredentials = true;
   }
 
   // Marcar cache key no config para uso posterior
@@ -95,7 +111,7 @@ export const clearCache = () => {
 // O cache salva dados após cada resposta GET bem-sucedida
 // A deduplicação pode ser implementada em hooks específicos (useTipsters, useBancas já têm)
 
-// Interceptor de resposta para salvar cache e tratar rate limiting e erros
+// Interceptor de resposta para salvar cache, tratar rate limiting, erros e refresh token
 api.interceptors.response.use(
   (response) => {
     const config = response.config;
@@ -121,11 +137,44 @@ api.interceptors.response.use(
 
     return response;
   },
-  (error: AxiosError<{ retryAfter?: number; error?: string }>) => {
+  async (error: AxiosError<{ retryAfter?: number; error?: string }>) => {
     if (!(error instanceof Error)) {
       return Promise.reject(new Error('Unknown error occurred'));
     }
     const config = error.config;
+
+    // Tratar erro 401 - tentar refresh token uma vez
+    if (error.response?.status === 401 && config) {
+      const retryConfig = config as InternalAxiosRequestConfig & { __tokenRefreshed?: boolean };
+      
+      // Se ainda não tentou refresh
+      if (!retryConfig.__tokenRefreshed) {
+        try {
+          const refreshed = await AuthManager.refreshToken();
+          if (refreshed) {
+            retryConfig.__tokenRefreshed = true;
+            // Atualizar token no header
+            const newToken = AuthManager.getAccessToken();
+            if (newToken) {
+              if (retryConfig.headers instanceof AxiosHeaders) {
+                retryConfig.headers.set('Authorization', `Bearer ${newToken}`);
+              } else {
+                const headers = retryConfig.headers as Record<string, string>;
+                headers.Authorization = `Bearer ${newToken}`;
+              }
+            }
+            return api.request(retryConfig);
+          }
+        } catch (refreshError) {
+          console.error('Token refresh failed:', refreshError);
+          // Limpar tokens e redirecionar para login
+          AuthManager.clearTokens();
+          if (typeof window !== 'undefined') {
+            window.location.href = '/login';
+          }
+        }
+      }
+    }
 
     // Retry automático para erros 5xx (apenas uma vez)
     if (
@@ -155,8 +204,9 @@ api.interceptors.response.use(
       
       // Mostrar notificação ao usuário (se houver sistema de notificações)
       if (typeof window !== 'undefined') {
-        // Você pode adicionar uma biblioteca de notificações aqui
-        alert(`${message}\n\nTente novamente em ${Math.ceil(retryAfter / 60)} minuto(s).`);
+        // Sanitizar mensagem para prevenir XSS
+        const sanitizedMessage = message.replace(/<[^>]*>/g, '');
+        alert(`${sanitizedMessage}\n\nTente novamente em ${Math.ceil(retryAfter / 60)} minuto(s).`);
       }
     }
     
