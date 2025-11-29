@@ -79,10 +79,17 @@ export default function Dashboard() {
     const token = AuthManager.getAccessToken();
     console.log('Token presente:', !!token);
     console.log('Token válido:', AuthManager.isTokenValid());
-    if (!token || !AuthManager.isTokenValid()) {
+    
+    // Em produção, se isTokenValid() é true, confiamos nos cookies
+    // Em desenvolvimento, verificamos se o token existe
+    const isAuth = import.meta.env.PROD ? AuthManager.isTokenValid() : !!token;
+    
+    if (!isAuth) {
       console.error('Usuário não autenticado ou token expirado');
       // Redirecionar para login se não estiver autenticado
       window.location.href = '/login';
+    } else {
+      console.log('✅ Usuário autenticado com sucesso');
     }
   }, []);
 

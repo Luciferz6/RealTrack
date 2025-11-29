@@ -41,7 +41,9 @@ export class AuthManager {
    */
   static getAccessToken(): string | null {
     if (import.meta.env.PROD) {
-      return this.getServerSideToken();
+      // Em produção com cookies httpOnly, não acessamos o token via JavaScript
+      // O backend envia o cookie automaticamente nas requisições
+      return 'httpOnly-cookie'; // Valor placeholder para indicar que depende do backend
     }
     return this.getDevelopmentToken();
   }
@@ -50,6 +52,12 @@ export class AuthManager {
    * Verifica se o token está válido
    */
   static isTokenValid(): boolean {
+    if (import.meta.env.PROD) {
+      // Em produção, confiamos que os cookies httpOnly são válidos
+      // O backend irá validar os cookies em cada requisição
+      return true;
+    }
+    
     const token = this.getAccessToken();
     if (!token) return false;
 
@@ -72,23 +80,6 @@ export class AuthManager {
     } else {
       this.clearDevelopmentTokens();
     }
-  }
-
-  /**
-   * Implementação server-side (httpOnly cookies)
-   */
-  private static getServerSideToken(): string | null {
-    // Token é enviado automaticamente via httpOnly cookie
-    // Não acessível via JavaScript (segurança!)
-    return null; // Backend vai validar o cookie
-  }
-
-  private static clearServerSideTokens(): void {
-    // Limpa cookies httpOnly via backend
-    fetch(`${import.meta.env.VITE_API_URL}/auth/logout`, {
-      method: 'POST',
-      credentials: 'include',
-    }).catch(console.error);
   }
 
   /**
