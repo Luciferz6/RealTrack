@@ -60,7 +60,8 @@ api.interceptors.request.use(async (config) => {
   // Removido refresh automático para evitar problemas com cookies
   
   const token = AuthManager.getAccessToken();
-  if (token) {
+  // Em produção, não enviar Authorization header - usa cookies httpOnly
+  if (token && token !== 'httpOnly-cookie') {
     if (config.headers instanceof AxiosHeaders) {
       config.headers.set('Authorization', `Bearer ${token}`);
     } else {
