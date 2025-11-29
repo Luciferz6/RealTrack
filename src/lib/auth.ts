@@ -76,7 +76,11 @@ export class AuthManager {
    */
   static clearTokens(): void {
     if (import.meta.env.PROD) {
-      this.clearServerSideTokens();
+      // Em produção, limpa cookies httpOnly via backend
+      fetch(`${import.meta.env.VITE_API_URL}/auth/logout`, {
+        method: 'POST',
+        credentials: 'include',
+      }).catch(console.error);
     } else {
       this.clearDevelopmentTokens();
     }
