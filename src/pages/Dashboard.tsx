@@ -233,8 +233,18 @@ export default function Dashboard() {
     };
 
     window.addEventListener('profile-updated', handleProfileUpdated);
+    
+    const handleBancaUpdated = () => {
+      console.log('Banca atualizada, recarregando dados do dashboard');
+      void fetchDashboardData();
+      void fetchApostasRecentes();
+    };
+
+    window.addEventListener('banca-updated', handleBancaUpdated);
+    
     return () => {
       window.removeEventListener('profile-updated', handleProfileUpdated);
+      window.removeEventListener('banca-updated', handleBancaUpdated);
     };
   }, []);
 
