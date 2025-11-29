@@ -79,10 +79,8 @@ api.interceptors.request.use(async (config) => {
     }
   }
 
-  // Em produção, incluir credentials para httpOnly cookies
-  if (import.meta.env.PROD) {
-    config.withCredentials = true;
-  }
+  // Sempre incluir credentials para httpOnly cookies (produção e desenvolvimento)
+  config.withCredentials = true;
 
   // Marcar cache key no config para uso posterior
   if (shouldCache(config.url, config.method)) {
