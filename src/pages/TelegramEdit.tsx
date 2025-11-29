@@ -104,8 +104,6 @@ export default function TelegramEdit() {
   // Log inicial para debug e garantir que algo apareça
   useEffect(() => {
     console.log('=== TELEGRAM EDIT PAGE LOADED ===');
-    console.log('betId:', betId);
-    console.log('window.location:', window.location.href);
     console.log('Telegram WebApp:', !!window.Telegram?.WebApp);
     
     // Garantir que o body tenha estilos básicos
@@ -181,19 +179,10 @@ export default function TelegramEdit() {
 
     const authenticateTelegram = async () => {
       console.log('=== AUTENTICANDO TELEGRAM ===');
-      console.log('telegramReady:', telegramReady);
-      const hasTelegram = typeof window !== 'undefined' && window.Telegram?.WebApp;
-      console.log('hasTelegram:', hasTelegram);
-      console.log('Telegram WebApp:', !!window.Telegram?.WebApp);
-      const webapp = window.Telegram?.WebApp;
-      console.log('initData:', webapp?.initData ? 'presente' : 'ausente');
-      console.log('User-Agent:', navigator.userAgent);
-      console.log('URL:', window.location.href);
       
       const telegramWebApp = window.Telegram?.WebApp;
       if (telegramWebApp?.initData) {
         try {
-          console.log('Tentando autenticar com initData...');
           const { data } = await api.post<{ token?: string }>('/auth/telegram', {
             initData: telegramWebApp.initData
           });
@@ -210,14 +199,11 @@ export default function TelegramEdit() {
         }
       } else {
         // Se não estiver no Telegram, verificar se já está autenticado
-        console.log('Não está no Telegram, verificando token local...');
         const token = localStorage.getItem('token');
         if (token) {
-          console.log('✅ Token local encontrado');
           setAuthenticated(true);
           setLoading(false);
         } else {
-          console.log('❌ Nenhum token encontrado');
           setError('Você precisa estar logado para editar apostas.');
           setLoading(false);
         }
@@ -428,7 +414,6 @@ export default function TelegramEdit() {
   // SEMPRE renderizar algo - nunca deixar tela preta
   // Mostrar loading ou erro com estilos inline para garantir que apareça
   if (!authenticated || loading) {
-    console.log('Renderizando tela de loading:', { authenticated, loading });
     return (
       <div style={{ 
         padding: '20px', 
