@@ -99,16 +99,18 @@ export default function Dashboard() {
   const [expandedSport, setExpandedSport] = useState<string | null>(null);
   const [expandedCasa, setExpandedCasa] = useState<string | null>(null);
   
-  // Mock data for recent performance
-  const [apostasRecentes] = useState([
-    { id: 1, evento: 'Flamengo vs Palmeiras', odd: '2.10', status: 'GANHOU', lucro: 11.00 },
-    { id: 2, evento: 'Corinthians vs São Paulo', odd: '1.85', status: 'PERDEU', lucro: -10.00 },
-    { id: 3, evento: 'Atlético-MG vs Cruzeiro', odd: '2.25', status: 'GANHOU', lucro: 12.50 },
-    { id: 4, evento: 'Vasco da Gama vs Botafogo', odd: '1.95', status: 'GANHOU', lucro: 9.50 },
-    { id: 5, evento: 'Grêmio vs Internacional', odd: '2.00', status: 'PERDEU', lucro: -10.00 },
-    { id: 6, evento: 'Fluminense vs Santos', odd: '1.75', status: 'GANHOU', lucro: 7.50 },
-    { id: 7, evento: 'Palmeiras vs Corinthians', odd: '2.15', status: 'GANHOU', lucro: 11.50 }
-  ]);
+  // Estado para apostas recentes dinâmicas
+  const [apostasRecentes, setApostasRecentes] = useState<Array<{
+    id: string;
+    evento: string;
+    odd: string;
+    status: string;
+    lucro: number;
+    dataJogo: Date;
+    esporte: string;
+    casaDeAposta: string;
+  }>>([]);
+  const [loadingApostasRecentes, setLoadingApostasRecentes] = useState(false);
 
   const buildParams = useCallback((): Partial<DashboardFilters> => {
     const params: Partial<DashboardFilters> = {};
@@ -130,6 +132,20 @@ export default function Dashboard() {
     }
     return params;
   }, [filters.status, filters.tipster, filters.casa, filters.dataInicio, filters.dataFim]);
+
+  const fetchApostasRecentes = useCallback(async () => {
+    setLoadingApostasRecentes(true);
+    try {
+      const { data } = await api.get('/apostas/recentes');
+      setApostasRecentes(data);
+    } catch (error) {
+      console.error('Erro ao buscar apostas recentes:', error);
+      // Em caso de erro, mantém o array vazio
+      setApostasRecentes([]);
+    } finally {
+      setLoadingApostasRecentes(false);
+    }
+  }, []);
 
   const fetchDashboardData = useCallback(async () => {
     const params = buildParams();
@@ -156,6 +172,10 @@ export default function Dashboard() {
 
     return () => clearTimeout(timeoutId);
   }, [fetchDashboardData]);
+
+  useEffect(() => {
+    void fetchApostasRecentes();
+  }, [fetchApostasRecentes]);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -708,7 +728,11 @@ export default function Dashboard() {
             </div>
             
             <div className="dashboard-new-recent-performance">
-              {apostasRecentes && apostasRecentes.length > 0 ? (
+              {loadingApostasRecentes ? (
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '200px', color: '#94a3b8' }}>
+                  Carregando apostas recentes...
+                </div>
+              ) : apostasRecentes && apostasRecentes.length > 0 ? (
                 <div className="dashboard-new-recent-list">
                   {apostasRecentes.slice(0, 5).map((aposta, index) => (
                     <div key={aposta.id || index} className="dashboard-new-recent-item">
