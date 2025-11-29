@@ -204,22 +204,24 @@ export default function Bancas() {
     setEditForm((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleTogglePadrao = async (banca: Banco) => {
+  const handleToggleStatus = async (banca: Banco) => {
     try {
       // Update local state optimistically
       setBancas(prev => prev.map(b => 
-        b.id === banca.id ? { ...b, padrao: !b.padrao } : b
+        b.id === banca.id 
+          ? { ...b, status: b.status === 'Ativa' ? 'Inativa' : 'Ativa' }
+          : b
       ));
       
-      // Make API call to update the bank
+      // Make API call to update the bank status
       await api.put(`/bancas/${banca.id}`, {
-        ePadrao: !banca.padrao
+        status: banca.status === 'Ativa' ? 'Inativa' : 'Ativa'
       });
       
       // Refresh data to ensure consistency
       await fetchBancas();
     } catch (error) {
-      console.error('Não foi possível atualizar o status padrão da banca:', error);
+      console.error('Não foi possível atualizar o status da banca:', error);
       // Revert the change if API call fails
       await fetchBancas();
     }
@@ -280,7 +282,6 @@ export default function Bancas() {
                   <th>Banca</th>
                   <th>Desc</th>
                   <th>Status</th>
-                  <th>Padrão</th>
                   <th>Visualizações</th>
                   <th>Visitantes Únicos</th>
                   <th>Última Visualização</th>
@@ -299,12 +300,9 @@ export default function Bancas() {
                     </td>
                     <td>{banca.descricao}</td>
                     <td>
-                      <Toggle checked={banca.status === 'Ativa'} />
-                    </td>
-                    <td>
                       <Toggle 
-                        checked={banca.padrao} 
-                        onClick={() => void handleTogglePadrao(banca)}
+                        checked={banca.status === 'Ativa'} 
+                        onClick={() => void handleToggleStatus(banca)}
                       />
                     </td>
                     <td>
