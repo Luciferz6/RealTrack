@@ -337,6 +337,8 @@ export default function Layout() {
       setCreateForm({ nome: '', descricao: '', saldo: '', cor: BANK_COLOR_PALETTE[0] });
       // Disparar evento para garantir que a cor seja aplicada
       window.dispatchEvent(new CustomEvent('banca-updated', { detail: { id: newBanco.id, cor: newBanco.cor } }));
+      // Disparar evento para notificar outros componentes sobre a criação
+      window.dispatchEvent(new CustomEvent('banca-created', { detail: { id: newBanco.id } }));
       void navigate('/bancas');
     } catch (error: unknown) {
       console.error('Não foi possível criar a banca.', error);

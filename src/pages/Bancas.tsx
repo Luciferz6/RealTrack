@@ -111,6 +111,23 @@ export default function Bancas() {
     void fetchBancas();
   }, [fetchBancas]);
 
+  // Listener para eventos de criação/edição/deleção de bancas
+  useEffect(() => {
+    const handleBancaUpdate = () => {
+      void fetchBancas();
+    };
+
+    window.addEventListener('banca-created', handleBancaUpdate);
+    window.addEventListener('banca-deleted', handleBancaUpdate);
+    window.addEventListener('banca-saved', handleBancaUpdate);
+    
+    return () => {
+      window.removeEventListener('banca-created', handleBancaUpdate);
+      window.removeEventListener('banca-deleted', handleBancaUpdate);
+      window.removeEventListener('banca-saved', handleBancaUpdate);
+    };
+  }, [fetchBancas]);
+
   const summaryCards = useMemo(() => {
     const totalViews = bancas.reduce((sum, banca) => sum + banca.visualizacoes, 0);
     const totalVisitors = bancas.reduce((sum, banca) => sum + banca.visitantes, 0);
@@ -190,6 +207,8 @@ export default function Bancas() {
     try {
       await api.delete(`/bancas/${confirmDelete.banca.id}`);
       await fetchBancas();
+      // Disparar evento para notificar outros componentes
+      window.dispatchEvent(new CustomEvent('banca-deleted', { detail: { id: confirmDelete.banca.id } }));
     } catch (error) {
       console.error('Não foi possível excluir a banca.', error);
     } finally {
@@ -265,6 +284,10 @@ export default function Bancas() {
       
       // Disparar evento para atualizar tema se a banca editada for a selecionada
       window.dispatchEvent(new CustomEvent('banca-updated', { detail: { id: editBanco.id, cor: editForm.cor } }));
+      
+      // Disparar evento para notificar outros componentes sobre a atualização
+      window.dispatchEvent(new CustomEvent('banca-saved', { detail: { id: editBanco.id } }));
+      
       setEditBanco(null);
     } catch (error) {
       console.error('Não foi possível salvar a banca.', error);
