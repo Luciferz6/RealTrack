@@ -202,12 +202,52 @@ export default function Layout() {
     [fetchBancas, selectedBanco?.id]
   );
 
+  // Ouvir eventos de exclusão de banca
+  const handleBancaDeleted = useCallback(
+    (rawEvent: Event) => {
+      const event = rawEvent as CustomEvent<{ id: string }>;
+      const deletedId = event.detail.id;
+
+      // Remover banca da lista
+      setBancas((prev) => prev.filter((b) => b.id !== deletedId));
+      
+      // Se a banca excluída era a selecionada, limpar seleção
+      if (selectedBanco?.id === deletedId) {
+        setSelectedBanco(null);
+      }
+    },
+    [selectedBanco?.id]
+  );
+
+  // Ouvir eventos de criação de banca
+  const handleBancaCreated = useCallback(
+    () => {
+      // Recarregar lista de bancas para incluir a nova
+      void fetchBancas();
+    },
+    [fetchBancas]
+  );
+
   useEffect(() => {
     window.addEventListener('banca-updated', handleBancaUpdated as EventListener);
     return () => {
       window.removeEventListener('banca-updated', handleBancaUpdated as EventListener);
     };
   }, [handleBancaUpdated]);
+
+  useEffect(() => {
+    window.addEventListener('banca-deleted', handleBancaDeleted as EventListener);
+    return () => {
+      window.removeEventListener('banca-deleted', handleBancaDeleted as EventListener);
+    };
+  }, [handleBancaDeleted]);
+
+  useEffect(() => {
+    window.addEventListener('banca-created', handleBancaCreated as EventListener);
+    return () => {
+      window.removeEventListener('banca-created', handleBancaCreated as EventListener);
+    };
+  }, [handleBancaCreated]);
 
   // Aplicar cor da banca selecionada como tema secundário
   useEffect(() => {
