@@ -833,8 +833,8 @@ export default function Atualizar() {
     try {
       // Terminar OCR se Tesseract foi carregado
       if (tesseractInstanceRef.current) {
-        const terminable = tesseractInstanceRef.current.default as { terminate?: () => void };
-      terminable.terminate?.();
+        // Tesseract não tem método terminate direto, então apenas limpamos a referência
+        tesseractInstanceRef.current = null;
       }
     } catch (error) {
       console.warn('Falha ao encerrar OCR:', error);
@@ -1340,7 +1340,8 @@ export default function Atualizar() {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <h3 style={{ marginTop: 0 }}>Apostas</h3>
           <div style={{ display: 'flex', gap: 8 }}>
-            <button
+            {import.meta.env.VITE_DEV_MODE === 'true' && (
+              <button
                 type="button"
                 className="btn ghost"
                 onClick={() => {
@@ -1350,6 +1351,7 @@ export default function Atualizar() {
               >
                 Gerar testes
               </button>
+            )}
             <button
               type="button"
               className="btn ghost"
