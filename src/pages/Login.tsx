@@ -26,13 +26,20 @@ export default function Login() {
     setLoading(true);
 
     try {
-      const { data } = await api.post<LoginResponse>('/auth/login', { email, senha });
+      console.log('🔐 [LOGIN] Enviando requisição de login...');
+      const response = await api.post<LoginResponse>('/auth/login', { email, senha });
+      console.log('✅ [LOGIN] Resposta recebida:', response.data);
+      console.log('🍪 [LOGIN] Headers da resposta:', response.headers);
+      console.log('🍪 [LOGIN] Set-Cookie:', response.headers['set-cookie']);
+      console.log('🍪 [LOGIN] Todos os cookies do documento:', document.cookie);
       
-      if (data.success) {
+      if (response.data.success) {
+        console.log('✅ [LOGIN] Login bem-sucedido, redirecionando...');
         // Cookies are set automatically by the backend
         void navigate('/dashboard');
       }
     } catch (err) {
+      console.error('❌ [LOGIN] Erro no login:', err);
       const apiError = err as ApiError;
       const errorMessage = apiError.response?.data?.error;
       setError(typeof errorMessage === 'string' ? errorMessage : 'Erro ao fazer login');
