@@ -134,19 +134,14 @@ export default function Dashboard() {
   }, [filters.status, filters.tipster, filters.casa, filters.dataInicio, filters.dataFim]);
 
   const fetchApostasRecentes = useCallback(async () => {
-    console.log('Iniciando busca de apostas recentes...');
     setLoadingApostasRecentes(true);
     try {
-      console.log('Fazendo requisição para /apostas/recentes');
       const { data } = await api.get('/apostas/recentes');
-      console.log('Dados recebidos:', data);
       setApostasRecentes(data || []);
     } catch (error) {
-      console.error('Erro ao buscar apostas recentes:', error);
       // Em caso de erro, mantém o array vazio
       setApostasRecentes([]);
     } finally {
-      console.log('Finalizando busca de apostas recentes');
       setLoadingApostasRecentes(false);
     }
   }, []);
@@ -183,15 +178,10 @@ export default function Dashboard() {
 
   useEffect(() => {
     const fetchProfile = async () => {
-      console.log('Iniciando busca de perfil...');
       try {
-        console.log('Fazendo requisição para /perfil');
         const { data } = await api.get<ApiProfileResponse>('/perfil');
-        console.log('Dados do perfil recebidos:', data);
         setProfile(data);
       } catch (error) {
-        console.error('Erro ao buscar perfil:', error);
-        console.warn('Não foi possível carregar perfil do usuário.', error);
         // Em caso de erro, definir perfil null para mostrar estado de erro
         setProfile(null);
       }
@@ -199,14 +189,11 @@ export default function Dashboard() {
     void fetchProfile();
 
     const handleProfileUpdated = (event: Event) => {
-      console.log('Evento profile-updated recebido');
       const customEvent = event as CustomEvent<ApiProfileResponse | undefined>;
       const updatedProfile = customEvent.detail;
       if (updatedProfile) {
-        console.log('Perfil atualizado via evento:', updatedProfile);
         setProfile(updatedProfile);
       } else {
-        console.log('Recarregando perfil via evento');
         void fetchProfile();
       }
     };
@@ -214,7 +201,6 @@ export default function Dashboard() {
     window.addEventListener('profile-updated', handleProfileUpdated);
     
     const handleBancaUpdated = () => {
-      console.log('Banca atualizada, recarregando dados do dashboard');
       void fetchDashboardData();
       void fetchApostasRecentes();
     };

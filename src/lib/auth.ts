@@ -29,7 +29,6 @@ export class AuthManager {
     localStorage.setItem(this.ACCESS_TOKEN_KEY, tokens.accessToken);
     localStorage.setItem(this.REFRESH_TOKEN_KEY, tokens.refreshToken);
     localStorage.setItem(this.EXPIRES_KEY, tokens.expiresAt.toString());
-    console.log('✅ Tokens salvos no localStorage');
   }
 
   /**
@@ -78,7 +77,7 @@ export class AuthManager {
     fetch(`${import.meta.env.VITE_API_URL}/auth/logout`, {
       method: 'POST',
       credentials: 'include',
-    }).catch(console.error);
+    }).catch(() => {});
   }
 
 

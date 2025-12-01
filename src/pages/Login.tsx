@@ -30,9 +30,7 @@ export default function Login() {
     setLoading(true);
 
     try {
-      console.log('🔐 [LOGIN] Enviando requisição de login...');
       const response = await api.post<LoginResponse>('/auth/login', { email, senha });
-      console.log('✅ [LOGIN] Resposta recebida:', response.data);
       
       if (response.data.success) {
         // Salvar tokens no localStorage
@@ -42,13 +40,11 @@ export default function Login() {
             refreshToken: response.data.refreshToken,
             expiresAt: response.data.expiresAt
           });
-          console.log('✅ [LOGIN] Tokens salvos, redirecionando...');
         }
         
         void navigate('/dashboard');
       }
     } catch (err) {
-      console.error('❌ [LOGIN] Erro no login:', err);
       const apiError = err as ApiError;
       const errorMessage = apiError.response?.data?.error;
       setError(typeof errorMessage === 'string' ? errorMessage : 'Erro ao fazer login');
