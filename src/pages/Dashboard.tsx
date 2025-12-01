@@ -6,7 +6,6 @@ import DateInput from '../components/DateInput';
 import { CASAS_APOSTAS } from '../constants/casasApostas';
 import { STATUS_APOSTAS } from '../constants/statusApostas';
 import api from '../lib/api';
-import { AuthManager } from '../lib/auth';
 import { useTipsters } from '../hooks/useTipsters';
 import { formatCurrency, formatPercent, getFirstName } from '../utils/formatters';
 import type { ApiProfileResponse } from '../types/api';
@@ -73,26 +72,6 @@ interface DashboardResponse {
 const SHOW_RANKING_TIPSTERS = false;
 
 export default function Dashboard() {
-  // Verificar autenticação no início
-  useEffect(() => {
-    console.log('Verificando autenticação...');
-    const token = AuthManager.getAccessToken();
-    console.log('Token presente:', !!token);
-    console.log('Token válido:', AuthManager.isTokenValid());
-    
-    // Em produção, se isTokenValid() é true, confiamos nos cookies
-    // Em desenvolvimento, verificamos se o token existe
-    const isAuth = import.meta.env.PROD ? AuthManager.isTokenValid() : !!token;
-    
-    if (!isAuth) {
-      console.error('Usuário não autenticado ou token expirado');
-      // Redirecionar para login se não estiver autenticado
-      window.location.href = '/login';
-    } else {
-      console.log('✅ Usuário autenticado com sucesso');
-    }
-  }, []);
-
   const [filtersOpen, setFiltersOpen] = useState(false);
   const { tipsters } = useTipsters();
   const [profile, setProfile] = useState<ApiProfileResponse | null>(null);

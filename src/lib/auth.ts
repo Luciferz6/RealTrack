@@ -139,10 +139,34 @@ export class AuthManager {
 
   useEffect(() => {
     const checkAuth = async () => {
-      if (AuthManager.isTokenValid()) {
-        setIsAuthenticated(true);
+      if (import.meta.env.PROD) {
+        // Em produção, verificar autenticação fazendo uma requisição ao backend
+        try {
+          const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+          const response = await fetch(`${apiUrl}/perfil`, {
+            method: 'GET',
+            credentials: 'include', // Incluir cookies httpOnly
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          });
+          
+          if (response.ok) {
+            setIsAuthenticated(true);
+          } else {
+            setIsAuthenticated(false);
+          }
+        } catch (error) {
+          console.error('Erro ao verificar autenticação:', error);
+          setIsAuthenticated(false);
+        }
       } else {
-        setIsAuthenticated(false);
+        // Em desenvolvimento, usar verificação local
+        if (AuthManager.isTokenValid()) {
+          setIsAuthenticated(true);
+        } else {
+          setIsAuthenticated(false);
+        }
       }
       setIsLoading(false);
     };
