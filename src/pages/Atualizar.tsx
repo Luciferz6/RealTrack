@@ -986,11 +986,22 @@ ${limitReachedMessage}`);
       }
       console.error('Erro ao processar upload:', error);
       const errorData = apiError.response?.data;
+      const statusCode = apiError.response?.status;
       const errorMessage =
         (typeof errorData?.error === 'string' ? errorData.error : undefined) ??
         errorData?.message ??
         apiError.message ??
         'Erro ao processar imagem. Tente novamente.';
+
+      if (!apiError.response) {
+        alert('Erro: Não foi possível conectar ao serviço de processamento. Verifique sua conexão e tente novamente.');
+        return;
+      }
+
+      if (statusCode === 504) {
+        alert('Erro: O serviço de reconhecimento demorou para responder (504). Tente novamente em alguns instantes.');
+        return;
+      }
 
       // Mensagem mais detalhada para erro de quota
       if (errorMessage.includes('Quota') || errorMessage.includes('quota') || errorMessage.includes('excedida')) {

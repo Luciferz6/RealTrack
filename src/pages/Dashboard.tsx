@@ -7,7 +7,7 @@ import DateInput from '../components/DateInput';
 import { CASAS_APOSTAS } from '../constants/casasApostas';
 import { STATUS_APOSTAS } from '../constants/statusApostas';
 import { formatCurrency, formatPercent, getFirstName } from '../utils/formatters';
-import { useDashboardData, useTipsters, useBancas } from '../hooks';
+import { useDashboardData, useTipsters, useBancas, useChartContainer } from '../hooks';
 import { cn } from '../components/ui/utils';
 import { chartTheme } from '../utils/chartTheme';
 
@@ -86,6 +86,8 @@ export default function Dashboard() {
     mediaDiaria,
     fetchDashboardData,
   } = useDashboardData();
+
+  const { containerRef: evolucaoChartRef, hasSize: evolucaoChartReady } = useChartContainer({ minHeight: 200, minWidth: 200 });
 
   const { tipsters } = useTipsters();
   const { bancas: userBancas, loading: bancasLoading } = useBancas();
@@ -458,9 +460,13 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <div className="h-64 w-full">
-            {evolucaoBancaChart.length > 0 ? (
-              <ResponsiveContainer width="100%" height="100%" minWidth={200} minHeight={200}>
+          <div ref={evolucaoChartRef} className="h-64 w-full">
+            {!evolucaoChartReady ? (
+              <div className="flex h-full items-center justify-center rounded-2xl border border-dashed border-white/10 text-xs font-medium text-foreground-muted">
+                Preparando gráfico...
+              </div>
+            ) : evolucaoBancaChart.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={evolucaoBancaChart} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
                   <CartesianGrid stroke="rgba(255,255,255,0.08)" strokeDasharray="3 3" />
                   <XAxis
