@@ -91,6 +91,15 @@ interface FiltersState {
   oddMax: string;
 }
 
+type ApiDiagnosticsStatus = 'idle' | 'checking' | 'ok' | 'error';
+
+interface ApiDiagnosticsState {
+  status: ApiDiagnosticsStatus;
+  message: string;
+  latencyMs: number | null;
+  lastCheckedAt: string | null;
+}
+
 const pageShellClass = 'space-y-10 text-foreground';
 const statGridClass = 'grid gap-6 md:grid-cols-2 xl:grid-cols-4';
 const glassCardClass = 'rounded-3xl border border-border/40 bg-background-card/80 p-6 shadow-card backdrop-blur';
@@ -188,8 +197,69 @@ export default function Atualizar() {
   const [updatingStatus, setUpdatingStatus] = useState(false);
   const [retornoManual, setRetornoManual] = useState(false);
   const [betsExpanded, setBetsExpanded] = useState(false);
+  const [apiDiagnostics, setApiDiagnostics] = useState<ApiDiagnosticsState>({
+    status: 'idle',
+    message: '',
+    latencyMs: null,
+    lastCheckedAt: null,
+  });
+  const diagnosticsTimestamp = useMemo(() => {
+    if (!apiDiagnostics.lastCheckedAt) {
+      return '';
+    }
+    try {
+      return new Date(apiDiagnostics.lastCheckedAt).toLocaleString();
+    } catch (error) {
+      console.warn('Falha ao formatar timestamp de diagnóstico:', error);
+      return apiDiagnostics.lastCheckedAt;
+    }
+  }, [apiDiagnostics.lastCheckedAt]);
 
   const isDev = import.meta.env.DEV;
+
+  const checkApiConnectivity = useCallback(async () => {
+    setApiDiagnostics((prev) => ({ ...prev, status: 'checking' }));
+    const startMark = typeof performance !== 'undefined' ? performance.now() : Date.now();
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/health`, {
+        method: 'GET',
+        mode: 'cors',
+      });
+
+      const endMark = typeof performance !== 'undefined' ? performance.now() : Date.now();
+      const latency = Math.round(endMark - startMark);
+
+      if (!response.ok) {
+        throw new Error(`Status ${response.status}`);
+      }
+
+      setApiDiagnostics({
+        status: 'ok',
+        message: 'API respondendo normalmente.',
+        latencyMs: latency,
+        lastCheckedAt: new Date().toISOString(),
+      });
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Falha ao verificar API.';
+      setApiDiagnostics({
+        status: 'error',
+        message: errorMessage,
+        latencyMs: null,
+        lastCheckedAt: new Date().toISOString(),
+      });
+    }
+  }, [API_BASE_URL]);
+
+  useEffect(() => {
+    void checkApiConnectivity();
+  }, [checkApiConnectivity]);
+
+  useEffect(() => {
+    if (uploadModalOpen) {
+      void checkApiConnectivity();
+    }
+  }, [uploadModalOpen, checkApiConnectivity]);
 
   const normalizeOptionalString = (value: string) => {
     const trimmed = value.trim();
@@ -217,6 +287,28 @@ export default function Atualizar() {
     const trimmed = value.trim();
     return trimmed === '' ? '-' : trimmed;
   };
+
+  const describeNetworkFailure = useCallback((error: UploadApiError) => {
+    const hints: string[] = [
+      'Não foi possível conectar ao serviço de processamento.',
+    ];
+
+    const browserOffline = typeof navigator !== 'undefined' ? navigator.onLine === false : false;
+    if (browserOffline) {
+      hints.push('O navegador reporta que está offline.');
+    }
+    if (error.code) {
+      hints.push(`Código: ${error.code}`);
+    }
+    if (typeof error.message === 'string' && error.message.trim().length > 0) {
+      hints.push(`Detalhe: ${error.message}`);
+    }
+    if (apiDiagnostics.status === 'error' && apiDiagnostics.message) {
+      hints.push(`Diagnóstico recente: ${apiDiagnostics.message}`);
+    }
+
+    return hints.join(' ');
+  }, [apiDiagnostics]);
 
   const resetFormState = useCallback(() => {
     setFormData({
@@ -1023,8 +1115,14 @@ ${limitReachedMessage}`);
         'Erro ao processar imagem. Tente novamente.';
 
       if (!apiError.response) {
-        const offlineMessage = 'Não foi possível conectar ao serviço de processamento. Verifique sua conexão e tente novamente.';
+        const offlineMessage = describeNetworkFailure(apiError);
         setUploadError(offlineMessage);
+        console.error('Upload network failure', {
+          baseUrl: API_BASE_URL,
+          diagnostics: apiDiagnostics,
+          code: apiError.code,
+          message: apiError.message,
+        });
         alert(`Erro: ${offlineMessage}`);
         return;
       }
@@ -1874,6 +1972,28 @@ ${limitReachedMessage}`);
       {/* Modal de Upload */}
       <Modal isOpen={uploadModalOpen} onClose={handleCloseUploadModal} title="Upload de Bilhete">
         <div className="flex flex-col gap-5">
+          <div className="rounded-2xl border border-border/40 bg-background/60 p-4 text-xs text-foreground/70">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <span className="break-all font-semibold">Endpoint: {`${API_BASE_URL}/upload/bilhete`}</span>
+              <button
+                type="button"
+                className="rounded-full border border-border/40 px-3 py-1 text-[11px] font-semibold text-foreground transition hover:border-brand-emerald/50 hover:text-brand-emerald disabled:opacity-60"
+                onClick={() => void checkApiConnectivity()}
+                disabled={apiDiagnostics.status === 'checking'}
+              >
+                {apiDiagnostics.status === 'checking' ? 'Verificando...' : 'Reverificar conexão'}
+              </button>
+            </div>
+            <p className="mt-2 text-sm font-semibold text-foreground">
+              {apiDiagnostics.status === 'ok' && `API online (${apiDiagnostics.latencyMs ?? 0} ms). ${apiDiagnostics.message}`}
+              {apiDiagnostics.status === 'error' && `Falha ao verificar: ${apiDiagnostics.message}`}
+              {apiDiagnostics.status === 'checking' && 'Verificando conectividade com o backend...'}
+              {apiDiagnostics.status === 'idle' && 'Diagnóstico ainda não executado.'}
+            </p>
+            {diagnosticsTimestamp && (
+              <p className="mt-1 text-[11px] text-foreground/50">Última verificação: {diagnosticsTimestamp}</p>
+            )}
+          </div>
           <div>
             <label className="mb-2 block text-sm font-semibold text-foreground/80">
               Selecione uma imagem do bilhete de aposta
