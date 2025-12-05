@@ -72,6 +72,11 @@ export interface UpdateApostaPayload extends Partial<CreateApostaPayload> {
   retornoObtido?: number;
 }
 
+interface UploadTicketOptions {
+  ocrText?: string;
+  signal?: AbortSignal;
+}
+
 export interface ApostasFilter {
   bancaId?: string;
   status?: ApostaStatus;
@@ -296,12 +301,17 @@ async function updateStatus(id: string, status: ApostaStatus, retornoObtido?: nu
 /**
  * Upload de ticket para extração de dados
  */
-async function uploadTicket(file: File): Promise<ApiUploadTicketResponse> {
+async function uploadTicket(file: File, options: UploadTicketOptions = {}): Promise<ApiUploadTicketResponse> {
   const formData = new FormData();
-  formData.append('ticket', file);
+  formData.append('image', file);
+
+  if (options.ocrText?.trim()) {
+    formData.append('ocrText', options.ocrText.trim());
+  }
   
-  const response = await apiClient.post<ApiUploadTicketResponse>('/upload/ticket', formData, {
+  const response = await apiClient.post<ApiUploadTicketResponse>('/upload/bilhete', formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
+    signal: options.signal,
   });
   
   return response.data;

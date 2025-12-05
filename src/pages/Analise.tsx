@@ -12,6 +12,7 @@ import AnaliseOddsChart from '../components/analise/AnaliseOddsChart';
 import { chartCardBaseClass, chartCardInteractiveClass, chartTitleClass } from '../components/analise/chartStyles';
 import useAnaliseData from '../hooks/useAnaliseData';
 import { useBancas } from '../hooks/useBancas';
+import { useChartContainer } from '../hooks/useChartContainer';
 import type { AnaliseFilters as AnaliseFiltersType } from '../types/AnaliseFilters';
 import type { RoiChartPoint } from '../types/RoiChartPoint';
 import type { OddsChartPoint } from '../types/OddsChartPoint';
@@ -258,6 +259,7 @@ export default function Analise() {
   const chartGridClass = 'grid gap-6 lg:grid-cols-2';
   const skeletonCardClass = `${chartCardBaseClass} animate-pulse`;
   const skeletonChartClass = `${chartCardBaseClass} h-[320px] animate-pulse`;
+  const { containerRef: winRateContainerRef, hasSize: winRateReady } = useChartContainer({ minHeight: 200, minWidth: 200 });
 
   return (
     <div className="space-y-6">
@@ -302,66 +304,78 @@ export default function Analise() {
       <section className={chartGridClass}>
         <div className={chartCardInteractiveClass}>
           <h3 className={chartTitleClass}>Win Rate por Esporte</h3>
-          {winRatePorEsporte.length > 0 ? (
-            <ResponsiveContainer width="100%" height={260} minWidth={200} minHeight={200}>
-              <BarChart 
-                data={winRatePorEsporte.slice(0, 10)} 
-                margin={{ top: 5, right: 20, left: 0, bottom: 5 }}
-              >
-                <defs>
-                  <linearGradient id={chartTheme.gradients.winRate.id} x1="0" y1="0" x2="0" y2="1">
-                    {chartTheme.gradients.winRate.stops.map((stop) => (
-                      <stop key={stop.offset} offset={stop.offset} stopColor={stop.color} stopOpacity={stop.opacity} />
-                    ))}
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke={chartTheme.gridStroke} vertical={false} />
-                <XAxis 
-                  dataKey="esporte" 
-                  stroke={chartTheme.axisStroke}
-                  tick={{ ...chartTheme.axisTick }}
-                  angle={-45}
-                  textAnchor="end"
-                  height={80}
-                  tickLine={false}
-                />
-                <YAxis 
-                  stroke={chartTheme.axisStroke}
-                  tick={{ ...chartTheme.axisTick }}
-                  tickLine={false}
-                  axisLine={false}
-                  label={{ value: 'Win Rate (%)', angle: -90, position: 'insideLeft', style: chartTheme.axisLabel }}
-                />
-                <Tooltip 
-                  contentStyle={{ 
-                    ...chartTheme.tooltip, 
-                    border: `1px solid ${chartTheme.colors.borderSuccess}`
-                  }}
-                  formatter={(value: number, name: string) => {
-                    if (name === 'winRate') {
-                      return [formatPercent(value), 'Win Rate'];
-                    }
-                    return [value, name === 'ganhas' ? 'Ganhas' : 'Total'];
-                  }}
-                  labelStyle={chartTheme.tooltipLabel}
-                  itemStyle={chartTheme.tooltipItem}
-                />
-                <Bar 
-                  dataKey="winRate" 
-                  fill={`url(#${chartTheme.gradients.winRate.id})`} 
-                  radius={chartTheme.barRadius}
-                  animationDuration={800}
-                  maxBarSize={32}
+          <div
+            ref={winRateContainerRef}
+            className="mt-2 w-full"
+            style={{ minHeight: 260, height: 260 }}
+          >
+            {!winRateReady ? (
+              <div className="flex h-full items-center justify-center text-xs font-medium text-foreground-muted">
+                Preparando gráfico...
+              </div>
+            ) : winRatePorEsporte.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart 
+                  data={winRatePorEsporte.slice(0, 10)} 
+                  margin={{ top: 5, right: 20, left: 0, bottom: 5 }}
                 >
-                  {winRatePorEsporte.slice(0, 10).map((entry) => (
-                    <Cell key={`cell-${entry.esporte}`} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          ) : (
-            <EmptyState title="Sem dados" description="Nenhuma aposta encontrada para os filtros." />
-          )}
+                  <defs>
+                    <linearGradient id={chartTheme.gradients.winRate.id} x1="0" y1="0" x2="0" y2="1">
+                      {chartTheme.gradients.winRate.stops.map((stop) => (
+                        <stop key={stop.offset} offset={stop.offset} stopColor={stop.color} stopOpacity={stop.opacity} />
+                      ))}
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke={chartTheme.gridStroke} vertical={false} />
+                  <XAxis 
+                    dataKey="esporte" 
+                    stroke={chartTheme.axisStroke}
+                    tick={{ ...chartTheme.axisTick }}
+                    angle={-45}
+                    textAnchor="end"
+                    height={80}
+                    tickLine={false}
+                  />
+                  <YAxis 
+                    stroke={chartTheme.axisStroke}
+                    tick={{ ...chartTheme.axisTick }}
+                    tickLine={false}
+                    axisLine={false}
+                    label={{ value: 'Win Rate (%)', angle: -90, position: 'insideLeft', style: chartTheme.axisLabel }}
+                  />
+                  <Tooltip 
+                    contentStyle={{ 
+                      ...chartTheme.tooltip, 
+                      border: `1px solid ${chartTheme.colors.borderSuccess}`
+                    }}
+                    formatter={(value: number, name: string) => {
+                      if (name === 'winRate') {
+                        return [formatPercent(value), 'Win Rate'];
+                      }
+                      return [value, name === 'ganhas' ? 'Ganhas' : 'Total'];
+                    }}
+                    labelStyle={chartTheme.tooltipLabel}
+                    itemStyle={chartTheme.tooltipItem}
+                  />
+                  <Bar 
+                    dataKey="winRate" 
+                    fill={`url(#${chartTheme.gradients.winRate.id})`} 
+                    radius={chartTheme.barRadius}
+                    animationDuration={800}
+                    maxBarSize={32}
+                  >
+                    {winRatePorEsporte.slice(0, 10).map((entry) => (
+                      <Cell key={`cell-${entry.esporte}`} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="flex h-full items-center justify-center">
+                <EmptyState title="Sem dados" description="Nenhuma aposta encontrada para os filtros." />
+              </div>
+            )}
+          </div>
         </div>
         <div className={chartCardInteractiveClass}>
           <h3 className={chartTitleClass}>Heatmap de Performance</h3>

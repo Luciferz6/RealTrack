@@ -17,7 +17,7 @@ import {
 import { ESPORTES } from '../constants/esportes';
 import { STATUS_SALVAMENTO } from '../constants/statusSalvamento';
 import { TIPOS_APOSTA } from '../constants/tiposAposta';
-import { apostaService, apiClient, type ApostasFilter, type ApostaStatus } from '../services/api';
+import { apostaService, type ApostasFilter, type ApostaStatus } from '../services/api';
 import { eventBus } from '../utils/eventBus';
 import { formatCurrency as formatCurrencyUtil, formatDate as formatDateUtil } from '../utils/formatters';
 import { useTipsters } from '../hooks/useTipsters';
@@ -931,24 +931,17 @@ ${limitReachedMessage}`);
     try {
       setUploading(true);
 
-      const formData = new FormData();
-      formData.append('image', selectedFile);
-      if (ocrText.trim()) {
-        formData.append('ocrText', ocrText.trim());
-      }
       uploadAbortControllerRef.current?.abort();
       const controller = new AbortController();
       uploadAbortControllerRef.current = controller;
 
-      const { data } = await apiClient.post<ApiUploadTicketResponse>('/upload/bilhete', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        },
+      const uploadResponse = await apostaService.uploadTicket(selectedFile, {
+        ocrText: ocrText.trim() || undefined,
         signal: controller.signal
       });
 
-      if (data.success && data.data) {
-        const extractedData: UploadTicketData = data.data;
+      if (uploadResponse.success && uploadResponse.data) {
+        const extractedData: UploadTicketData = uploadResponse.data;
 
         // Preencher formulário com dados extraídos
         const defaultBancaId = preferredBancaId || '';
@@ -982,6 +975,9 @@ ${limitReachedMessage}`);
         setSelectedFile(null);
         setUploadPreview(null);
         setOcrText('');
+      } else {
+        const fallbackMessage = uploadResponse.message ?? uploadResponse.error ?? 'Não foi possível analisar o bilhete.';
+        throw new Error(fallbackMessage);
       }
     } catch (error) {
       const apiError = error as ApiError & { code?: string };

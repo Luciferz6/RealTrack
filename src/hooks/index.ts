@@ -49,6 +49,7 @@ export {
   type UsePaginatedTableOptions,
   type UsePaginatedTableResult,
 } from './usePaginatedTable';
+export { useChartContainer, type UseChartContainerResult } from './useChartContainer';
 
 // ============================================
 // Event Hooks
