@@ -44,6 +44,10 @@ const statusGlowClassMap: Record<string, string> = {
 };
 
 type UploadTicketData = NonNullable<ApiUploadTicketResponse['data']>;
+type UploadApiError = ApiError & {
+  code?: string;
+  response?: ApiError['response'] & { status?: number };
+};
 
 interface StatusUpdatePayload {
   status: string;
@@ -139,6 +143,7 @@ export default function Atualizar() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [ocrText, setOcrText] = useState('');
   const [ocrExtracting, setOcrExtracting] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
   const [selectedApostaForStatus, setSelectedApostaForStatus] = useState<ApiBetWithBank | null>(null);
   const [editingAposta, setEditingAposta] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
@@ -930,17 +935,40 @@ ${limitReachedMessage}`);
 
     try {
       setUploading(true);
+      setUploadError(null);
 
       uploadAbortControllerRef.current?.abort();
       const controller = new AbortController();
       uploadAbortControllerRef.current = controller;
 
-      const uploadResponse = await apostaService.uploadTicket(selectedFile, {
-        ocrText: ocrText.trim() || undefined,
-        signal: controller.signal
-      });
+      const maxAttempts = 2;
+      let currentAttempt = 0;
+      let uploadResponse: ApiUploadTicketResponse | null = null;
 
-      if (uploadResponse.success && uploadResponse.data) {
+      while (currentAttempt < maxAttempts) {
+        currentAttempt += 1;
+        try {
+          uploadResponse = await apostaService.uploadTicket(selectedFile, {
+            ocrText: ocrText.trim() || undefined,
+            signal: controller.signal
+          });
+          break;
+        } catch (error) {
+          const attemptError = error as UploadApiError;
+          if (attemptError.code === 'ERR_CANCELED') {
+            throw attemptError;
+          }
+          const attemptStatus = attemptError.response?.status;
+          if (attemptStatus === 504 && currentAttempt < maxAttempts) {
+            setUploadError('O serviço demorou para responder. Tentando novamente...');
+            await new Promise((resolve) => setTimeout(resolve, 1500));
+            continue;
+          }
+          throw attemptError;
+        }
+      }
+
+      if (uploadResponse && uploadResponse.success && uploadResponse.data) {
         const extractedData: UploadTicketData = uploadResponse.data;
 
         // Preencher formulário com dados extraídos
@@ -975,12 +1003,13 @@ ${limitReachedMessage}`);
         setSelectedFile(null);
         setUploadPreview(null);
         setOcrText('');
+        setUploadError(null);
       } else {
-        const fallbackMessage = uploadResponse.message ?? uploadResponse.error ?? 'Não foi possível analisar o bilhete.';
+        const fallbackMessage = uploadResponse?.message ?? uploadResponse?.error ?? 'Não foi possível analisar o bilhete.';
         throw new Error(fallbackMessage);
       }
     } catch (error) {
-      const apiError = error as ApiError & { code?: string };
+      const apiError = error as UploadApiError;
       if (apiError.code === 'ERR_CANCELED') {
         return;
       }
@@ -994,12 +1023,16 @@ ${limitReachedMessage}`);
         'Erro ao processar imagem. Tente novamente.';
 
       if (!apiError.response) {
-        alert('Erro: Não foi possível conectar ao serviço de processamento. Verifique sua conexão e tente novamente.');
+        const offlineMessage = 'Não foi possível conectar ao serviço de processamento. Verifique sua conexão e tente novamente.';
+        setUploadError(offlineMessage);
+        alert(`Erro: ${offlineMessage}`);
         return;
       }
 
       if (statusCode === 504) {
-        alert('Erro: O serviço de reconhecimento demorou para responder (504). Tente novamente em alguns instantes.');
+        const timeoutMessage = 'O serviço de reconhecimento demorou para responder (504). Tente novamente em alguns instantes.';
+        setUploadError(timeoutMessage);
+        alert(`Erro: ${timeoutMessage}`);
         return;
       }
 
@@ -1020,8 +1053,10 @@ ${limitReachedMessage}`);
           `3. Adicione créditos ou atualize seu plano\n\n` +
           `Após resolver, tente novamente.`
         );
+        setUploadError('Uso da API excedido. Ajuste a cota e tente novamente.');
       } else {
         alert(`Erro: ${errorMessage}`);
+        setUploadError(errorMessage);
       }
     } finally {
       uploadAbortControllerRef.current = null;
@@ -1036,6 +1071,7 @@ ${limitReachedMessage}`);
     setSelectedFile(null);
     setUploadPreview(null);
     setOcrText('');
+    setUploadError(null);
     setUploading(false);
     setOcrExtracting(false);
     setUploadModalOpen(true);
@@ -1048,6 +1084,7 @@ ${limitReachedMessage}`);
     setUploadPreview(null);
     setOcrText('');
     setOcrExtracting(false);
+    setUploadError(null);
     ocrCancelledRef.current = true;
     try {
       // Terminar OCR se Tesseract foi carregado
@@ -1899,6 +1936,11 @@ ${limitReachedMessage}`);
                 <RefreshCw size={16} className="animate-spin text-foreground/70" />
                 <span>Analisando bilhete com IA...</span>
               </div>
+            </div>
+          )}
+          {uploadError && (
+            <div className="rounded-2xl border border-rose-400/40 bg-rose-500/10 p-4 text-sm font-semibold text-rose-200">
+              {uploadError}
             </div>
           )}
         </div>
