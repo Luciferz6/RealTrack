@@ -5,6 +5,7 @@ import PageHeader from '../components/PageHeader';
 import StatCard from '../components/StatCard';
 import EmptyState from '../components/EmptyState';
 import Modal from '../components/Modal';
+import UploadTicketModal from '../components/UploadTicketModal';
 import FilterPopover from '../components/FilterPopover';
 import DateInput from '../components/DateInput';
 import { CASAS_APOSTAS } from '../constants/casasApostas';
@@ -1045,8 +1046,8 @@ ${limitReachedMessage}`);
   }, [uploadModalOpen, handlePaste]);
 
   // Função para processar upload e extrair dados
-  const handleUpload = async () => {
-    if (!selectedFile) {
+  const handleUpload = async (file: File, ocrText?: string) => {
+    if (!file) {
       alert('Por favor, selecione uma imagem');
       return;
     }
@@ -1066,8 +1067,8 @@ ${limitReachedMessage}`);
       while (currentAttempt < maxAttempts) {
         currentAttempt += 1;
         try {
-          uploadResponse = await apostaService.uploadTicket(selectedFile, {
-            ocrText: ocrText.trim() || undefined,
+          uploadResponse = await apostaService.uploadTicket(file, {
+            ocrText: ocrText?.trim() || undefined,
             signal: controller.signal
           });
           break;
@@ -1997,104 +1998,12 @@ ${limitReachedMessage}`);
       </Modal>
 
       {/* Modal de Upload */}
-      <Modal isOpen={uploadModalOpen} onClose={handleCloseUploadModal} title="Upload de Bilhete">
-        <div className="flex flex-col gap-5">
-          <div className="rounded-2xl border border-border/40 bg-background/60 p-4 text-xs text-foreground/70">
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <span className="break-all font-semibold">Endpoint: {API_UPLOAD_URL}</span>
-              <button
-                type="button"
-                className="rounded-full border border-border/40 px-3 py-1 text-[11px] font-semibold text-foreground transition hover:border-brand-emerald/50 hover:text-brand-emerald disabled:opacity-60"
-                onClick={() => void checkApiConnectivity()}
-                disabled={apiDiagnostics.status === 'checking'}
-              >
-                {apiDiagnostics.status === 'checking' ? 'Verificando...' : 'Reverificar conexão'}
-              </button>
-            </div>
-            <p className="mt-2 text-sm font-semibold text-foreground">
-              {apiDiagnostics.status === 'ok' && `API online (${apiDiagnostics.latencyMs ?? 0} ms). ${apiDiagnostics.message}`}
-              {apiDiagnostics.status === 'error' && `Falha ao verificar: ${apiDiagnostics.message}`}
-              {apiDiagnostics.status === 'checking' && 'Verificando conectividade com o backend...'}
-              {apiDiagnostics.status === 'idle' && 'Diagnóstico ainda não executado.'}
-            </p>
-            {apiDiagnostics.probeUrl && (
-              <p className="mt-1 text-[11px] text-foreground/50">Verificação via: {apiDiagnostics.probeUrl}</p>
-            )}
-            {diagnosticsTimestamp && (
-              <p className="mt-1 text-[11px] text-foreground/50">Última verificação: {diagnosticsTimestamp}</p>
-            )}
-          </div>
-          <div>
-            <label className="mb-2 block text-sm font-semibold text-foreground/80">
-              Selecione uma imagem do bilhete de aposta
-            </label>
-                       <input
-              type="file"
-              accept="image/*"
-              onChange={handleFileSelect}
-              className="sr-only"
-              id="file-upload"
-            />
-            <label
-              htmlFor="file-upload"
-              className="group block cursor-pointer rounded-3xl border-2 border-dashed border-border/50 bg-background-card/50 p-6 text-center transition hover:border-brand-emerald/70 hover:bg-background-card/70"
-            >
-              {uploadPreview ? (
-                <div className="flex flex-col items-center gap-3">
-                  <img
-                    src={uploadPreview}
-                    alt="Preview do bilhete"
-                    className="max-h-[300px] w-full max-w-full rounded-2xl border border-border/40 object-contain shadow-inner"
-                  />
-                  <span className="text-sm text-foreground/60">
-                    Clique para selecionar outra imagem
-                  </span>
-                </div>
-              ) : (
-                <div className="flex flex-col items-center gap-2">
-                  <Upload size={48} className="text-foreground/50" />
-                  <span className="font-semibold text-foreground">Clique para selecionar uma imagem</span>
-                  <span className="text-sm text-foreground/60">PNG, JPG ou JPEG (máx. 10MB)</span>
-                  <span className="text-xs text-foreground/50">ou pressione Ctrl+V para colar</span>
-                </div>
-              )}
-            </label>
-          </div>
-
-          {uploadPreview && (
-            <div className="flex justify-end gap-3">
-              <button
-                type="button"
-                className={buttonVariants.ghost}
-                onClick={handleCloseUploadModal}
-              >
-                Cancelar
-              </button>
-              <button
-                type="button"
-                className={buttonVariants.primary}
-                onClick={handleUpload}
-                disabled={uploading || ocrExtracting}
-              >
-                {ocrExtracting ? 'Preparando...' : uploading ? 'Processando...' : 'Processar Bilhete'}
-              </button>
-            </div>
-          )}
-          {uploading && (
-            <div className="rounded-2xl border border-border/30 bg-background/60 p-4 text-center text-sm text-foreground">
-              <div className="flex items-center justify-center gap-2">
-                <RefreshCw size={16} className="animate-spin text-foreground/70" />
-                <span>Analisando bilhete com IA...</span>
-              </div>
-            </div>
-          )}
-          {uploadError && (
-            <div className="rounded-2xl border border-rose-400/40 bg-rose-500/10 p-4 text-sm font-semibold text-rose-200">
-              {uploadError}
-            </div>
-          )}
-        </div>
-      </Modal>
+      <UploadTicketModal
+        isOpen={uploadModalOpen}
+        onClose={handleCloseUploadModal}
+        onProcess={handleUpload}
+        loading={uploading}
+      />
 
       <Modal isOpen={statusModalOpen} onClose={handleCloseStatusModal} title="Atualizar Status" size="sm">
         <div className="space-y-6 py-2">
