@@ -28,6 +28,9 @@ import { type ApiBetWithBank, type ApiError, type ApiUploadTicketResponse } from
 
 const VITE_API_URL: unknown = import.meta.env.VITE_API_URL;
 const API_BASE_URL = (typeof VITE_API_URL === 'string' && VITE_API_URL.length > 0 ? VITE_API_URL : 'http://localhost:3001/api').replace(/\/$/, '');
+const API_ORIGIN = API_BASE_URL.replace(/\/api$/, '');
+const API_HEALTH_URL = `${API_ORIGIN}/health`;
+const API_UPLOAD_URL = `${API_BASE_URL}/upload/bilhete`;
 
 const STATUS_WITH_RETURNS = ['Ganha', 'Meio Ganha', 'Cashout'];
 
@@ -98,6 +101,7 @@ interface ApiDiagnosticsState {
   message: string;
   latencyMs: number | null;
   lastCheckedAt: string | null;
+  probeUrl: string | null;
 }
 
 const pageShellClass = 'space-y-10 text-foreground';
@@ -202,6 +206,7 @@ export default function Atualizar() {
     message: '',
     latencyMs: null,
     lastCheckedAt: null,
+    probeUrl: null,
   });
   const diagnosticsTimestamp = useMemo(() => {
     if (!apiDiagnostics.lastCheckedAt) {
@@ -219,37 +224,55 @@ export default function Atualizar() {
 
   const checkApiConnectivity = useCallback(async () => {
     setApiDiagnostics((prev) => ({ ...prev, status: 'checking' }));
-    const startMark = typeof performance !== 'undefined' ? performance.now() : Date.now();
 
-    try {
-      const response = await fetch(`${API_BASE_URL}/health`, {
-        method: 'GET',
-        mode: 'cors',
-      });
+    const probeCandidates = Array.from(
+      new Set([
+        API_HEALTH_URL,
+        `${API_BASE_URL}/health`,
+        API_BASE_URL,
+      ]),
+    ).filter((url): url is string => typeof url === 'string' && url.length > 0);
 
-      const endMark = typeof performance !== 'undefined' ? performance.now() : Date.now();
-      const latency = Math.round(endMark - startMark);
+    let lastErrorMessage = 'Falha ao verificar API.';
 
-      if (!response.ok) {
-        throw new Error(`Status ${response.status}`);
+    for (const probeUrl of probeCandidates) {
+      const startMark = typeof performance !== 'undefined' ? performance.now() : Date.now();
+      try {
+        const response = await fetch(probeUrl, {
+          method: 'GET',
+          mode: 'cors',
+        });
+
+        const endMark = typeof performance !== 'undefined' ? performance.now() : Date.now();
+        const latency = Math.round(endMark - startMark);
+
+        if (!response.ok) {
+          lastErrorMessage = `Status ${response.status} em ${probeUrl}`;
+          continue;
+        }
+
+        setApiDiagnostics({
+          status: 'ok',
+          message: `API respondendo (HTTP ${response.status}).`,
+          latencyMs: latency,
+          lastCheckedAt: new Date().toISOString(),
+          probeUrl,
+        });
+        return;
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Falha ao verificar API.';
+        lastErrorMessage = `${errorMessage} em ${probeUrl}`;
       }
-
-      setApiDiagnostics({
-        status: 'ok',
-        message: 'API respondendo normalmente.',
-        latencyMs: latency,
-        lastCheckedAt: new Date().toISOString(),
-      });
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Falha ao verificar API.';
-      setApiDiagnostics({
-        status: 'error',
-        message: errorMessage,
-        latencyMs: null,
-        lastCheckedAt: new Date().toISOString(),
-      });
     }
-  }, [API_BASE_URL]);
+
+    setApiDiagnostics({
+      status: 'error',
+      message: lastErrorMessage,
+      latencyMs: null,
+      lastCheckedAt: new Date().toISOString(),
+      probeUrl: null,
+    });
+  }, [API_BASE_URL, API_HEALTH_URL]);
 
   useEffect(() => {
     void checkApiConnectivity();
@@ -305,6 +328,9 @@ export default function Atualizar() {
     }
     if (apiDiagnostics.status === 'error' && apiDiagnostics.message) {
       hints.push(`Diagnóstico recente: ${apiDiagnostics.message}`);
+    }
+    if (apiDiagnostics.probeUrl) {
+      hints.push(`Último endpoint testado: ${apiDiagnostics.probeUrl}`);
     }
 
     return hints.join(' ');
@@ -1118,7 +1144,8 @@ ${limitReachedMessage}`);
         const offlineMessage = describeNetworkFailure(apiError);
         setUploadError(offlineMessage);
         console.error('Upload network failure', {
-          baseUrl: API_BASE_URL,
+          uploadUrl: API_UPLOAD_URL,
+          healthUrl: apiDiagnostics.probeUrl ?? API_HEALTH_URL,
           diagnostics: apiDiagnostics,
           code: apiError.code,
           message: apiError.message,
@@ -1974,7 +2001,7 @@ ${limitReachedMessage}`);
         <div className="flex flex-col gap-5">
           <div className="rounded-2xl border border-border/40 bg-background/60 p-4 text-xs text-foreground/70">
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <span className="break-all font-semibold">Endpoint: {`${API_BASE_URL}/upload/bilhete`}</span>
+              <span className="break-all font-semibold">Endpoint: {API_UPLOAD_URL}</span>
               <button
                 type="button"
                 className="rounded-full border border-border/40 px-3 py-1 text-[11px] font-semibold text-foreground transition hover:border-brand-emerald/50 hover:text-brand-emerald disabled:opacity-60"
@@ -1990,6 +2017,9 @@ ${limitReachedMessage}`);
               {apiDiagnostics.status === 'checking' && 'Verificando conectividade com o backend...'}
               {apiDiagnostics.status === 'idle' && 'Diagnóstico ainda não executado.'}
             </p>
+            {apiDiagnostics.probeUrl && (
+              <p className="mt-1 text-[11px] text-foreground/50">Verificação via: {apiDiagnostics.probeUrl}</p>
+            )}
             {diagnosticsTimestamp && (
               <p className="mt-1 text-[11px] text-foreground/50">Última verificação: {diagnosticsTimestamp}</p>
             )}
