@@ -522,9 +522,9 @@ export default function Dashboard() {
                 const positive = status === 'GANHOU';
                 const negative = status === 'PERDEU';
                 const statusClass = positive
-                  ? 'border border-emerald-500/20 bg-emerald-500/10 text-emerald-200'
+                  ? 'border border-emerald-500/20 bg-emerald-500/10 text-emerald-400'
                   : negative
-                    ? 'border border-rose-500/20 bg-rose-500/10 text-rose-200'
+                    ? 'border border-red-500/30 bg-red-500/15 text-red-500'
                     : 'border border-white/10 bg-white/5 text-white/70';
                 const valueClass = positive ? 'text-emerald-400' : negative ? 'text-rose-400' : 'text-foreground';
                 const rawDate = aposta.dataJogo ? new Date(aposta.dataJogo) : null;
