@@ -5,9 +5,13 @@
  */
 
 import { useState, useCallback } from 'react';
+import { useToast } from '../contexts/ToastContext';
 import Modal from './Modal';
+import { useToast } from '../contexts/ToastContext';
 import { STATUS_APOSTAS } from '../constants/statusApostas';
+import { useToast } from '../contexts/ToastContext';
 import { formatCurrency } from '../utils/formatters';
+import { useToast } from '../contexts/ToastContext';
 import {
   STATUS_WITH_RETURNS,
   calcularRetornoObtido,
@@ -15,7 +19,9 @@ import {
   type StatusFormState,
 } from '../hooks/useApostasManager';
 import type { ApiBetWithBank } from '../types/api';
+import { useToast } from '../contexts/ToastContext';
 import { cn } from './ui/utils';
+import { useToast } from '../contexts/ToastContext';
 import {
   betStatusPillBaseClass,
   betStatusPillVariants,
@@ -77,7 +83,7 @@ function StatusFormContent({ aposta, onClose, onConfirm, loading }: StatusFormCo
 
   const handleSubmit = useCallback(async () => {
     if (!formData.status) {
-      alert('Selecione um status');
+      showToast('Selecione um status', 'error');
       return;
     }
     await onConfirm(formData);

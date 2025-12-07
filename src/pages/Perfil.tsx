@@ -1,5 +1,7 @@
 import { useEffect, useState, type ReactNode } from 'react';
+import { useToast } from '../contexts/ToastContext';
 import { useNavigate } from 'react-router-dom';
+import { useToast } from '../contexts/ToastContext';
 import {
   AlertTriangle,
   ArrowRight,
@@ -22,11 +24,17 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import PageHeader from '../components/PageHeader';
+import { useToast } from '../contexts/ToastContext';
 import Modal from '../components/Modal';
+import { useToast } from '../contexts/ToastContext';
 import { perfilService } from '../services/api';
+import { useToast } from '../contexts/ToastContext';
 import { type ApiProfileResponse } from '../types/api';
+import { useToast } from '../contexts/ToastContext';
 import { formatCurrency as formatCurrencyUtil, formatDate as formatDateUtil } from '../utils/formatters';
+import { useToast } from '../contexts/ToastContext';
 import { cn } from '../components/ui/utils';
+import { useToast } from '../contexts/ToastContext';
 
 const sectionCardClass =
   'rounded-lg border border-white/5 bg-[#0f2d29] p-6 text-white shadow-[0_25px_45px_rgba(0,0,0,0.25)] backdrop-blur-sm';
@@ -152,7 +160,7 @@ export default function Perfil() {
         email: data.email,
       });
       window.dispatchEvent(new CustomEvent('profile-updated', { detail: data }));
-      alert('Perfil atualizado com sucesso!');
+      showToast('Perfil atualizado com sucesso!', 'error');
     } catch (err) {
       console.error('Erro ao atualizar perfil:', err);
       setError('Erro ao atualizar perfil');
@@ -243,10 +251,10 @@ export default function Perfil() {
     try {
       const data = await perfilService.updateTelegram(null);
       setProfile(data);
-      alert('Telegram desvinculado com sucesso!');
+      showToast('Telegram desvinculado com sucesso!', 'error');
     } catch (err) {
       console.error('Erro ao desvincular Telegram:', err);
-      alert('Erro ao desvincular Telegram');
+      showToast('Erro ao desvincular Telegram', 'error');
     }
   };
 

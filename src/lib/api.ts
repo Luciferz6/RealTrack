@@ -5,6 +5,7 @@ import axios, {
   type InternalAxiosRequestConfig,
 } from 'axios';
 import { AuthManager } from './auth';
+import { useToast } from '../contexts/ToastContext';
 
 const DEFAULT_BASE_URL = 'http://localhost:3001/api';
 const envBaseUrl = typeof import.meta.env.VITE_API_URL === 'string' ? import.meta.env.VITE_API_URL : undefined;

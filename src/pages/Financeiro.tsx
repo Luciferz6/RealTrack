@@ -1,12 +1,21 @@
 import { Filter, Loader2, Pencil, Plus, Trash2, Wallet } from 'lucide-react';
+import { useToast } from '../contexts/ToastContext';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useToast } from '../contexts/ToastContext';
 import DateInput from '../components/DateInput';
+import { useToast } from '../contexts/ToastContext';
 import FilterPopover from '../components/FilterPopover';
+import { useToast } from '../contexts/ToastContext';
 import Modal from '../components/Modal';
+import { useToast } from '../contexts/ToastContext';
 import EmptyState from '../components/EmptyState';
+import { useToast } from '../contexts/ToastContext';
 import { CASAS_APOSTAS } from '../constants/casasApostas';
+import { useToast } from '../contexts/ToastContext';
 import { financeiroService, type TipoTransacao } from '../services/api';
+import { useToast } from '../contexts/ToastContext';
 import { useBancas } from '../hooks/useBancas';
+import { useToast } from '../contexts/ToastContext';
 import {
   formatCurrency,
   formatDate,
@@ -21,6 +30,7 @@ import {
   type ApiFinancialTransaction,
 } from '../types/api';
 import { cn } from '../components/ui/utils';
+import { useToast } from '../contexts/ToastContext';
 
 type TipoFiltro = TipoTransacao | '';
 
@@ -338,7 +348,7 @@ export default function Financeiro() {
           : 'Erro desconhecido.';
         alert(`Erro ao salvar transação: ${message}`);
       } else {
-        alert('Erro ao salvar transação. Tente novamente.');
+        showToast('Erro ao salvar transação. Tente novamente.', 'error');
       }
     } finally {
       setSaving(false);
@@ -388,7 +398,7 @@ export default function Financeiro() {
       await fetchStats();
     } catch (err) {
       console.error('Erro ao deletar transação', err);
-      alert('Não foi possível remover a transação.');
+      showToast('Não foi possível remover a transação.', 'error');
     }
   };
 
