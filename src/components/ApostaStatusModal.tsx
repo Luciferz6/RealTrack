@@ -8,6 +8,7 @@ import { useState, useCallback } from 'react';
 import Modal from './Modal';
 import { STATUS_APOSTAS } from '../constants/statusApostas';
 import { formatCurrency } from '../utils/formatters';
+import { formatMarketDisplay } from '../utils/marketFormatter';
 import {
   STATUS_WITH_RETURNS,
   calcularRetornoObtido,
@@ -86,13 +87,13 @@ function StatusFormContent({ aposta, onClose, onConfirm, loading }: StatusFormCo
   const manualRetornoValue = parseNullableNumber(formData.retornoObtido);
   const retornoPreview = STATUS_WITH_RETURNS.includes(formData.status)
     ? (manualRetornoValue ??
-        calcularRetornoObtido(
-          formData.status,
-          aposta.valorApostado,
-          aposta.odd,
-          manualRetornoValue
-        ) ??
-        0)
+      calcularRetornoObtido(
+        formData.status,
+        aposta.valorApostado,
+        aposta.odd,
+        manualRetornoValue
+      ) ??
+      0)
     : 0;
 
   return (
@@ -105,7 +106,7 @@ function StatusFormContent({ aposta, onClose, onConfirm, loading }: StatusFormCo
           </p>
           <p className="flex items-center justify-between gap-4">
             <span className="text-foreground-muted">Mercado</span>
-            <span className="font-semibold">{aposta.mercado}</span>
+            <span className="font-semibold text-right">{formatMarketDisplay(aposta.mercado)}</span>
           </p>
           <p className="flex items-center justify-between gap-4">
             <span className="text-foreground-muted">Valor Apostado</span>

@@ -6,6 +6,7 @@
 
 import { Pencil, Trash2 } from 'lucide-react';
 import { formatCurrency } from '../utils/formatters';
+import { formatMarketDisplay } from '../utils/marketFormatter';
 import EmptyState from './EmptyState';
 import type { ApiBetWithBank } from '../types/api';
 import { cn } from './ui/utils';
@@ -91,9 +92,9 @@ export default function ApostasTable({
       </div>
 
       {apostas.length === 0 ? (
-        <EmptyState 
-          title="Nenhuma aposta" 
-          description="Cadastre uma nova aposta para começar a acompanhar resultados." 
+        <EmptyState
+          title="Nenhuma aposta"
+          description="Cadastre uma nova aposta para começar a acompanhar resultados."
         />
       ) : (
         <div className={cn('mt-4 overflow-hidden rounded-2xl border border-white/10', expanded ? '' : 'max-h-[420px]')}>
@@ -153,7 +154,7 @@ function ApostaRow({ aposta, onOpenStatusModal, onEdit, onDelete }: ApostaRowPro
       <td className="px-4 py-4 text-white/60">{formatDate(aposta.dataJogo)}</td>
       <td className="px-4 py-4 text-white/80">{aposta.esporte}</td>
       <td className="px-4 py-4 text-white/80">{aposta.jogo}</td>
-      <td className="px-4 py-4 text-white/80">{aposta.mercado}</td>
+      <td className="px-4 py-4 text-white/80">{formatMarketDisplay(aposta.mercado)}</td>
       <td className="px-4 py-4">
         <div className="flex flex-col gap-1">
           <span className="font-semibold text-white">{formatCurrency(aposta.valorApostado)}</span>
