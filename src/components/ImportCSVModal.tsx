@@ -226,12 +226,17 @@ export default function ImportCSVModal({
                     batch.map(bet => apostaService.create(bet.data))
                 );
 
-                results.forEach(result => {
+                results.forEach((result, index) => {
                     if (result.status === 'fulfilled') {
                         successCount++;
                     } else {
                         errorCount++;
-                        console.error('Erro ao importar aposta:', result.reason);
+                        const betData = batch[index].data;
+                        console.error('Erro ao importar aposta:', {
+                            error: result.reason,
+                            response: result.reason?.response?.data,
+                            betData: betData
+                        });
                     }
                 });
 
