@@ -74,6 +74,7 @@ export interface UpdateBancaPayload {
   descricao?: string;
   status?: string;
   ePadrao?: boolean;
+  saldoInicial?: number;
 }
 
 export interface SidebarBanca {
@@ -187,11 +188,11 @@ const mapSidebarBanca = (
 async function getAll(): Promise<Banca[]> {
   const response = await apiClient.get<BancaApi[]>('/bancas');
   const data = response.data;
-  
+
   if (!Array.isArray(data)) {
     return [];
   }
-  
+
   return data.map(mapBancaFromApi);
 }
 
@@ -201,11 +202,11 @@ async function getAll(): Promise<Banca[]> {
 async function getAllForSidebar(): Promise<SidebarBanca[]> {
   const response = await apiClient.get<BancaApi[]>('/bancas');
   const data = response.data;
-  
+
   if (!Array.isArray(data) || data.length === 0) {
     return [];
   }
-  
+
   return data.map((item, index) => mapSidebarBanca(item, index));
 }
 
@@ -230,14 +231,14 @@ async function create(payload: CreateBancaPayload): Promise<Banca> {
     descricao: toOptionalString(payload.descricao),
     saldoInicial: payload.saldoInicial,
   };
-  
+
   const response = await apiClient.post<BancaApi>('/bancas', normalizedPayload);
   const newBanca = mapBancaFromApi(response.data);
-  
+
   // Invalidar cache e emitir evento
   invalidateCachePattern('/bancas');
   eventBus.emitBancaCreated(newBanca.id);
-  
+
   return newBanca;
 }
 
@@ -247,11 +248,11 @@ async function create(payload: CreateBancaPayload): Promise<Banca> {
 async function update(id: string, payload: UpdateBancaPayload): Promise<Banca> {
   const response = await apiClient.put<BancaApi>(`/bancas/${id}`, payload);
   const updatedBanca = mapBancaFromApi(response.data);
-  
+
   // Invalidar cache e emitir evento
   invalidateCachePattern('/bancas');
   eventBus.emitBancaUpdated(id);
-  
+
   return updatedBanca;
 }
 
@@ -260,7 +261,7 @@ async function update(id: string, payload: UpdateBancaPayload): Promise<Banca> {
  */
 async function remove(id: string): Promise<void> {
   await apiClient.delete(`/bancas/${id}`);
-  
+
   // Invalidar cache e emitir evento
   invalidateCachePattern('/bancas');
   eventBus.emitBancaDeleted(id);
@@ -294,11 +295,11 @@ export const bancaService = {
   update,
   remove,
   delete: remove,  // alias para compatibilidade
-  
+
   // Ações especiais
   togglePadrao,
   toggleStatus,
-  
+
   // Mapeadores (para casos onde é preciso mapear manualmente)
   mapBancaFromApi,
   mapSidebarBanca,
