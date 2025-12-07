@@ -4,7 +4,7 @@ import { Upload, FileText, AlertCircle, CheckCircle2, Loader2, Download } from '
 import Modal from './Modal';
 import { cn } from './ui/utils';
 import type { CreateApostaPayload } from '../services/api/apostaService';
-import { useToast } from '../contexts/ToastContext';
+import { toast } from '../utils/toast';
 
 interface Banca {
     id: string;
@@ -57,7 +57,6 @@ export default function ImportCSVModal({
     defaultBancaId,
     onImportSuccess,
 }: ImportCSVModalProps) {
-    const { showToast } = useToast();
     const [selectedBancaId, setSelectedBancaId] = useState(defaultBancaId || '');
     const [file, setFile] = useState<File | null>(null);
     const [parsedData, setParsedData] = useState<ParsedBet[]>([]);
@@ -147,7 +146,7 @@ export default function ImportCSVModal({
         }
 
         if (selectedFile.type !== 'text/csv' && !selectedFile.name.endsWith('.csv')) {
-            showToast('Por favor, selecione um arquivo CSV válido.', 'warning');
+            toast.warning('Por favor, selecione um arquivo CSV válido.');
             return;
         }
 
@@ -186,7 +185,7 @@ export default function ImportCSVModal({
             },
             error: (error) => {
                 console.error('Erro ao fazer parse do CSV:', error);
-                showToast('Erro ao processar arquivo CSV. Verifique o formato do arquivo.', 'error');
+                toast.error('Erro ao processar arquivo CSV. Verifique o formato do arquivo.');
             },
         });
     }, [selectedBancaId]);
@@ -213,13 +212,13 @@ export default function ImportCSVModal({
 
     const handleImport = async () => {
         if (!selectedBancaId) {
-            showToast('Por favor, selecione uma banca.', 'warning');
+            toast.warning('Por favor, selecione uma banca.');
             return;
         }
 
         const validBets = parsedData.filter(bet => bet.valid);
         if (validBets.length === 0) {
-            showToast('Nenhuma aposta válida para importar.', 'warning');
+            toast.warning('Nenhuma aposta válida para importar.');
             return;
         }
 
@@ -278,7 +277,7 @@ export default function ImportCSVModal({
             }
         } catch (error) {
             console.error('Erro durante importação:', error);
-            showToast('Erro ao importar apostas. Verifique o console para mais detalhes.', 'error');
+            toast.error('Erro ao importar apostas. Verifique o console para mais detalhes.');
         } finally {
             setIsImporting(false);
         }

@@ -1,19 +1,12 @@
 import { useCallback, useState } from 'react';
-import { useToast } from '../contexts/ToastContext';
 import { Check, Pencil, Plus, Trash2, X } from 'lucide-react';
-import { useToast } from '../contexts/ToastContext';
 import PageHeader from '../components/PageHeader';
-import { useToast } from '../contexts/ToastContext';
 import Modal from '../components/Modal';
-import { useToast } from '../contexts/ToastContext';
 import { tipsterService } from '../services/api';
-import { useToast } from '../contexts/ToastContext';
 import { useTipsters } from '../hooks/useTipsters';
-import { useToast } from '../contexts/ToastContext';
 import { type ApiTipster, type ApiError } from '../types/api';
-import { useToast } from '../contexts/ToastContext';
 import { cn } from '../components/ui/utils';
-import { useToast } from '../contexts/ToastContext';
+import { toast } from '../utils/toast';
 
 const sectionCardClass =
   'rounded-3xl border border-border/30 bg-background-card/80 p-6 shadow-card backdrop-blur-sm';
@@ -90,7 +83,7 @@ export default function Tipsters() {
     } catch (err) {
       const apiError = err as ApiError;
       const errorMessage = apiError.response?.data?.error;
-      alert(typeof errorMessage === 'string' ? errorMessage : 'Erro ao atualizar tipster');
+      toast.error(typeof errorMessage === 'string' ? errorMessage : 'Erro ao atualizar tipster');
     }
   };
 
@@ -105,7 +98,7 @@ export default function Tipsters() {
     } catch (err) {
       const apiError = err as ApiError;
       const errorMessage = apiError.response?.data?.error;
-      alert(typeof errorMessage === 'string' ? errorMessage : 'Erro ao deletar tipster');
+      toast.error(typeof errorMessage === 'string' ? errorMessage : 'Erro ao deletar tipster');
     }
   };
 

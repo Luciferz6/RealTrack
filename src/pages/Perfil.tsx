@@ -27,6 +27,7 @@ import { perfilService } from '../services/api';
 import { type ApiProfileResponse } from '../types/api';
 import { formatCurrency as formatCurrencyUtil, formatDate as formatDateUtil } from '../utils/formatters';
 import { cn } from '../components/ui/utils';
+import { toast } from '../utils/toast';
 
 const sectionCardClass =
   'rounded-lg border border-white/5 bg-[#0f2d29] p-6 text-white shadow-[0_25px_45px_rgba(0,0,0,0.25)] backdrop-blur-sm';
@@ -152,7 +153,7 @@ export default function Perfil() {
         email: data.email,
       });
       window.dispatchEvent(new CustomEvent('profile-updated', { detail: data }));
-      alert('Perfil atualizado com sucesso!');
+      toast.success('Perfil atualizado com sucesso!');
     } catch (err) {
       console.error('Erro ao atualizar perfil:', err);
       setError('Erro ao atualizar perfil');
@@ -205,7 +206,7 @@ export default function Perfil() {
       setResetting(true);
       setResetError('');
       const data = await perfilService.resetAccount();
-      alert(
+      toast.success(
         `Conta resetada com sucesso!\n\nDados removidos:\n- ${data.deleted.bancas} bancas\n- ${data.deleted.apostas} apostas\n- ${data.deleted.transacoes} transações`
       );
       setResetModalOpen(false);
@@ -222,8 +223,8 @@ export default function Perfil() {
   const copyToClipboard = (text: string) => {
     void navigator.clipboard
       .writeText(text)
-      .then(() => alert('ID copiado para a área de transferência!'))
-      .catch(() => alert('Erro ao copiar ID'));
+      .then(() => toast.success('ID copiado para a área de transferência!'))
+      .catch(() => toast.error('Erro ao copiar ID'));
   };
 
   const handleLinkTelegram = () => {
@@ -243,10 +244,10 @@ export default function Perfil() {
     try {
       const data = await perfilService.updateTelegram(null);
       setProfile(data);
-      alert('Telegram desvinculado com sucesso!');
+      toast.success('Telegram desvinculado com sucesso!');
     } catch (err) {
       console.error('Erro ao desvincular Telegram:', err);
-      alert('Erro ao desvincular Telegram');
+      toast.error('Erro ao desvincular Telegram');
     }
   };
 

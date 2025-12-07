@@ -1,21 +1,12 @@
 import { Filter, Loader2, Pencil, Plus, Trash2, Wallet } from 'lucide-react';
-import { useToast } from '../contexts/ToastContext';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useToast } from '../contexts/ToastContext';
 import DateInput from '../components/DateInput';
-import { useToast } from '../contexts/ToastContext';
 import FilterPopover from '../components/FilterPopover';
-import { useToast } from '../contexts/ToastContext';
 import Modal from '../components/Modal';
-import { useToast } from '../contexts/ToastContext';
 import EmptyState from '../components/EmptyState';
-import { useToast } from '../contexts/ToastContext';
 import { CASAS_APOSTAS } from '../constants/casasApostas';
-import { useToast } from '../contexts/ToastContext';
 import { financeiroService, type TipoTransacao } from '../services/api';
-import { useToast } from '../contexts/ToastContext';
 import { useBancas } from '../hooks/useBancas';
-import { useToast } from '../contexts/ToastContext';
 import {
   formatCurrency,
   formatDate,
@@ -30,7 +21,6 @@ import {
   type ApiFinancialTransaction,
 } from '../types/api';
 import { cn } from '../components/ui/utils';
-import { useToast } from '../contexts/ToastContext';
 
 type TipoFiltro = TipoTransacao | '';
 
@@ -340,12 +330,12 @@ export default function Financeiro() {
       if (errorData) {
         const message = Array.isArray(errorData)
           ? errorData
-              .map((entry) => entry.message?.trim())
-              .filter((entry): entry is string => Boolean(entry && entry.length > 0))
-              .join(', ') || 'Erro desconhecido.'
+            .map((entry) => entry.message?.trim())
+            .filter((entry): entry is string => Boolean(entry && entry.length > 0))
+            .join(', ') || 'Erro desconhecido.'
           : typeof errorData === 'string'
-          ? errorData
-          : 'Erro desconhecido.';
+            ? errorData
+            : 'Erro desconhecido.';
         alert(`Erro ao salvar transação: ${message}`);
       } else {
         showToast('Erro ao salvar transação. Tente novamente.', 'error');

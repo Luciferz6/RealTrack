@@ -1,53 +1,31 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { useToast } from '../contexts/ToastContext';
 import { useSearchParams, useLocation, useNavigate } from 'react-router-dom';
-import { useToast } from '../contexts/ToastContext';
 import { Filter, Plus, Pencil, Upload, Trash2, RefreshCw } from 'lucide-react';
-import { useToast } from '../contexts/ToastContext';
 import PageHeader from '../components/PageHeader';
-import { useToast } from '../contexts/ToastContext';
 import StatCard from '../components/StatCard';
-import { useToast } from '../contexts/ToastContext';
 import EmptyState from '../components/EmptyState';
-import { useToast } from '../contexts/ToastContext';
 import Modal from '../components/Modal';
-import { useToast } from '../contexts/ToastContext';
 import UploadTicketModal from '../components/UploadTicketModal';
-import { useToast } from '../contexts/ToastContext';
 import FilterPopover from '../components/FilterPopover';
-import { useToast } from '../contexts/ToastContext';
 import DateInput from '../components/DateInput';
-import { useToast } from '../contexts/ToastContext';
 import { CASAS_APOSTAS } from '../constants/casasApostas';
-import { useToast } from '../contexts/ToastContext';
 import { STATUS_APOSTAS } from '../constants/statusApostas';
-import { useToast } from '../contexts/ToastContext';
 import {
   betStatusPillBaseClass,
   betStatusPillVariants,
   getBetStatusIcon,
 } from '../constants/betStatusStyles';
 import { ESPORTES } from '../constants/esportes';
-import { useToast } from '../contexts/ToastContext';
 import { STATUS_SALVAMENTO } from '../constants/statusSalvamento';
-import { useToast } from '../contexts/ToastContext';
 import { TIPOS_APOSTA } from '../constants/tiposAposta';
-import { useToast } from '../contexts/ToastContext';
 import { apostaService, type ApostasFilter, type ApostaStatus } from '../services/api';
-import { useToast } from '../contexts/ToastContext';
 import { eventBus } from '../utils/eventBus';
-import { useToast } from '../contexts/ToastContext';
 import { formatCurrency as formatCurrencyUtil, formatDate as formatDateUtil } from '../utils/formatters';
-import { useToast } from '../contexts/ToastContext';
 import { useTipsters } from '../hooks/useTipsters';
-import { useToast } from '../contexts/ToastContext';
 import { useBancas } from '../hooks/useBancas';
-import { useToast } from '../contexts/ToastContext';
 import { cn } from '../components/ui/utils';
-import { useToast } from '../contexts/ToastContext';
 // Tesseract será carregado dinamicamente apenas quando necessário (biblioteca pesada ~2MB)
 import { type ApiBetWithBank, type ApiError, type ApiUploadTicketResponse } from '../types/api';
-import { useToast } from '../contexts/ToastContext';
 
 const VITE_API_URL: unknown = import.meta.env.VITE_API_URL;
 const API_BASE_URL = (typeof VITE_API_URL === 'string' && VITE_API_URL.length > 0 ? VITE_API_URL : 'http://localhost:3001/api').replace(/\/$/, '');
