@@ -102,10 +102,10 @@ export default function ImportCSVModal({
         const stake = parseFloat(row.Stake.replace(',', '.'));
         const status = STATUS_MAP[row.State] || 'Pendente';
 
-        // Converter data do formato "YYYY-MM-DD HH:mm" para ISO 8601
-        // Adiciona segundos e timezone para compatibilidade com backend
+        // Converter data do formato "YYYY-MM-DD HH:mm" para ISO 8601 UTC
+        // Zod espera formato datetime completo: YYYY-MM-DDTHH:mm:ss.sssZ
         const [datePart, timePart] = row.Date.split(' ');
-        const isoDate = `${datePart}T${timePart}:00-03:00`;
+        const isoDate = `${datePart}T${timePart}:00.000Z`;
 
         return {
             bancaId,
