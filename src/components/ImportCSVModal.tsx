@@ -112,9 +112,10 @@ export default function ImportCSVModal({
             retornoObtido = stake;
         }
 
-        // Converter data do formato "YYYY-MM-DD HH:mm" para ISO
+        // Converter data do formato "YYYY-MM-DD HH:mm" para ISO 8601
+        // Adiciona segundos e timezone para compatibilidade com backend
         const [datePart, timePart] = row.Date.split(' ');
-        const isoDate = `${datePart}T${timePart}:00.000Z`;
+        const isoDate = `${datePart}T${timePart}:00-03:00`;
 
         return {
             bancaId,
