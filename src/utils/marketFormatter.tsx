@@ -1,42 +1,55 @@
 /**
- * Formata o texto do mercado adicionando quebras de linha
- * Detecta padrões como "Jogador pontos →" e adiciona quebra de linha antes
+ * Formata o texto do mercado com abreviações e formato compacto
+ * Exemplo: "Jogador pontos → Flagg, Cooper 20+ (DAL) Jogador assistências → Flagg, Cooper 5+ (DAL)"
+ * Se torna: "Pts 20+ • Ast 5+ → Flagg, C. (DAL)"
  */
 export function formatMarketDisplay(mercado: string): JSX.Element {
     if (!mercado) {
         return <>{mercado}</>;
     }
 
-    // Padrões para detectar onde adicionar quebras de linha
-    const patterns = [
-        'Jogador pontos',
-        'Jogador assistências',
-        'Jogador rebotes',
-        'Jogador ressaltos',
-        'Jogador gols',
-        'Jogador passes',
-        'Jogador chutes',
-        'Jogador acertos',
-    ];
+    // Mapeamento de estatísticas para abreviações
+    const statAbbreviations: Record<string, string> = {
+        'pontos': 'Pts',
+        'assistências': 'Ast',
+        'assistencias': 'Ast',
+        'rebotes': 'Rebs',
+        'ressaltos': 'Rebs',
+        'gols': 'Gols',
+        'passes': 'Pass',
+        'chutes': 'Chut',
+        'acertos': 'Acer',
+    };
 
-    let formatted = mercado;
+    // Padrão: "Jogador [stat] → [Nome], [Sobrenome] [valor]+ (TEAM)"
+    const playerPropPattern = /Jogador\s+(\w+)\s*→\s*([^,]+),\s*(\S+)\s+([^(]+)\(([^)]+)\)/gi;
 
-    // Adiciona quebra de linha antes de cada padrão (exceto se for o início)
-    patterns.forEach(pattern => {
-        const regex = new RegExp(`(?<!^)(${pattern})`, 'gi');
-        formatted = formatted.replace(regex, '\n$1');
+    const matches = Array.from(mercado.matchAll(playerPropPattern));
+
+    if (matches.length === 0) {
+        // Se não encontrar o padrão, retorna o texto original
+        return <>{mercado}</>;
+    }
+
+    // Extrair informações do primeiro match (assumindo que todos são do mesmo jogador)
+    const firstMatch = matches[0];
+    const lastName = firstMatch[2].trim();
+    const firstName = firstMatch[3].trim();
+    const team = firstMatch[5].trim();
+
+    // Abreviar primeiro nome (Cooper → C.)
+    const firstInitial = firstName.charAt(0).toUpperCase() + '.';
+
+    // Coletar todas as stats
+    const stats = matches.map(match => {
+        const statName = match[1].toLowerCase();
+        const value = match[4].trim();
+        const abbrev = statAbbreviations[statName] || match[1];
+        return `${abbrev} ${value}`;
     });
 
-    // Divide por quebras de linha e renderiza
-    const lines = formatted.split('\n').filter(line => line.trim());
+    // Combinar em formato compacto: "Pts 20+ • Ast 5+ • Rebs 7+ → Flagg, C. (DAL)"
+    const formatted = `${stats.join(' • ')} → ${lastName}, ${firstInitial} (${team})`;
 
-    return (
-        <>
-            {lines.map((line, index) => (
-                <span key={index} className="block">
-                    {line.trim()}
-                </span>
-            ))}
-        </>
-    );
+    return <>{formatted}</>;
 }
