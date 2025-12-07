@@ -225,7 +225,14 @@ export default function ImportCSVModal({
                 const batch = validBets.slice(i, i + batchSize);
 
                 const results = await Promise.allSettled(
-                    batch.map(bet => apostaService.create(bet.data))
+                    batch.map(bet => {
+                        // Atualizar bancaId com o valor selecionado atual
+                        const betWithBancaId = {
+                            ...bet.data,
+                            bancaId: selectedBancaId
+                        };
+                        return apostaService.create(betWithBancaId);
+                    })
                 );
 
                 results.forEach((result, index) => {
@@ -235,7 +242,7 @@ export default function ImportCSVModal({
                         errorCount++;
                         const betData = batch[index].data;
                         console.error('===== ERRO AO IMPORTAR APOSTA =====');
-                        console.error('Dados enviados:', JSON.stringify(betData, null, 2));
+                        console.error('Dados enviados:', JSON.stringify({ ...betData, bancaId: selectedBancaId }, null, 2));
                         console.error('Erro retornado:', result.reason);
                         console.error('Resposta do servidor:', result.reason?.response?.data);
                         console.error('Status HTTP:', result.reason?.response?.status);
