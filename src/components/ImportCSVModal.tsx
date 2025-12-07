@@ -130,7 +130,7 @@ export default function ImportCSVModal({
             bonus: 0,
             dataJogo: isoDate,
             tipster: row.Tipster?.trim() || '',
-            status,
+            status: status as any, // Cast necessário pois status pode ter valores diferentes do enum
             casaDeAposta: row.Bookmaker.trim(),
             retornoObtido,
         };
