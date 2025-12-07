@@ -43,10 +43,10 @@ interface ParsedBet {
 }
 
 const STATUS_MAP: Record<string, string> = {
-    'W': 'Green',
-    'L': 'Red',
-    'R': 'Reembolso',
-    'V': 'Void',
+    'W': 'Ganha',     // Win -> Ganha
+    'L': 'Perdida',   // Loss -> Perdida
+    'R': 'Reembolso', // Refund -> Reembolso
+    'V': 'Void',      // Void -> Void
 };
 
 export default function ImportCSVModal({
@@ -104,9 +104,9 @@ export default function ImportCSVModal({
 
         // Calcular retorno obtido baseado no status
         let retornoObtido: number | undefined;
-        if (status === 'Green') {
+        if (status === 'Ganha') {
             retornoObtido = stake * odd;
-        } else if (status === 'Red') {
+        } else if (status === 'Perdida') {
             retornoObtido = 0;
         } else if (status === 'Reembolso') {
             retornoObtido = stake;
