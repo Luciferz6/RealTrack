@@ -461,22 +461,24 @@ export default function Financeiro() {
       label: 'Apostas/saldo recebidas',
       icon: CheckCircle2,
       accent: 'bg-emerald-500/15 text-emerald-200',
+      cardClass: 'border-emerald-400/15 bg-emerald-400/5 shadow-[0_15px_35px_rgba(16,185,129,0.18)]',
       parts: resultadoParts,
       isNegative: resultadoEhNegativo,
       description: 'Valores finalizados',
-        valueClass: 'text-white',
-        decimalClass: 'text-white/60',
+      valueClass: 'text-white',
+      decimalClass: 'text-white/60',
     },
     {
       key: 'pendentes',
       label: 'Aguardando resultado',
       icon: Clock3,
-        accent: 'bg-[#ff9a15]/20 text-[#ffe9c7]',
+      accent: 'bg-[#ff9a15]/25 text-[#ffebc9]',
+      cardClass: 'border-[#ffb347]/50 bg-gradient-to-br from-[#ff8a00]/25 via-[#ff9a15]/15 to-transparent shadow-[0_20px_45px_rgba(255,138,0,0.25)]',
       parts: pendenteParts,
       isNegative: false,
       description: 'Entradas pendentes',
-        valueClass: 'text-[#ffd36b]',
-        decimalClass: 'text-[#ffdd9c]',
+      valueClass: 'text-[#ffd36b]',
+      decimalClass: 'text-[#ffdd9c]',
     },
   ];
 
@@ -588,8 +590,8 @@ export default function Financeiro() {
               </div>
               <div className="h-px bg-white/10" />
               <div className="grid gap-3 md:grid-cols-2">
-                {resumoApostasCards.map(({ key, label, icon: ResumoIcon, accent, parts, isNegative, description, valueClass, decimalClass }) => (
-                  <div key={key} className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                {resumoApostasCards.map(({ key, label, icon: ResumoIcon, accent, cardClass, parts, isNegative, description, valueClass, decimalClass }) => (
+                  <div key={key} className={cn('rounded-2xl border border-white/10 bg-white/5 p-4 transition-all', cardClass)}>
                     <div className="flex items-center gap-2 text-sm text-white/70">
                       <span className={cn('inline-flex h-9 w-9 items-center justify-center rounded-2xl', accent)}>
                         <ResumoIcon className="h-4 w-4" />

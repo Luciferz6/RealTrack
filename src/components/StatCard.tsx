@@ -11,7 +11,7 @@ interface StatCardProps {
   color?: StatCardColor;
 }
 
-const COLOR_STYLES: Record<StatCardColor, { icon: string; helper: string }> = {
+const COLOR_STYLES: Record<StatCardColor, { icon: string; helper: string; card?: string; title?: string; value?: string }> = {
   emerald: {
     icon: 'border-brand-emerald/40 bg-brand-emerald/15 text-brand-emerald',
     helper: 'text-brand-emerald/70',
@@ -31,6 +31,10 @@ const COLOR_STYLES: Record<StatCardColor, { icon: string; helper: string }> = {
   amber: {
     icon: 'border-[#ffb347]/40 bg-[#ff8a00]/20 text-[#ffe6b8]',
     helper: 'text-[#ffd36b]',
+    card:
+      'bg-gradient-to-br from-[#4a1e00] via-[#6c2c00] to-[#8e3b00] border border-[#ffb347]/40 shadow-[0_25px_45px_rgba(255,138,0,0.25)]',
+    title: 'text-[#ffdca8]',
+    value: 'text-[#fff4d8]',
   },
   cyan: {
     icon: 'border-cyan-400/40 bg-cyan-400/15 text-cyan-200',
@@ -45,9 +49,9 @@ function StatCard({ title, value, helper, icon, color = 'purple' }: StatCardProp
   const style = COLOR_STYLES[color];
 
   return (
-    <div className={STAT_CARD_BASE}>
+    <div className={cn(STAT_CARD_BASE, style.card)}>
       <div className="flex items-start justify-between gap-4">
-        <p className="text-sm font-semibold uppercase tracking-[0.3em] text-white/60">{title}</p>
+        <p className={cn('text-sm font-semibold uppercase tracking-[0.3em] text-white/60', style.title)}>{title}</p>
         {icon && (
           <span
             className={cn(
@@ -59,7 +63,7 @@ function StatCard({ title, value, helper, icon, color = 'purple' }: StatCardProp
           </span>
         )}
       </div>
-      <p className="mt-4 text-3xl font-semibold text-white">{value}</p>
+      <p className={cn('mt-4 text-3xl font-semibold text-white', style.value)}>{value}</p>
       {helper && <p className={cn('mt-2 text-sm font-medium', style.helper)}>{helper}</p>}
     </div>
   );

@@ -356,7 +356,7 @@ const Sidebar = ({ collapsed, onToggle }: SidebarProps) => {
     >
       <button
         type="button"
-        className="absolute right-0 top-8 z-20 translate-x-1/2 flex h-8 w-8 items-center justify-center rounded-full bg-[#14b8a6] text-white shadow-lg shadow-[#14b8a6]/30"
+        className="absolute bottom-6 left-1/2 z-20 -translate-x-1/2 flex h-10 w-10 items-center justify-center rounded-full bg-[#14b8a6] text-white shadow-lg shadow-[#14b8a6]/30"
         onClick={onToggle}
         aria-label={collapsed ? 'Expandir sidebar' : 'Recolher sidebar'}
       >
@@ -550,7 +550,7 @@ const Sidebar = ({ collapsed, onToggle }: SidebarProps) => {
           </div>
         )}
 
-        <div className={`${sectionPadding} pb-6`}>
+        <div className={`${sectionPadding} pb-16`}>
           <div className={`flex items-center ${collapsed ? 'justify-center' : 'justify-between'}`}>
             <div className="flex items-center gap-3">
               {perfil?.fotoPerfil ? (
