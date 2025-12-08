@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { authService, apostaService, telegramService } from '../services/api';
 import { type ApiBetWithBank, type ApiError } from '../types/api';
 import { STATUS_APOSTAS } from '../constants/statusApostas';
+import { normalizarEsporteParaOpcao } from '../constants/esportes';
 
 const toRetornoString = (value: number) => (Number.isFinite(value) ? value.toString() : '');
 
@@ -189,7 +190,7 @@ export default function TelegramStatus() {
       {aposta && (
         <div className="mb-6 rounded-xl border border-border/60 bg-background/70 p-4 shadow-sm">
           <p className="mb-2 font-medium">Jogo: {aposta.jogo}</p>
-          <p className="mb-2 text-sm text-foreground-muted">Esporte: {aposta.esporte}</p>
+          <p className="mb-2 text-sm text-foreground-muted">Esporte: {normalizarEsporteParaOpcao(aposta.esporte)}</p>
           <p className="text-sm text-foreground-muted">
             Valor: R$ {aposta.valorApostado.toFixed(2)} | Odd: {aposta.odd}
           </p>

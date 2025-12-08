@@ -130,7 +130,7 @@ const initialMetricas: DashboardMetricas = {
  */
 const buildParams = (filters: DashboardFilters): Partial<DashboardFilters> => {
   const params: Partial<DashboardFilters> = {};
-  
+
   if (filters.status && filters.status !== 'Tudo' && filters.status !== '') {
     params.status = filters.status;
   }
@@ -149,7 +149,7 @@ const buildParams = (filters: DashboardFilters): Partial<DashboardFilters> => {
   if (filters.bancaId) {
     params.bancaId = filters.bancaId;
   }
-  
+
   return params;
 };
 
@@ -168,24 +168,93 @@ const sliceByPeriod = (
   return periodo ? lucroAcumulado.slice(-periodo) : lucroAcumulado;
 };
 
+const startOfDay = (date: Date): Date => {
+  const normalized = new Date(date);
+  normalized.setHours(0, 0, 0, 0);
+  return normalized;
+};
+
+const formatChartDayLabel = (date: Date): string =>
+  date.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' });
+
+const formatISODate = (date: Date): string => date.toISOString().split('T')[0];
+
+const getReferenceEndDate = (
+  lucroAcumulado: LucroAcumuladoItem[],
+  referenceDate?: Date
+): Date => {
+  if (referenceDate) {
+    return startOfDay(referenceDate);
+  }
+
+  if (lucroAcumulado.length === 0) {
+    return startOfDay(new Date());
+  }
+
+  return startOfDay(new Date(lucroAcumulado[lucroAcumulado.length - 1].date));
+};
+
 /**
  * Prepara dados para o gráfico de evolução da banca
  */
 const prepareChartData = (
   lucroAcumulado: LucroAcumuladoItem[],
-  periodoGrafico: string
+  periodoGrafico: string,
+  referenceDate?: Date
 ): EvolucaoBancaChartItem[] => {
-  const sliced = sliceByPeriod(lucroAcumulado, periodoGrafico);
-  if (sliced.length === 0) return [];
-  
-  return sliced.map((item) => ({
-    date: new Date(item.date).toLocaleDateString('pt-BR', { 
-      day: '2-digit', 
-      month: 'short' 
-    }),
-    diário: Number(item.lucro.toFixed(2)),
-    acumulado: Number(item.acumulado.toFixed(2)),
-  }));
+  if (lucroAcumulado.length === 0) return [];
+
+  const sortedData = [...lucroAcumulado].sort((a, b) => a.date.localeCompare(b.date));
+  const periodLength = periodMap[periodoGrafico];
+
+  if (!periodLength) {
+    return sortedData.map((item) => ({
+      date: formatChartDayLabel(new Date(item.date)),
+      diário: Number(item.lucro.toFixed(2)),
+      acumulado: Number(item.acumulado.toFixed(2)),
+    }));
+  }
+
+  const endDate = getReferenceEndDate(sortedData, referenceDate);
+  const startDate = startOfDay(new Date(endDate));
+  startDate.setDate(startDate.getDate() - (periodLength - 1));
+
+  const datasetByDate = new Map<string, LucroAcumuladoItem>();
+  sortedData.forEach((item) => datasetByDate.set(item.date, item));
+
+  let baselineAcumulado = 0;
+  for (const item of sortedData) {
+    const itemDate = new Date(item.date);
+    if (itemDate < startDate) {
+      baselineAcumulado = item.acumulado;
+    } else {
+      break;
+    }
+  }
+
+  const filledData: EvolucaoBancaChartItem[] = [];
+  let cursor = new Date(startDate);
+  let lastAcumulado = baselineAcumulado;
+
+  while (cursor <= endDate) {
+    const isoKey = formatISODate(cursor);
+    const existingEntry = datasetByDate.get(isoKey);
+    const dailyValue = existingEntry ? existingEntry.lucro : 0;
+
+    if (existingEntry) {
+      lastAcumulado = existingEntry.acumulado;
+    }
+
+    filledData.push({
+      date: formatChartDayLabel(cursor),
+      diário: Number(dailyValue.toFixed(2)),
+      acumulado: Number(lastAcumulado.toFixed(2)),
+    });
+
+    cursor.setDate(cursor.getDate() + 1);
+  }
+
+  return filledData;
 };
 
 /**
@@ -193,10 +262,10 @@ const prepareChartData = (
  */
 const calculateGrowthPercent = (chartData: EvolucaoBancaChartItem[]): number => {
   if (chartData.length < 2) return 0;
-  
+
   const primeiro = chartData[0]?.acumulado ?? 0;
   const ultimo = chartData[chartData.length - 1]?.acumulado ?? 0;
-  
+
   if (primeiro === 0) return 0;
   return ((ultimo - primeiro) / Math.abs(primeiro)) * 100;
 };
@@ -210,17 +279,17 @@ const findBestDay = (
 ): { valor: number; data: string } => {
   const dataset = periodoGrafico ? sliceByPeriod(lucroAcumulado, periodoGrafico) : lucroAcumulado;
   if (dataset.length === 0) return { valor: 0, data: '' };
-  
+
   const melhor = dataset.reduce(
     (max, item) => (item.lucro > max.lucro ? item : max),
     dataset[0]
   );
-  
+
   return {
     valor: melhor.lucro,
-    data: new Date(melhor.date).toLocaleDateString('pt-BR', { 
-      day: 'numeric', 
-      month: 'long' 
+    data: new Date(melhor.date).toLocaleDateString('pt-BR', {
+      day: 'numeric',
+      month: 'long'
     }),
   };
 };
@@ -235,7 +304,7 @@ const calculateDailyAverage = (
   const sliced = sliceByPeriod(lucroAcumulado, periodoGrafico);
   if (sliced.length === 0) return 0;
   const soma = sliced.reduce((acc, item) => acc + item.lucro, 0);
-  
+
   return soma / sliced.length;
 };
 
@@ -253,7 +322,7 @@ interface UseDashboardDataResult {
   loading: boolean;
   error: Error | null;
   profile: Perfil | null;
-  
+
   // Dados
   metricas: DashboardMetricas;
   lucroAcumulado: LucroAcumuladoItem[];
@@ -262,24 +331,24 @@ interface UseDashboardDataResult {
   resumoPorCasa: ResumoCasaItem[];
   apostasRecentes: ApostaRecente[];
   loadingApostasRecentes: boolean;
-  
+
   // Filtros
   filters: DashboardFilters;
   setFilters: React.Dispatch<React.SetStateAction<DashboardFilters>>;
   handleFilterChange: (field: keyof DashboardFilters, value: string) => void;
   clearFilters: () => void;
   activeFiltersCount: number;
-  
+
   // Período do gráfico
   periodoGrafico: string;
   setPeriodoGrafico: React.Dispatch<React.SetStateAction<string>>;
-  
+
   // Dados calculados
   evolucaoBancaChart: EvolucaoBancaChartItem[];
   crescimentoPercentual: number;
   melhorDia: { valor: number; data: string };
   mediaDiaria: number;
-  
+
   // Ações
   fetchDashboardData: () => Promise<void>;
   fetchApostasRecentes: () => Promise<void>;
@@ -290,27 +359,27 @@ export function useDashboardData(
   options: UseDashboardDataOptions = {}
 ): UseDashboardDataResult {
   const { autoFetch = true, debounceMs = 300 } = options;
-  
+
   // Estados principais
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const [profile, setProfile] = useState<Perfil | null>(null);
-  
+
   // Dados do dashboard
   const [metricas, setMetricas] = useState<DashboardMetricas>(initialMetricas);
   const [lucroAcumulado, setLucroAcumulado] = useState<LucroAcumuladoItem[]>([]);
   const [lucroPorTipster, setLucroPorTipster] = useState<LucroPorTipsterItem[]>([]);
   const [resumoPorEsporte, setResumoPorEsporte] = useState<ResumoEsporteItem[]>([]);
   const [resumoPorCasa, setResumoPorCasa] = useState<ResumoCasaItem[]>([]);
-  
+
   // Apostas recentes
   const [apostasRecentes, setApostasRecentes] = useState<ApostaRecente[]>([]);
   const [loadingApostasRecentes, setLoadingApostasRecentes] = useState(false);
-  
+
   // Filtros
   const [filters, setFilters] = useState<DashboardFilters>(initialFilters);
   const [periodoGrafico, setPeriodoGrafico] = useState('7');
-  
+
   // Ref para acessar filtros atuais sem causar re-criação do callback
   const filtersRef = useRef(filters);
   filtersRef.current = filters;
@@ -322,7 +391,7 @@ export function useDashboardData(
     setResumoPorEsporte([]);
     setResumoPorCasa([]);
   }, []);
-  
+
   // Fetch do perfil
   const fetchProfile = useCallback(async () => {
     try {
@@ -332,7 +401,7 @@ export function useDashboardData(
       setProfile(null);
     }
   }, []);
-  
+
   // Fetch das apostas recentes
   const fetchApostasRecentes = useCallback(async () => {
     const bancaId = filtersRef.current.bancaId;
@@ -353,7 +422,7 @@ export function useDashboardData(
       setLoadingApostasRecentes(false);
     }
   }, []);
-  
+
   // Fetch dos dados do dashboard
   const fetchDashboardData = useCallback(async () => {
     const bancaId = filtersRef.current.bancaId;
@@ -366,20 +435,29 @@ export function useDashboardData(
     }
 
     const params = buildParams(filtersRef.current);
+    console.log('[EVOLUÇÃO] Parâmetros da API:', params);
     setLoading(true);
     setError(null);
-    
+
     try {
       const response = await apiClient.get<DashboardResponse>('/analise/dashboard', { params });
       const data = response.data;
-      
+
+      console.log('[EVOLUÇÃO] Resposta completa da API:', data);
+      console.log('[EVOLUÇÃO] lucroAcumulado recebido:', data.lucroAcumulado);
+      console.log('[EVOLUÇÃO] Quantidade de itens em lucroAcumulado:', data.lucroAcumulado?.length);
+
       setMetricas(data.metricas);
       setLucroAcumulado(data.lucroAcumulado);
       setLucroPorTipster(data.lucroPorTipster);
       setResumoPorEsporte(data.resumoPorEsporte);
       setResumoPorCasa(data.resumoPorCasa);
+
+      console.log('[EVOLUÇÃO] Dados salvos com sucesso');
     } catch (err) {
       const apiError = err as { response?: { status?: number } };
+      console.error('[EVOLUÇÃO] Erro ao carregar dados:', err);
+      console.error('[EVOLUÇÃO] Status do erro:', apiError.response?.status);
       if (apiError.response?.status !== 429) {
         console.error('Erro ao carregar dados do dashboard:', err);
         setError(err instanceof Error ? err : new Error('Erro ao carregar dashboard'));
@@ -388,7 +466,7 @@ export function useDashboardData(
       setLoading(false);
     }
   }, [clearDashboardData]);
-  
+
   // Handler para mudança de filtros
   const handleFilterChange = useCallback((field: keyof DashboardFilters, value: string) => {
     setFilters((prev: DashboardFilters) => {
@@ -396,128 +474,141 @@ export function useDashboardData(
       return { ...prev, [field]: value };
     });
   }, []);
-  
+
   // Limpar filtros
   const clearFilters = useCallback(() => {
     setFilters(initialFilters);
   }, []);
-  
+
   // Refetch completo
   const refetch = useCallback(() => {
     console.log('[DEBUG] refetch chamado');
     void fetchDashboardData();
     void fetchApostasRecentes();
   }, [fetchDashboardData, fetchApostasRecentes]);
-  
+
   // Ref para controlar se já fez o fetch inicial
   const hasFetchedRef = useRef(false);
-  
+
   // Efeito único para fetch inicial (roda apenas uma vez)
   useEffect(() => {
     // Ignora se autoFetch está desabilitado
     if (!autoFetch) return;
-    
+
     // Evita fetch duplicado
     if (hasFetchedRef.current) {
       console.log('[DEBUG] fetch inicial ignorado - já foi feito');
       return;
     }
     hasFetchedRef.current = true;
-    
+
     console.log('[DEBUG] fetch inicial executado');
     void fetchDashboardData();
     void fetchApostasRecentes();
     void fetchProfile();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-  
+
   // Ref para controlar mudança real de filtros (não primeira renderização)
   const prevFiltersRef = useRef<string>(JSON.stringify(initialFilters));
-  
+
   // Efeito para mudança de filtros (com debounce)
   useEffect(() => {
     if (!autoFetch) return;
-    
+
     const currentFilters = JSON.stringify(filters);
-    
+
     // Ignora se os filtros não mudaram de verdade
     if (prevFiltersRef.current === currentFilters) {
       return;
     }
     prevFiltersRef.current = currentFilters;
-    
+
     console.log('[DEBUG] filtros mudaram, agendando fetch');
     const timeoutId = setTimeout(() => {
       console.log('[DEBUG] fetch por mudança de filtros');
       void fetchDashboardData();
       void fetchApostasRecentes();
     }, debounceMs);
-    
+
     return () => clearTimeout(timeoutId);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filters, fetchApostasRecentes]);
-  
+
   // Escutar eventos de atualização (refs para evitar re-criação)
   const refetchRef = useRef(refetch);
   refetchRef.current = refetch;
   const fetchProfileRef = useRef(fetchProfile);
   fetchProfileRef.current = fetchProfile;
-  
+
   useEffect(() => {
     const unsubscribeProfile = eventBus.on('profile:updated', () => {
       console.log('[DEBUG] evento profile:updated');
       void fetchProfileRef.current();
     });
-    
+
     const unsubscribeBanca = eventBus.on('banca:updated', () => {
       console.log('[DEBUG] evento banca:updated');
       refetchRef.current();
     });
-    
+
     const unsubscribeApostas = eventBus.on('apostas:updated', () => {
       console.log('[DEBUG] evento apostas:updated');
       refetchRef.current();
     });
-    
+
     return () => {
       unsubscribeProfile();
       unsubscribeBanca();
       unsubscribeApostas();
     };
   }, []); // Dependências vazias - usa refs para funções atuais
-  
+
   // Dados calculados (memoizados)
   const activeFiltersCount = useMemo(
     () => Object.values(filters).filter(v => v !== '').length,
     [filters]
   );
-  
+
+  const chartEndKey = useMemo(() => {
+    const explicitEnd = filters.dataFim || null;
+    const lastDataEnd = lucroAcumulado.length
+      ? lucroAcumulado[lucroAcumulado.length - 1].date
+      : null;
+
+    if (explicitEnd && lastDataEnd) {
+      return lastDataEnd > explicitEnd ? lastDataEnd : explicitEnd;
+    }
+
+    return explicitEnd ?? lastDataEnd ?? new Date().toISOString().split('T')[0];
+  }, [filters.dataFim, lucroAcumulado]);
+
   const evolucaoBancaChart = useMemo(
-    () => prepareChartData(lucroAcumulado, periodoGrafico),
-    [lucroAcumulado, periodoGrafico]
+    () => prepareChartData(lucroAcumulado, periodoGrafico, new Date(chartEndKey)),
+    [lucroAcumulado, periodoGrafico, chartEndKey]
   );
-  
+
   const crescimentoPercentual = useMemo(
     () => calculateGrowthPercent(evolucaoBancaChart),
     [evolucaoBancaChart]
   );
-  
+
   const melhorDia = useMemo(
     () => findBestDay(lucroAcumulado, periodoGrafico),
     [lucroAcumulado, periodoGrafico]
   );
-  
+
   const mediaDiaria = useMemo(
     () => calculateDailyAverage(lucroAcumulado, periodoGrafico),
     [lucroAcumulado, periodoGrafico]
   );
-  
+
   return {
     // Estados
     loading,
     error,
     profile,
-    
+
     // Dados
     metricas,
     lucroAcumulado,
@@ -526,24 +617,24 @@ export function useDashboardData(
     resumoPorCasa,
     apostasRecentes,
     loadingApostasRecentes,
-    
+
     // Filtros
     filters,
     setFilters,
     handleFilterChange,
     clearFilters,
     activeFiltersCount,
-    
+
     // Período do gráfico
     periodoGrafico,
     setPeriodoGrafico,
-    
+
     // Dados calculados
     evolucaoBancaChart,
     crescimentoPercentual,
     melhorDia,
     mediaDiaria,
-    
+
     // Ações
     fetchDashboardData,
     fetchApostasRecentes,

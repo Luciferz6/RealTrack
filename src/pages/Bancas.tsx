@@ -479,16 +479,16 @@ function SwitchControl({ checked, onToggle, label }: { checked: boolean; onToggl
     <button
       type="button"
       className={cn(
-        'relative inline-flex h-6 w-11 items-center rounded-full border border-white/15 bg-white/5 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-emerald/40',
-        checked && 'border-brand-emerald/50 bg-brand-emerald/20'
+        'relative inline-flex h-6 w-11 items-center rounded-full transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-emerald/40',
+        checked ? 'border-brand-emerald/50 bg-brand-emerald/20' : 'border-danger/50 bg-danger/10'
       )}
       onClick={onToggle}
     >
       <span className="sr-only">{label}</span>
       <span
         className={cn(
-          'inline-block h-4 w-4 translate-x-1 rounded-full bg-white transition shadow-sm',
-          checked && 'translate-x-6 bg-brand-emerald'
+          'inline-block h-4 w-4 rounded-full transition shadow-sm',
+          checked ? 'translate-x-6 bg-brand-emerald' : 'translate-x-1 bg-danger'
         )}
       />
     </button>

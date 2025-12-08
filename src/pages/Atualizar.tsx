@@ -15,7 +15,7 @@ import {
   betStatusPillVariants,
   getBetStatusIcon,
 } from '../constants/betStatusStyles';
-import { ESPORTES } from '../constants/esportes';
+import { ESPORTES, normalizarEsporteParaOpcao } from '../constants/esportes';
 import { STATUS_SALVAMENTO } from '../constants/statusSalvamento';
 import { TIPOS_APOSTA } from '../constants/tiposAposta';
 import { apostaService, type ApostasFilter, type ApostaStatus } from '../services/api';
@@ -365,54 +365,7 @@ export default function Atualizar() {
   }, [preferredBancaId, todayISO]);
 
   // Função para normalizar o esporte do banco para o formato da lista do frontend
-  const normalizeEsporte = (esporteFromDb: string): string => {
-    if (!esporteFromDb) return '';
-
-    // Normalizar: remover emojis, converter para minúsculo, remover espaços extras
-    const normalized = esporteFromDb.toLowerCase().trim();
-
-    // Mapear variações comuns para o formato correto da lista
-    const esporteMap: Record<string, string> = {
-      'basquete': 'Basquete 🏀',
-      'basketball': 'Basquete 🏀',
-      'futebol': 'Futsal', // Mapear para o mais próximo disponível
-      'soccer': 'Futsal',
-      'futebol americano': 'Futebol Americano 🏈',
-      'football': 'Futebol Americano 🏈',
-      'tênis': 'Tênis 🎾',
-      'tennis': 'Tênis 🎾',
-      'beisebol': 'Beisebol ⚾',
-      'baseball': 'Beisebol ⚾',
-      'hóquei no gelo': 'Hóquei no Gelo 🏒',
-      'hockey': 'Hóquei no Gelo 🏒',
-      'corrida de cavalos': 'Corrida de Cavalos 🏇',
-      'horse racing': 'Corrida de Cavalos 🏇',
-      'curling': 'Curling 🥌',
-      'e-sports': 'E-Sports 🎮',
-      'esports': 'E-Sports 🎮',
-      'e sports': 'E-Sports 🎮',
-      'outros': 'Outros',
-      'outros esportes': 'Outros Esportes'
-    };
-
-    // Verificar se há mapeamento direto
-    if (esporteMap[normalized]) {
-      return esporteMap[normalized];
-    }
-
-    // Tentar encontrar correspondência parcial na lista (case-insensitive, sem emojis)
-    const esporteEncontrado = ESPORTES.find(esp => {
-      const espNormalized = esp.toLowerCase().replace(/[🏀⚽🏈🎾⚾🏒🏇🥌🎮]/gu, '').trim();
-      return espNormalized === normalized || espNormalized.includes(normalized) || normalized.includes(espNormalized);
-    });
-
-    if (esporteEncontrado) {
-      return esporteEncontrado;
-    }
-
-    // Se não encontrou, retornar o valor original (pode não estar na lista)
-    return esporteFromDb;
-  };
+  const normalizeEsporte = (esporteFromDb: string): string => normalizarEsporteParaOpcao(esporteFromDb);
 
   const fetchApostas = useCallback(async () => {
     try {
@@ -1597,7 +1550,7 @@ ${limitReachedMessage}`);
                     <td className="px-4 py-3 align-middle text-sm font-medium text-white">{formatOptionalCellText(aposta.casaDeAposta)}</td>
                     <td className="px-4 py-3 align-middle text-sm text-white/80">{formatOptionalCellText(aposta.tipster)}</td>
                     <td className="px-4 py-3 align-middle text-sm text-white/80">{formatDate(aposta.dataJogo)}</td>
-                    <td className="px-4 py-3 align-middle text-sm text-white/80">{aposta.esporte}</td>
+                    <td className="px-4 py-3 align-middle text-sm text-white/80">{normalizeEsporte(aposta.esporte)}</td>
                     <td className="px-4 py-3 align-middle text-sm text-white">{aposta.jogo}</td>
                     <td className="px-4 py-3 align-middle text-sm text-white/80">{aposta.mercado}</td>
                     <td className="px-4 py-3 align-middle text-sm text-white">

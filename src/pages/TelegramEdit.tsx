@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { authService, apostaService, bancaService, tipsterService, telegramService } from '../services/api';
 import { type ApiBetWithBank, type ApiError } from '../types/api';
-import { ESPORTES } from '../constants/esportes';
+import { ESPORTES, normalizarEsporteParaOpcao } from '../constants/esportes';
 import { CASAS_APOSTAS } from '../constants/casasApostas';
 import { STATUS_APOSTAS } from '../constants/statusApostas';
 import { TIPOS_APOSTA } from '../constants/tiposAposta';
@@ -52,40 +52,7 @@ declare global {
 }
 
 // Função para normalizar o esporte
-const normalizeEsporte = (esporteFromDb: string): string => {
-  if (!esporteFromDb) return '';
-  const normalized = esporteFromDb.toLowerCase().trim();
-  const esporteMap: Record<string, string> = {
-    'basquete': 'Basquete 🏀',
-    'basketball': 'Basquete 🏀',
-    'futebol': 'Futsal',
-    'soccer': 'Futsal',
-    'futebol americano': 'Futebol Americano 🏈',
-    'football': 'Futebol Americano 🏈',
-    'tênis': 'Tênis 🎾',
-    'tennis': 'Tênis 🎾',
-    'beisebol': 'Beisebol ⚾',
-    'baseball': 'Beisebol ⚾',
-    'hóquei no gelo': 'Hóquei no Gelo 🏒',
-    'hockey': 'Hóquei no Gelo 🏒',
-    'corrida de cavalos': 'Corrida de Cavalos 🏇',
-    'horse racing': 'Corrida de Cavalos 🏇',
-    'curling': 'Curling 🥌',
-    'e-sports': 'E-Sports 🎮',
-    'esports': 'E-Sports 🎮',
-    'e sports': 'E-Sports 🎮',
-    'outros': 'Outros',
-    'outros esportes': 'Outros Esportes'
-  };
-  if (esporteMap[normalized]) {
-    return esporteMap[normalized];
-  }
-  const esporteEncontrado = ESPORTES.find(esp => {
-    const espNormalized = esp.toLowerCase().replace(/[🏀⚽🏈🎾⚾🏒🏇🥌🎮]/gu, '').trim();
-    return espNormalized === normalized || espNormalized.includes(normalized) || normalized.includes(espNormalized);
-  });
-  return esporteEncontrado ?? esporteFromDb;
-};
+const normalizeEsporte = (esporteFromDb: string): string => normalizarEsporteParaOpcao(esporteFromDb);
 
 const getTextWithFallback = (value?: string | null, fallback = '') => {
   if (typeof value !== 'string') {
