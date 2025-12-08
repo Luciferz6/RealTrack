@@ -356,7 +356,7 @@ const Sidebar = ({ collapsed, onToggle }: SidebarProps) => {
     >
       <button
         type="button"
-        className="absolute right-0 bottom-8 z-20 flex h-10 w-10 translate-x-1/2 items-center justify-center rounded-full bg-[#14b8a6] text-white shadow-lg shadow-[#14b8a6]/30"
+        className="absolute right-0 top-1/2 z-20 flex h-10 w-10 -translate-y-1/2 translate-x-1/2 items-center justify-center rounded-full bg-[#14b8a6] text-white shadow-lg shadow-[#14b8a6]/30"
         onClick={onToggle}
         aria-label={collapsed ? 'Expandir sidebar' : 'Recolher sidebar'}
       >
