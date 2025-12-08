@@ -1,4 +1,16 @@
-import { Filter, Loader2, Pencil, Plus, Trash2, Wallet } from 'lucide-react';
+import {
+  ArrowDownRight,
+  ArrowUpRight,
+  Filter,
+  Loader2,
+  Pencil,
+  Plus,
+  ReceiptText,
+  Trash2,
+  TrendingDown,
+  TrendingUp,
+  Wallet,
+} from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import DateInput from '../components/DateInput';
 import FilterPopover from '../components/FilterPopover';
@@ -412,6 +424,35 @@ export default function Financeiro() {
   const totalApostasConsideradas = statsData.apostasConcluidas + statsData.apostasPendentes;
   const taxaAcertoPercent = totalApostasConsideradas > 0 ? (statsData.apostasConcluidas / totalApostasConsideradas) * 100 : 0;
   const retornoPotencial = statsData.valorApostasPendentes;
+  const saldoBase = statsData.totalDepositado - Math.abs(statsData.totalSacado);
+  const saldoVariationPercent =
+    saldoBase !== 0 ? ((statsData.saldoAtual - saldoBase) / Math.abs(saldoBase)) * 100 : 0;
+  const normalizedVariation = Number.isFinite(saldoVariationPercent) ? saldoVariationPercent : 0;
+  const variationIsPositive = normalizedVariation >= 0;
+  const formattedVariationPercent = `${variationIsPositive ? '+' : '-'}${Math.abs(normalizedVariation).toLocaleString(
+    'pt-BR',
+    { minimumFractionDigits: 1, maximumFractionDigits: 1 },
+  )}% este mês`;
+  const quickStats = [
+    {
+      label: 'Total Depositado',
+      value: formatCurrency(statsData.totalDepositado),
+      icon: ArrowUpRight,
+      accent: 'bg-emerald-500/15 text-emerald-200',
+    },
+    {
+      label: 'Total Sacado',
+      value: formatCurrency(Math.abs(statsData.totalSacado)),
+      icon: ArrowDownRight,
+      accent: 'bg-rose-500/15 text-rose-200',
+    },
+    {
+      label: 'Transações',
+      value: statsData.totalTransacoes.toLocaleString('pt-BR'),
+      icon: ReceiptText,
+      accent: 'bg-cyan-500/15 text-cyan-200',
+    },
+  ];
 
   return (
     <div className="space-y-6 text-foreground">
@@ -462,28 +503,37 @@ export default function Financeiro() {
         ) : (
           <>
             <div className={cn(dashboardCardShellClass, 'bg-bank-hero text-white shadow-[0_35px_55px_rgba(0,0,0,0.35)]')}>
-              <div className="flex items-center justify-between gap-4">
-                <div>
+              <div className="flex items-start justify-between">
+                <div className="space-y-3">
                   <p className="text-[0.65rem] font-semibold uppercase tracking-[0.35em] text-white/70">Saldo Atual</p>
-                  <p className="mt-3 text-4xl font-semibold text-white">{formatCurrency(statsData.saldoAtual)}</p>
+                  <div className="text-5xl font-semibold leading-tight text-white">{formatCurrency(statsData.saldoAtual)}</div>
+                  <div className="flex items-center gap-2 text-sm font-medium text-white/80">
+                    {variationIsPositive ? (
+                      <TrendingUp className="h-4 w-4 text-emerald-300" />
+                    ) : (
+                      <TrendingDown className="h-4 w-4 text-rose-300" />
+                    )}
+                    <span className={variationIsPositive ? 'text-emerald-200' : 'text-rose-200'}>
+                      {formattedVariationPercent}
+                    </span>
+                  </div>
                 </div>
                 <div className="rounded-2xl bg-white/10 p-3 text-white">
                   <Wallet className="h-5 w-5" />
                 </div>
               </div>
-              <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                <div className="space-y-1 text-sm text-white/80">
-                  <p>Total Depositado</p>
-                  <p className="text-xl font-semibold text-white">{formatCurrency(statsData.totalDepositado)}</p>
-                </div>
-                <div className="space-y-1 text-sm text-white/80">
-                  <p>Total Sacado</p>
-                  <p className="text-xl font-semibold text-white">{formatCurrency(Math.abs(statsData.totalSacado))}</p>
-                </div>
-              </div>
-              <div className="mt-2 text-sm text-white/75">
-                {statsData.totalTransacoes}{' '}
-                {statsData.totalTransacoes === 1 ? 'transação registrada' : 'transações registradas'}
+              <div className="mt-6 grid gap-3 md:grid-cols-3">
+                {quickStats.map(({ label, value, icon: StatIcon, accent }) => (
+                  <div key={label} className="rounded-2xl bg-white/5 p-4">
+                    <div className="flex items-center gap-2 text-sm text-white/70">
+                      <span className={cn('inline-flex h-7 w-7 items-center justify-center rounded-xl text-xs', accent)}>
+                        <StatIcon className="h-3.5 w-3.5" />
+                      </span>
+                      {label}
+                    </div>
+                    <p className="mt-3 text-2xl font-semibold text-white">{value}</p>
+                  </div>
+                ))}
               </div>
             </div>
 
