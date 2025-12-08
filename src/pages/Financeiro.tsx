@@ -1,6 +1,8 @@
 import {
   ArrowDownRight,
   ArrowUpRight,
+  CheckCircle2,
+  Clock3,
   Filter,
   Loader2,
   Pencil,
@@ -453,6 +455,26 @@ export default function Financeiro() {
       accent: 'bg-cyan-500/15 text-cyan-200',
     },
   ];
+  const resumoApostasCards = [
+    {
+      key: 'concluidas',
+      label: 'Apostas/saldo recebidas',
+      icon: CheckCircle2,
+      accent: 'bg-emerald-500/15 text-emerald-200',
+      parts: resultadoParts,
+      isNegative: resultadoEhNegativo,
+      description: 'Valores finalizados',
+    },
+    {
+      key: 'pendentes',
+      label: 'Aguardando resultado',
+      icon: Clock3,
+      accent: 'bg-amber-500/20 text-amber-100',
+      parts: pendenteParts,
+      isNegative: false,
+      description: 'Entradas pendentes',
+    },
+  ];
 
   return (
     <div className="space-y-6 text-foreground">
@@ -483,7 +505,7 @@ export default function Financeiro() {
         </div>
       </div>
 
-      <section className="grid gap-4 lg:grid-cols-[2fr_1fr_1fr]">
+      <section className="grid gap-4 lg:grid-cols-[2fr_1.3fr]">
         {statsLoading ? (
           <>
             {[0, 1, 2].map((index) => (
@@ -537,60 +559,57 @@ export default function Financeiro() {
               </div>
             </div>
 
-            <div className={cn(dashboardCardShellClass, 'relative overflow-hidden')}> 
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex items-center gap-3">
-                  <span className="inline-flex h-10 w-1 rounded-full bg-rose-400" />
-                  <p className="text-[0.65rem] font-semibold uppercase tracking-[0.35em] text-white/70">Resultado de Apostas</p>
+            <div className={cn(dashboardCardShellClass, 'space-y-6')}>
+              <div className="flex flex-wrap items-start justify-between gap-4">
+                <div>
+                  <h3 className="text-2xl font-semibold text-white">Resumo de Apostas</h3>
+                  <p className="text-sm text-white/70">Visão geral das suas apostas</p>
                 </div>
-                <div className="flex items-center gap-2 text-sm font-semibold text-brand-emerald">
-                  <span className="h-2 w-2 rounded-full bg-brand-emerald" />
-                  <span>
+                <div className="flex flex-wrap gap-2">
+                  <span className="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-100">
+                    <span className="h-2 w-2 rounded-full bg-emerald-300" />
                     {statsData.apostasConcluidas}{' '}
-                    {statsData.apostasConcluidas === 1 ? 'aposta' : 'apostas'}
+                    {statsData.apostasConcluidas === 1 ? 'finalizada' : 'finalizadas'}
+                  </span>
+                  <span className="inline-flex items-center gap-2 rounded-full border border-amber-400/30 bg-amber-500/10 px-3 py-1 text-xs font-semibold text-amber-100">
+                    <span className="h-2 w-2 rounded-full bg-amber-300" />
+                    {statsData.apostasPendentes === 1 ? '1 pendente' : `${statsData.apostasPendentes} pendentes`}
                   </span>
                 </div>
               </div>
-              <div className="mt-5 flex flex-wrap items-baseline gap-2">
-                <span className="text-base font-semibold text-white/70">{resultadoParts.symbol}</span>
-                <div className="flex items-baseline gap-1">
-                  {resultadoEhNegativo && <span className="text-4xl font-semibold text-rose-300">-</span>}
-                  <span className="text-4xl font-semibold text-white">{resultadoParts.integerPart}</span>
-                  <span className="text-2xl font-semibold text-white/60">,{resultadoParts.decimalPart}</span>
-                </div>
+              <div className="h-px bg-white/10" />
+              <div className="grid gap-4 md:grid-cols-2">
+                {resumoApostasCards.map(({ key, label, icon: ResumoIcon, accent, parts, isNegative, description }) => (
+                  <div key={key} className="rounded-3xl border border-white/10 bg-white/5 p-5">
+                    <div className="flex items-center gap-2 text-sm text-white/70">
+                      <span className={cn('inline-flex h-9 w-9 items-center justify-center rounded-2xl', accent)}>
+                        <ResumoIcon className="h-4 w-4" />
+                      </span>
+                      {label}
+                    </div>
+                    <div className="mt-6 flex flex-wrap items-baseline gap-2">
+                      <span className="text-base font-semibold text-white/70">{parts.symbol}</span>
+                      <div className="flex items-baseline gap-1">
+                        {isNegative && <span className="text-4xl font-semibold text-rose-300">-</span>}
+                        <span className="text-4xl font-semibold text-white">{parts.integerPart}</span>
+                        <span className="text-2xl font-semibold text-white/60">,{parts.decimalPart}</span>
+                      </div>
+                    </div>
+                    <p className="mt-2 text-xs uppercase tracking-[0.35em] text-white/45">{description}</p>
+                  </div>
+                ))}
               </div>
-              <p className="mt-2 text-sm text-white/70">Apostas/saldo recebidas</p>
-              <div className="mt-6 flex items-center justify-between border-t border-white/10 pt-4 text-sm">
-                <span className="text-white/60">Taxa de acerto</span>
-                <span className="font-semibold text-rose-300">{formatPercent(taxaAcertoPercent)}</span>
-              </div>
-            </div>
-
-            <div className={cn(dashboardCardShellClass, 'relative overflow-hidden')}>
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex items-center gap-3">
-                  <span className="inline-flex h-10 w-1 rounded-full bg-amber-400" />
-                  <p className="text-[0.65rem] font-semibold uppercase tracking-[0.35em] text-white/70">Apostas Pendentes</p>
-                </div>
-                <div className="flex items-center gap-2 text-sm font-semibold text-amber-300">
+              <div className="flex flex-wrap gap-4 border-t border-white/10 pt-4 text-sm">
+                <span className="inline-flex items-center gap-2 text-white/70">
+                  <span className="h-2 w-2 rounded-full bg-emerald-300" />
+                  Taxa de acerto
+                  <span className="font-semibold text-white">{formatPercent(taxaAcertoPercent)}</span>
+                </span>
+                <span className="inline-flex items-center gap-2 text-white/70">
                   <span className="h-2 w-2 rounded-full bg-amber-300" />
-                  <span>
-                    {statsData.apostasPendentes}{' '}
-                    {statsData.apostasPendentes === 1 ? 'aposta' : 'apostas'}
-                  </span>
-                </div>
-              </div>
-              <div className="mt-5 flex flex-wrap items-baseline gap-2">
-                <span className="text-base font-semibold text-white/70">{pendenteParts.symbol}</span>
-                <div className="flex items-baseline gap-1">
-                  <span className="text-4xl font-semibold text-white">{pendenteParts.integerPart}</span>
-                  <span className="text-2xl font-semibold text-white/60">,{pendenteParts.decimalPart}</span>
-                </div>
-              </div>
-              <p className="mt-2 text-sm text-white/70">Aguardando resultado</p>
-              <div className="mt-6 flex items-center justify-between border-t border-white/10 pt-4 text-sm">
-                <span className="text-white/60">Retorno potencial</span>
-                <span className="font-semibold text-amber-300">{formatCurrency(retornoPotencial)}</span>
+                  Retorno potencial
+                  <span className="font-semibold text-white">{formatCurrency(retornoPotencial)}</span>
+                </span>
               </div>
             </div>
           </>
