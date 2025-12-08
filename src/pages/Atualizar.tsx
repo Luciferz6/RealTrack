@@ -341,6 +341,7 @@ export default function Atualizar() {
         segment
           .replace(/R\$\s*[\d.,]+/gi, '')
           .replace(/\s{2,}/g, ' ')
+          .replace(/^[^a-zA-ZÀ-ÿ0-9]+/, '')
           .replace(/^[\d\s.,:;()\-]+/, '')
           .replace(connectorPattern, '')
           .trim()
