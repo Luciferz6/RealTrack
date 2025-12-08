@@ -328,90 +328,42 @@ export default function Atualizar() {
       return [];
     }
 
-    const rawLines = normalized
-      .replace(/\r/g, '\n')
-      .split('\n')
-      .map((line) => line)
-      .filter(Boolean);
+    const labelPattern = /^(aposta|odd|retorno|retornos?\spotenciais?|valor|stake|cotação|apostas?)[:]?/i;
+    const connectorPattern = /^(?:o|e|ou)\s+/i;
 
-    const cleaned = rawLines
-      .map((line) =>
-        line
-          .replace(/r\$\s*[\d.,]+/gi, '')
-          .replace(/^[-•\s]+/, '')
+    const fragments = normalized
+      .replace(/\r/g, '\n')
+      .replace(/R\$\s*[\d.,]+/gi, '\n')
+      .replace(/Odd[s]?[^\n]*[\d.,]+/gi, '\n')
+      .split(/\n+/)
+      .flatMap((segment) => segment.split(/\s{2,}|[|]/))
+      .map((segment) =>
+        segment
+          .replace(/R\$\s*[\d.,]+/gi, '')
           .replace(/\s{2,}/g, ' ')
+          .replace(/^[\d\s.,:;()\-]+/, '')
+          .replace(connectorPattern, '')
           .trim()
       )
-      .filter((line) => line.length > 0)
-      .filter((line) => {
-        const numericOnly = /^[\d.,]+$/.test(line.replace(',', '.'));
-        if (numericOnly) {
+      .filter((segment) => segment.length > 0)
+      .filter((segment) => {
+        if (!/[a-zA-ZÀ-ÿ]/.test(segment)) {
           return false;
         }
-
-        const labelPrefix = /^(aposta|odd|retorno|retornos?\spotenciais?|valor|stake)[:]?/i;
-        if (labelPrefix.test(line)) {
+        if (labelPattern.test(segment)) {
           return false;
         }
-
-        return /[a-zA-ZÀ-ÿ]/.test(line);
+        if (/^[\d.,]+$/.test(segment.replace(',', '.'))) {
+          return false;
+        }
+        return true;
       });
 
     const deduped: string[] = [];
-    for (const line of cleaned) {
-      const normalizedLine = line.toLowerCase();
-      if (!deduped.some((existing) => existing.toLowerCase() === normalizedLine)) {
-        deduped.push(line);
-      }
-    }
-
-    return deduped;
-  };
-
-  const extractMarketSelections = (market?: string | null): string[] => {
-    if (typeof market !== 'string') {
-      return [];
-    }
-
-    const normalized = market.trim();
-    if (normalized === '' || normalized === 'N/D') {
-      return [];
-    }
-
-    const rawLines = normalized
-      .replace(/\r/g, '\n')
-      .split('\n')
-      .map((line) => line)
-      .filter(Boolean);
-
-    const cleaned = rawLines
-      .map((line) =>
-        line
-          .replace(/r\$\s*[\d.,]+/gi, '')
-          .replace(/^[-•\s]+/, '')
-          .replace(/\s{2,}/g, ' ')
-          .trim()
-      )
-      .filter((line) => line.length > 0)
-      .filter((line) => {
-        const numericOnly = /^[\d.,]+$/.test(line.replace(',', '.'));
-        if (numericOnly) {
-          return false;
-        }
-
-        const labelPrefix = /^(aposta|odd|retorno|retornos?\spotenciais?|valor|stake)[:]?/i;
-        if (labelPrefix.test(line)) {
-          return false;
-        }
-
-        return /[a-zA-ZÀ-ÿ]/.test(line);
-      });
-
-    const deduped: string[] = [];
-    for (const line of cleaned) {
-      const normalizedLine = line.toLowerCase();
-      if (!deduped.some((existing) => existing.toLowerCase() === normalizedLine)) {
-        deduped.push(line);
+    for (const fragment of fragments) {
+      const normalizedFragment = fragment.toLowerCase();
+      if (!deduped.some((existing) => existing.toLowerCase() === normalizedFragment)) {
+        deduped.push(fragment);
       }
     }
 
