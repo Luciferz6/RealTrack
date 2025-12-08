@@ -468,29 +468,33 @@ export default function Financeiro() {
 
             <div className={dashboardCardShellClass}>
               <div className="flex items-center justify-between gap-4">
-                <div>
+                <div className="flex flex-col justify-center">
                   <p className="text-[0.65rem] font-semibold uppercase tracking-[0.35em] text-white/60">Resultado de Apostas</p>
                   <p className="mt-3 text-3xl font-semibold text-white">{formatCurrency(statsData.resultadoApostas)}</p>
                   <p className="mt-4 text-sm text-white/70">Apostas/saldo recebidas</p>
                 </div>
-                <span className="text-xs font-semibold text-brand-emerald">
-                  {statsData.apostasConcluidas}{' '}
-                  {statsData.apostasConcluidas === 1 ? 'aposta' : 'apostas'}
-                </span>
+                <div className="flex h-full items-center">
+                  <span className="text-xs font-semibold text-brand-emerald">
+                    {statsData.apostasConcluidas}{' '}
+                    {statsData.apostasConcluidas === 1 ? 'aposta' : 'apostas'}
+                  </span>
+                </div>
               </div>
             </div>
 
             <div className={dashboardCardShellClass}>
               <div className="flex items-center justify-between gap-4">
-                <div>
+                <div className="flex flex-col justify-center">
                   <p className="text-[0.65rem] font-semibold uppercase tracking-[0.35em] text-white/60">Apostas Pendentes</p>
                   <p className="mt-3 text-3xl font-semibold text-white">{formatCurrency(statsData.valorApostasPendentes)}</p>
                   <p className="mt-4 text-sm text-white/70">Aguardando resultado</p>
                 </div>
-                <span className="text-xs font-semibold text-amber-300">
-                  {statsData.apostasPendentes}{' '}
-                  {statsData.apostasPendentes === 1 ? 'aposta' : 'apostas'}
-                </span>
+                <div className="flex h-full items-center">
+                  <span className="text-xs font-semibold text-amber-300">
+                    {statsData.apostasPendentes}{' '}
+                    {statsData.apostasPendentes === 1 ? 'aposta' : 'apostas'}
+                  </span>
+                </div>
               </div>
             </div>
           </>
