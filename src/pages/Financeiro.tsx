@@ -524,11 +524,16 @@ export default function Financeiro() {
           </>
         ) : (
           <>
-            <div className={cn(dashboardCardShellClass, 'bg-bank-hero text-white shadow-[0_35px_55px_rgba(0,0,0,0.35)] flex h-full flex-col')}>
+            <div className={cn(
+              dashboardCardShellClass,
+              'bg-bank-hero text-white shadow-[0_35px_55px_rgba(0,0,0,0.35)] flex h-full flex-col p-5 lg:p-6',
+            )}>
               <div className="flex items-start justify-between">
                 <div className="space-y-3">
                   <p className="text-[0.65rem] font-semibold uppercase tracking-[0.35em] text-white/70">Saldo Atual</p>
-                  <div className="text-5xl font-semibold leading-tight text-white">{formatCurrency(statsData.saldoAtual)}</div>
+                  <div className="text-4xl font-semibold leading-tight text-white lg:text-[2.75rem]">
+                    {formatCurrency(statsData.saldoAtual)}
+                  </div>
                   <div className="flex items-center gap-2 text-sm font-medium text-white/80">
                     {variationIsPositive ? (
                       <TrendingUp className="h-4 w-4 text-emerald-300" />
@@ -544,9 +549,9 @@ export default function Financeiro() {
                   <Wallet className="h-5 w-5" />
                 </div>
               </div>
-              <div className="mt-6 grid gap-3 md:grid-cols-3">
+              <div className="mt-4 grid gap-3 md:grid-cols-3">
                 {quickStats.map(({ label, value, icon: StatIcon, accent }) => (
-                  <div key={label} className="rounded-2xl bg-white/5 p-4">
+                  <div key={label} className="rounded-2xl bg-white/5 p-3.5">
                     <div className="flex items-center gap-2 text-sm text-white/70">
                       <span className={cn('inline-flex h-7 w-7 items-center justify-center rounded-xl text-xs', accent)}>
                         <StatIcon className="h-3.5 w-3.5" />
@@ -559,10 +564,10 @@ export default function Financeiro() {
               </div>
             </div>
 
-            <div className={cn(dashboardCardShellClass, 'flex h-full flex-col gap-6')}>
+            <div className={cn(dashboardCardShellClass, 'flex h-full flex-col gap-5 p-5 lg:p-6')}>
               <div className="flex flex-wrap items-start justify-between gap-4">
                 <div>
-                  <h3 className="text-2xl font-semibold text-white">Resumo de Apostas</h3>
+                  <h3 className="text-xl font-semibold text-white">Resumo de Apostas</h3>
                   <p className="text-sm text-white/70">Visão geral das suas apostas</p>
                 </div>
                 <div className="flex flex-wrap gap-2">
@@ -578,9 +583,9 @@ export default function Financeiro() {
                 </div>
               </div>
               <div className="h-px bg-white/10" />
-              <div className="grid gap-4 md:grid-cols-2">
+              <div className="grid gap-3 md:grid-cols-2">
                 {resumoApostasCards.map(({ key, label, icon: ResumoIcon, accent, parts, isNegative, description }) => (
-                  <div key={key} className="rounded-3xl border border-white/10 bg-white/5 p-5">
+                  <div key={key} className="rounded-2xl border border-white/10 bg-white/5 p-4">
                     <div className="flex items-center gap-2 text-sm text-white/70">
                       <span className={cn('inline-flex h-9 w-9 items-center justify-center rounded-2xl', accent)}>
                         <ResumoIcon className="h-4 w-4" />
@@ -590,9 +595,9 @@ export default function Financeiro() {
                     <div className="mt-6 flex flex-wrap items-baseline gap-2">
                       <span className="text-base font-semibold text-white/70">{parts.symbol}</span>
                       <div className="flex items-baseline gap-1">
-                        {isNegative && <span className="text-4xl font-semibold text-rose-300">-</span>}
-                        <span className="text-4xl font-semibold text-white">{parts.integerPart}</span>
-                        <span className="text-2xl font-semibold text-white/60">,{parts.decimalPart}</span>
+                        {isNegative && <span className="text-3xl font-semibold text-rose-300">-</span>}
+                        <span className="text-3xl font-semibold text-white">{parts.integerPart}</span>
+                        <span className="text-xl font-semibold text-white/60">,{parts.decimalPart}</span>
                       </div>
                     </div>
                     <p className="mt-2 text-xs uppercase tracking-[0.35em] text-white/45">{description}</p>
