@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import type { ToastMessage } from '../utils/toast';
 
 interface ToastProps {
@@ -9,6 +9,13 @@ interface ToastProps {
 const Toast = ({ toast, onRemove }: ToastProps) => {
     const [isExiting, setIsExiting] = useState(false);
 
+    const handleRemove = useCallback(() => {
+        setIsExiting(true);
+        setTimeout(() => {
+            onRemove(toast.id);
+        }, 300);
+    }, [onRemove, toast.id]);
+
     useEffect(() => {
         if (toast.duration && toast.duration > 0) {
             const timer = setTimeout(() => {
@@ -16,14 +23,8 @@ const Toast = ({ toast, onRemove }: ToastProps) => {
             }, toast.duration);
             return () => clearTimeout(timer);
         }
-    }, [toast.duration, toast.id]);
-
-    const handleRemove = () => {
-        setIsExiting(true);
-        setTimeout(() => {
-            onRemove(toast.id);
-        }, 300);
-    };
+        return undefined;
+    }, [handleRemove, toast.duration]);
 
     const getIcon = () => {
         const iconClass = "w-5 h-5 flex-shrink-0";

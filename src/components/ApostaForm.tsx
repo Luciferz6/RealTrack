@@ -162,10 +162,7 @@ export default function ApostaForm({
           {errors.jogo && <span className="text-sm text-danger">{errors.jogo}</span>}
         </div>
 
-        {/* Torneio */}
-
-          {/* ...campos removidos: torneio e país... */}
-        </div>
+        {/* Torneio removido temporariamente */}
 
         {/* Mercado */}
         <div className="flex flex-col gap-2">

@@ -22,14 +22,16 @@ export function useChartContainer(options: UseChartContainerOptions = {}) {
 
   const containerRef = useCallback((element: HTMLDivElement | null) => {
     setNode(element);
+    if (!element) {
+      setHasSize(false);
+      setDimensions({ width: 0, height: 0 });
+    }
   }, []);
 
   useEffect(() => {
     const element = node;
     if (!element) {
-      setHasSize(false);
-      setDimensions({ width: 0, height: 0 });
-      return;
+      return undefined;
     }
 
     const applySize = (width: number, height: number) => {

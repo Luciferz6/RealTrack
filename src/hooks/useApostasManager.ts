@@ -5,7 +5,7 @@
  */
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { apostaService } from '../services/api';
+import { apostaService, type ApostaStatus } from '../services/api';
 import { eventBus } from '../utils/eventBus';
 import type { ApiBetWithBank } from '../types/api';
 
@@ -209,7 +209,7 @@ export function useApostasManager(options: UseApostasManagerOptions = {}) {
       bonus: parseNumberOrFallback(formData.bonus),
       dataJogo: dataJogoDate.toISOString(),
       tipster: normalizeOptionalString(formData.tipster),
-      status: formData.status as 'Pendente' | 'Green' | 'Red' | 'Reembolso' | 'Meio Green' | 'Meio Red' | 'Cashout',
+      status: formData.status as ApostaStatus,
       casaDeAposta: formData.casaDeAposta,
     };
 
@@ -233,7 +233,7 @@ export function useApostasManager(options: UseApostasManagerOptions = {}) {
       bonus: parseNumberOrFallback(formData.bonus),
       dataJogo: dataJogoDate.toISOString(),
       tipster: normalizeOptionalString(formData.tipster),
-      status: formData.status as 'Pendente' | 'Green' | 'Red' | 'Reembolso' | 'Meio Green' | 'Meio Red' | 'Cashout',
+      status: formData.status as ApostaStatus,
       casaDeAposta: formData.casaDeAposta,
       retornoObtido: parseNullableNumber(formData.retornoObtido),
     };
@@ -274,7 +274,7 @@ export function useApostasManager(options: UseApostasManagerOptions = {}) {
     }
 
     await apostaService.update(id, {
-      status: statusFormData.status as 'Pendente' | 'Green' | 'Red' | 'Reembolso' | 'Meio Green' | 'Meio Red' | 'Cashout',
+      status: statusFormData.status as ApostaStatus,
       retornoObtido,
     });
     await fetchApostas();

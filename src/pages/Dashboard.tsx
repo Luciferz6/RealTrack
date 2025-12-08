@@ -1,6 +1,17 @@
 import { useEffect, useMemo, useState } from 'react';
 import { LineChart, Line, Tooltip, XAxis, YAxis, CartesianGrid } from 'recharts';
-import { ArrowUpRight, ChevronDown, Download, Filter, Loader2, Plus, TrendingUp, Trophy } from 'lucide-react';
+import {
+  ArrowDownRight,
+  ArrowUpRight,
+  CalendarDays,
+  ChevronDown,
+  Download,
+  Filter,
+  Loader2,
+  Plus,
+  TrendingUp,
+  Trophy,
+} from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import FilterPopover from '../components/FilterPopover';
 import DateInput from '../components/DateInput';
@@ -24,6 +35,11 @@ const formatSignedCurrency = (value: number): string => {
   if (value > 0) return `+${normalized}`;
   if (value < 0) return `-${normalized}`;
   return normalized;
+};
+
+const formatAxisCurrency = (value: number): string => {
+  const formatted = formatCurrency(value);
+  return formatted.replace(/,00$/, '');
 };
 
 const timeframeOptions = [
@@ -186,6 +202,27 @@ export default function Dashboard() {
     [evolucaoBancaChart]
   );
   const periodoDiasLabel = `${periodoGrafico} dias`;
+  const melhorDiaFormatado = useMemo(() => {
+    if (!melhorDia.data) return 'Sem histórico';
+    const parsed = new Date(melhorDia.data);
+    if (Number.isNaN(parsed.getTime())) return melhorDia.data;
+    return parsed.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long' });
+  }, [melhorDia.data]);
+  const crescimentoLabel = formatSignedPercent(crescimentoPercentual);
+  const crescimentoNegativo = crescimentoPercentual < 0;
+  const GrowthTrendIcon = crescimentoNegativo ? ArrowDownRight : ArrowUpRight;
+  const growthColorClass = crescimentoNegativo ? 'text-[#ff9bb7]' : 'text-[#8efadd]';
+  const chartTooltipStyles = useMemo(
+    () => ({
+      backgroundColor: 'rgba(3, 21, 19, 0.95)',
+      border: '1px solid rgba(31, 231, 203, 0.25)',
+      borderRadius: 16,
+      boxShadow: '0 20px 40px rgba(0,0,0,0.35)',
+      color: '#f4fffc',
+      padding: '12px 16px',
+    }),
+    []
+  );
 
   const filterInputClass =
     'mt-2 w-full rounded-2xl border border-border/40 bg-background px-4 py-3 text-sm text-foreground placeholder:text-foreground-muted transition focus-visible:border-brand-emerald focus-visible:ring-2 focus-visible:ring-brand-emerald/30';
@@ -194,6 +231,15 @@ export default function Dashboard() {
   const cardBorderClass = 'border-white/5';
   const cardShadowClass = 'shadow-[0_25px_45px_rgba(0,0,0,0.25)]';
   const sectionCardClass = `rounded-lg ${cardBorderClass} ${cardSurfaceClass} p-6 ${cardShadowClass} backdrop-blur-sm`;
+  const evolutionCardClass =
+    'rounded-[32px] border border-white/5 bg-gradient-to-br from-[#031d1a] via-[#042722] to-[#021213] p-6 sm:p-8 text-white shadow-[0_35px_70px_rgba(0,0,0,0.6)]';
+  const evolutionMetricCardClass =
+    'rounded-2xl border border-white/10 bg-white/5 p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] backdrop-blur-sm';
+  const timeframeSwitchBaseClass =
+    'rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-wide transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1fe7cb]/40';
+  const evolutionChartShellClass =
+    'rounded-[28px] border border-white/10 bg-black/10 p-4 sm:p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] backdrop-blur';
+  const lucroLineGradientId = 'lucroLineGradient';
 
   return (
     <div className="space-y-8 text-foreground">
@@ -424,22 +470,27 @@ export default function Dashboard() {
       </section>
 
       <section className="grid gap-6 xl:grid-cols-[2fr_1fr]">
-        <div className={cn(sectionCardClass, 'space-y-6')}>
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <div>
-              <h3 className="text-lg font-semibold text-foreground">Evolução do lucro</h3>
-              <p className={cn('text-sm text-foreground-muted', labelTextClass)}>Desempenho diário e acumulado</p>
+        <div className={cn(evolutionCardClass, 'space-y-6')}>
+          <div className="flex flex-wrap items-start justify-between gap-6">
+            <div className="flex items-start gap-4">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10 text-[#7efee0]">
+                <CalendarDays className="h-6 w-6" />
+              </div>
+              <div>
+                <p className="text-2xl font-semibold text-white">Evolução do Lucro</p>
+                <p className="text-sm text-white/70">Acompanhe o desempenho financeiro do seu negócio.</p>
+              </div>
             </div>
-            <div className="flex items-center gap-2 rounded-2xl border border-white/5 bg-white/5 p-1">
+            <div className="flex items-center gap-2 rounded-full border border-white/10 bg-black/20 p-1">
               {timeframeOptions.map((option) => (
                 <button
                   key={option.value}
                   type="button"
                   className={cn(
-                    'rounded-2xl px-3 py-1 text-xs font-semibold uppercase tracking-wide transition',
+                    timeframeSwitchBaseClass,
                     periodoGrafico === option.value
-                      ? 'bg-brand-emerald text-slate-950 shadow-glow'
-                      : cn('text-foreground-muted hover:text-foreground', softLabelTextClass)
+                      ? 'bg-[#1fe7cb] text-[#031d1a] shadow-[0_15px_30px_rgba(31,231,203,0.35)]'
+                      : 'text-white/65 hover:text-white'
                   )}
                   onClick={() => setPeriodoGrafico(option.value)}
                 >
@@ -450,62 +501,87 @@ export default function Dashboard() {
           </div>
 
           <div className="grid gap-4 md:grid-cols-3">
-            <div className="rounded-2xl border border-white/5 bg-white/5 p-4">
-              <p className={cn('text-sm text-foreground-muted', labelTextClass)}>Total acumulado</p>
-              <p className="text-2xl font-semibold text-foreground">{formatCurrency(lucroPeriodo)}</p>
-              <p className="flex items-center gap-1 text-xs text-brand-emerald">
-                <TrendingUp size={14} /> {formatSignedPercent(crescimentoPercentual)} nos últimos {periodoDiasLabel}
+            <div className={evolutionMetricCardClass}>
+              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-white/60">Total acumulado</p>
+              <p className="mt-2 text-3xl font-semibold text-white">{formatCurrency(lucroPeriodo)}</p>
+              <p className={cn('mt-3 flex items-center gap-2 text-sm font-semibold', growthColorClass)}>
+                <GrowthTrendIcon className="h-4 w-4" /> {crescimentoLabel} vs período anterior
               </p>
             </div>
-            <div className="rounded-2xl border border-white/5 bg-white/5 p-4">
-              <p className={cn('text-sm text-foreground-muted', labelTextClass)}>Melhor dia</p>
-              <p className="text-2xl font-semibold text-foreground">{formatCurrency(melhorDia.valor)}</p>
-              <p className={cn('text-xs text-foreground-muted', softLabelTextClass)}>{melhorDia.data || 'Sem histórico'}</p>
+            <div className={evolutionMetricCardClass}>
+              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-white/60">Melhor dia</p>
+              <p className="mt-2 text-3xl font-semibold text-white">{formatCurrency(melhorDia.valor)}</p>
+              <p className="mt-1 text-sm text-white/65">{melhorDiaFormatado}</p>
             </div>
-            <div className="rounded-2xl border border-white/5 bg-white/5 p-4">
-              <p className={cn('text-sm text-foreground-muted', labelTextClass)}>Média diária</p>
-              <p className="text-2xl font-semibold text-foreground">{formatCurrency(mediaDiaria || 0)}</p>
-              <p className={cn('text-xs text-foreground-muted', softLabelTextClass)}>Últimos {periodoGrafico} dias</p>
+            <div className={evolutionMetricCardClass}>
+              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-white/60">Média diária</p>
+              <p className="mt-2 text-3xl font-semibold text-white">{formatCurrency(mediaDiaria || 0)}</p>
+              <p className="mt-1 text-sm text-white/65">Últimos {periodoDiasLabel}</p>
             </div>
           </div>
 
-          <div ref={evolucaoChartRef} className="h-64 w-full">
-            {!evolucaoChartReady ? (
-              <div className="flex h-full items-center justify-center rounded-2xl border border-dashed border-white/10 text-xs font-medium text-foreground-muted">
-                Preparando gráfico...
+          <div className={evolutionChartShellClass}>
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <p className="text-base font-semibold text-white">Gráfico de desempenho</p>
+                <p className="text-sm text-white/60">Lucro diário em reais</p>
               </div>
-            ) : evolucaoBancaChart.length > 0 ? (
-              <LineChart
-                width={evolucaoChartWidth}
-                height={evolucaoChartHeight}
-                data={evolucaoBancaChart}
-                margin={{ top: 10, right: 20, left: 0, bottom: 0 }}
-              >
-                <CartesianGrid stroke="rgba(255,255,255,0.08)" strokeDasharray="3 3" />
-                <XAxis
-                  dataKey="date"
-                  stroke="rgba(255,255,255,0.2)"
-                  tick={{ ...chartTheme.axisTick, fill: 'rgba(255,255,255,0.65)' }}
-                  tickLine={false}
-                />
-                <YAxis
-                  stroke="rgba(255,255,255,0.2)"
-                  tick={{ ...chartTheme.axisTick, fill: 'rgba(255,255,255,0.65)' }}
-                  tickFormatter={(value) => `R$ ${value}`}
-                  tickLine={false}
-                />
-                <Tooltip
-                  contentStyle={chartTheme.tooltipDark}
-                  formatter={(value: number, name: string) => [formatCurrency(value), name === 'diário' ? 'Lucro diário' : 'Acumulado']}
-                />
-                <Line type="monotone" dataKey="diário" stroke={chartTheme.colors.linePrimary} strokeWidth={2} dot={false} />
-                <Line type="monotone" dataKey="acumulado" stroke={chartTheme.colors.lineSecondary} strokeWidth={3} dot={false} />
-              </LineChart>
-            ) : (
-              <div className="flex h-full items-center justify-center rounded-2xl border border-dashed border-white/10 text-sm text-foreground-muted">
-                Nenhum dado disponível para o período selecionado.
-              </div>
-            )}
+            </div>
+            <div ref={evolucaoChartRef} className="mt-6 h-72 w-full">
+              {!evolucaoChartReady ? (
+                <div className="flex h-full items-center justify-center rounded-2xl border border-dashed border-white/10 text-xs font-medium text-white/60">
+                  Preparando gráfico...
+                </div>
+              ) : evolucaoBancaChart.length > 0 ? (
+                <LineChart
+                  width={evolucaoChartWidth}
+                  height={evolucaoChartHeight}
+                  data={evolucaoBancaChart}
+                  margin={{ top: 5, right: 30, left: 10, bottom: 10 }}
+                >
+                  <defs>
+                    <linearGradient id={lucroLineGradientId} x1="0" y1="0" x2="1" y2="0">
+                      <stop offset="0%" stopColor="#35ffe4" />
+                      <stop offset="100%" stopColor="#1ddfd0" />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid stroke="rgba(255,255,255,0.08)" strokeDasharray="4 4" vertical={false} />
+                  <XAxis
+                    dataKey="date"
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ ...chartTheme.axisTick, fill: 'rgba(255,255,255,0.7)' }}
+                    tickMargin={12}
+                  />
+                  <YAxis
+                    axisLine={false}
+                    tickLine={false}
+                    width={70}
+                    tick={{ ...chartTheme.axisTick, fill: 'rgba(255,255,255,0.7)' }}
+                    tickFormatter={formatAxisCurrency}
+                  />
+                  <Tooltip
+                    contentStyle={chartTooltipStyles}
+                    itemStyle={{ color: '#1fe7cb' }}
+                    labelStyle={{ color: '#e8ffff', fontWeight: 600 }}
+                    formatter={(value: number) => [formatCurrency(value), 'Lucro diário']}
+                    labelFormatter={(label: string) => `Dia ${label}`}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="diário"
+                    stroke={`url(#${lucroLineGradientId})`}
+                    strokeWidth={3}
+                    dot={{ r: 4, strokeWidth: 0, fill: '#38ffe4' }}
+                    activeDot={{ r: 6, fill: '#38ffe4', stroke: '#042620', strokeWidth: 2 }}
+                  />
+                </LineChart>
+              ) : (
+                <div className="flex h-full items-center justify-center rounded-2xl border border-dashed border-white/10 text-sm text-white/70">
+                  Nenhum dado disponível para o período selecionado.
+                </div>
+              )}
+            </div>
           </div>
         </div>
 

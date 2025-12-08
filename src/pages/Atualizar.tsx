@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useSearchParams, useLocation, useNavigate } from 'react-router-dom';
-import { Filter, Plus, Pencil, Upload, Trash2, RefreshCw } from 'lucide-react';
+import { Filter, Plus, Pencil, Upload, Trash2 } from 'lucide-react';
 import PageHeader from '../components/PageHeader';
 import StatCard from '../components/StatCard';
 import EmptyState from '../components/EmptyState';
@@ -20,6 +20,7 @@ import { STATUS_SALVAMENTO } from '../constants/statusSalvamento';
 import { TIPOS_APOSTA } from '../constants/tiposAposta';
 import { apostaService, type ApostasFilter, type ApostaStatus } from '../services/api';
 import { eventBus } from '../utils/eventBus';
+import { toast } from '../utils/toast';
 import { formatCurrency as formatCurrencyUtil, formatDate as formatDateUtil } from '../utils/formatters';
 import { useTipsters } from '../hooks/useTipsters';
 import { useBancas } from '../hooks/useBancas';
@@ -35,7 +36,19 @@ const API_UPLOAD_URL = `${API_BASE_URL}/upload/bilhete`;
 
 const STATUS_WITH_RETURNS = ['Ganha', 'Meio Ganha', 'Cashout'];
 
-const statusGlowClassMap: Record<string, string> = {
+const toError = (error: unknown): Error => {
+  if (error instanceof Error) {
+    return error;
+  }
+  if (typeof error === 'string') {
+    return new Error(error);
+  }
+  return new Error('Erro desconhecido');
+};
+
+type StatusStyleKey = keyof typeof betStatusPillVariants;
+
+const statusGlowClassMap: Partial<Record<StatusStyleKey, string>> & { default: string } = {
   Pendente: 'ring-[rgba(245,158,11,0.55)] shadow-[0_0_30px_rgba(245,158,11,0.45)]',
   Ganha: 'ring-[rgba(16,185,129,0.55)] shadow-[0_0_30px_rgba(16,185,129,0.45)]',
   Perdida: 'ring-[rgba(239,68,68,0.55)] shadow-[0_0_30px_rgba(239,68,68,0.45)]',
@@ -45,6 +58,18 @@ const statusGlowClassMap: Record<string, string> = {
   Reembolsada: 'ring-[rgba(59,130,246,0.55)] shadow-[0_0_30px_rgba(59,130,246,0.45)]',
   Void: 'ring-[rgba(148,163,184,0.55)] shadow-[0_0_30px_rgba(148,163,184,0.45)]',
   default: 'ring-[rgba(255,255,255,0.35)] shadow-[0_0_25px_rgba(255,255,255,0.25)]',
+};
+
+const resolveBetStatusClass = (status: string): string => {
+  if (status in betStatusPillVariants) {
+    return betStatusPillVariants[status as StatusStyleKey];
+  }
+  return betStatusPillVariants.default;
+};
+
+const resolveStatusGlowClass = (status: string): string => {
+  const glowKey = status as StatusStyleKey;
+  return statusGlowClassMap[glowKey] ?? statusGlowClassMap.default;
 };
 
 type UploadTicketData = NonNullable<ApiUploadTicketResponse['data']>;
@@ -107,7 +132,6 @@ interface ApiDiagnosticsState {
 
 const pageShellClass = 'space-y-10 text-foreground';
 const statGridClass = 'grid gap-6 md:grid-cols-2 xl:grid-cols-4';
-const glassCardClass = 'rounded-3xl border border-border/40 bg-background-card/80 p-6 shadow-card backdrop-blur';
 const dashboardCardShellClass = 'rounded-lg border border-white/5 bg-[#0f2d29] p-6 text-white shadow-[0_25px_45px_rgba(0,0,0,0.25)] backdrop-blur-sm';
 const buttonVariants = {
   primary:
@@ -153,11 +177,6 @@ export default function Atualizar() {
   const [statusModalOpen, setStatusModalOpen] = useState(false);
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [uploadPreview, setUploadPreview] = useState<string | null>(null);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [ocrText, setOcrText] = useState('');
-  const [ocrExtracting, setOcrExtracting] = useState(false);
-  const [uploadError, setUploadError] = useState<string | null>(null);
   const [selectedApostaForStatus, setSelectedApostaForStatus] = useState<ApiBetWithBank | null>(null);
   const [editingAposta, setEditingAposta] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
@@ -207,17 +226,6 @@ export default function Atualizar() {
     lastCheckedAt: null,
     probeUrl: null,
   });
-  const diagnosticsTimestamp = useMemo(() => {
-    if (!apiDiagnostics.lastCheckedAt) {
-      return '';
-    }
-    try {
-      return new Date(apiDiagnostics.lastCheckedAt).toLocaleString();
-    } catch (error) {
-      console.warn('Falha ao formatar timestamp de diagnóstico:', error);
-      return apiDiagnostics.lastCheckedAt;
-    }
-  }, [apiDiagnostics.lastCheckedAt]);
 
   const isDev = import.meta.env.DEV;
 
@@ -271,7 +279,7 @@ export default function Atualizar() {
       lastCheckedAt: new Date().toISOString(),
       probeUrl: null,
     });
-  }, [API_BASE_URL, API_HEALTH_URL]);
+  }, []);
 
   useEffect(() => {
     void checkApiConnectivity();
@@ -315,7 +323,7 @@ export default function Atualizar() {
       'Não foi possível conectar ao serviço de processamento.',
     ];
 
-    const browserOffline = typeof navigator !== 'undefined' ? navigator.onLine === false : false;
+    const browserOffline = typeof navigator !== 'undefined' ? !navigator.onLine : false;
     if (browserOffline) {
       hints.push('O navegador reporta que está offline.');
     }
@@ -460,7 +468,7 @@ export default function Atualizar() {
       }
 
       if (!preferredBancaId) {
-        showToast('Nenhuma banca encontrada para associar às apostas de teste.', 'error');
+        toast.error('Nenhuma banca encontrada para associar às apostas de teste.');
         return;
       }
 
@@ -527,7 +535,7 @@ export default function Atualizar() {
                 : 'Limite diário de apostas atingido.';
           } else {
             console.error('Erro ao criar apostas de teste:', error);
-            showToast('Erro ao criar apostas de teste. Confira o console para mais detalhes.', 'error');
+            toast.error('Erro ao criar apostas de teste. Confira o console para mais detalhes.');
           }
           aborted = true;
           break;
@@ -552,7 +560,7 @@ ${limitReachedMessage}`);
       alert(`${createdCount} apostas de teste criadas com sucesso.`);
     } catch (error) {
       console.error('Erro ao criar apostas de teste:', error);
-      showToast('Erro ao criar apostas de teste. Confira o console para mais detalhes.', 'error');
+      toast.error('Erro ao criar apostas de teste. Confira o console para mais detalhes.');
     }
   }, [preferredBancaId, fetchApostas]);
 
@@ -704,13 +712,17 @@ ${limitReachedMessage}`);
     let lastFetchTime = 0;
     const THROTTLE_MS = 2000; // Aguardar 2 segundos entre requisições
 
-    const handleBetUpdate = () => {
+    const handleBetUpdate = async () => {
       const now = Date.now();
       if (now - lastFetchTime < THROTTLE_MS) {
         return; // Ignorar se ainda não passou o tempo mínimo
       }
       lastFetchTime = now;
-      void fetchApostas();
+      try {
+        await fetchApostas();
+      } catch (error: unknown) {
+        console.error('Erro ao atualizar apostas via stream:', error);
+      }
       window.dispatchEvent(new Event('apostas-updated'));
     };
 
@@ -943,80 +955,17 @@ ${limitReachedMessage}`);
       } else if (typeof responseError === 'string') {
         alert(responseError);
       } else {
-        showToast('Erro ao criar aposta. Tente novamente.', 'error');
+        toast.error('Erro ao criar aposta. Tente novamente.');
       }
     } finally {
       setSaving(false);
     }
   };
 
-  // Função para processar arquivo de imagem
-  const processImageFile = useCallback((file: File): boolean => {
-    if (!file.type.startsWith('image/')) {
-      showToast('Por favor, selecione apenas imagens', 'error');
-      return false;
-    }
-    if (file.size > 10 * 1024 * 1024) {
-      showToast('A imagem deve ter no máximo 10MB', 'error');
-      return false;
-    }
-    setSelectedFile(file);
-    // Criar preview
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setUploadPreview(reader.result as string);
-    };
-    reader.readAsDataURL(file);
-    return true;
-  }, []);
-
-  // Função para lidar com seleção de arquivo
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      processImageFile(file);
-    }
-  };
-
-  // Função para lidar com colagem de imagem (Ctrl+V)
-  const handlePaste = useCallback((e: ClipboardEvent) => {
-    if (!uploadModalOpen) return;
-
-    const items = e.clipboardData?.items;
-    if (!items) return;
-
-    for (const item of Array.from(items)) {
-      if (item.type.startsWith('image/')) {
-        e.preventDefault();
-        const file = item.getAsFile();
-        if (file) {
-          void processImageFile(file);
-        }
-        break;
-      }
-    }
-  }, [uploadModalOpen, processImageFile]);
-
-  // Adicionar listener para Ctrl+V quando modal estiver aberto
-  useEffect(() => {
-    if (uploadModalOpen) {
-      window.addEventListener('paste', handlePaste);
-      return () => {
-        window.removeEventListener('paste', handlePaste);
-      };
-    }
-  }, [uploadModalOpen, handlePaste]);
-
   // Função para processar upload e extrair dados
   const handleUpload = async (file: File) => {
-    if (!file) {
-      showToast('Por favor, selecione uma imagem', 'error');
-      return;
-    }
-
     try {
       setUploading(true);
-      setUploadError(null);
 
       uploadAbortControllerRef.current?.abort();
       const controller = new AbortController();
@@ -1036,15 +985,15 @@ ${limitReachedMessage}`);
         } catch (error) {
           const attemptError = error as UploadApiError;
           if (attemptError.code === 'ERR_CANCELED') {
-            throw attemptError;
+            throw toError(attemptError);
           }
           const attemptStatus = attemptError.response?.status;
           if (attemptStatus === 504 && currentAttempt < maxAttempts) {
-            setUploadError('O serviço demorou para responder. Tentando novamente...');
+            toast.warning('O serviço demorou para responder. Tentando novamente...');
             await new Promise((resolve) => setTimeout(resolve, 1500));
             continue;
           }
-          throw attemptError;
+          throw toError(attemptError);
         }
       }
 
@@ -1079,11 +1028,6 @@ ${limitReachedMessage}`);
         setRetornoManual(false);
         setFormNotice('Dados extraídos com sucesso! Revise e ajuste os campos antes de salvar.');
 
-        // Limpar upload
-        setSelectedFile(null);
-        setUploadPreview(null);
-        setOcrText('');
-        setUploadError(null);
       } else {
         const fallbackMessage = uploadResponse?.message ?? uploadResponse?.error ?? 'Não foi possível analisar o bilhete.';
         throw new Error(fallbackMessage);
@@ -1104,7 +1048,7 @@ ${limitReachedMessage}`);
 
       if (!apiError.response) {
         const offlineMessage = describeNetworkFailure(apiError);
-        setUploadError(offlineMessage);
+        toast.error(offlineMessage);
         console.error('Upload network failure', {
           uploadUrl: API_UPLOAD_URL,
           healthUrl: apiDiagnostics.probeUrl ?? API_HEALTH_URL,
@@ -1118,7 +1062,7 @@ ${limitReachedMessage}`);
 
       if (statusCode === 504) {
         const timeoutMessage = 'O serviço de reconhecimento demorou para responder (504). Tente novamente em alguns instantes.';
-        setUploadError(timeoutMessage);
+        toast.error(timeoutMessage);
         alert(`Erro: ${timeoutMessage}`);
         return;
       }
@@ -1140,10 +1084,10 @@ ${limitReachedMessage}`);
           `3. Adicione créditos ou atualize seu plano\n\n` +
           `Após resolver, tente novamente.`
         );
-        setUploadError('Uso da API excedido. Ajuste a cota e tente novamente.');
+        toast.error('Uso da API excedido. Ajuste a cota e tente novamente.');
       } else {
         alert(`Erro: ${errorMessage}`);
-        setUploadError(errorMessage);
+        toast.error(errorMessage);
       }
     } finally {
       uploadAbortControllerRef.current = null;
@@ -1154,9 +1098,6 @@ ${limitReachedMessage}`);
   const handleOpenUploadModal = () => {
     uploadAbortControllerRef.current?.abort();
     uploadAbortControllerRef.current = null;
-    setSelectedFile(null);
-    setUploadPreview(null);
-    setUploadError(null);
     setUploading(false);
     setUploadModalOpen(true);
   };
@@ -1164,21 +1105,6 @@ ${limitReachedMessage}`);
   // Função para fechar modal de upload
   const handleCloseUploadModal = () => {
     setUploadModalOpen(false);
-    setSelectedFile(null);
-    setUploadPreview(null);
-    setOcrText('');
-    setOcrExtracting(false);
-    setUploadError(null);
-    ocrCancelledRef.current = true;
-    try {
-      // Terminar OCR se Tesseract foi carregado
-      if (tesseractInstanceRef.current) {
-        const terminable = tesseractInstanceRef.current.default as { terminate?: () => void };
-        terminable.terminate?.();
-      }
-    } catch (error) {
-      console.warn('Falha ao encerrar OCR:', error);
-    }
     uploadAbortControllerRef.current?.abort();
     uploadAbortControllerRef.current = null;
     setUploading(false);
@@ -1224,7 +1150,7 @@ ${limitReachedMessage}`);
 
     // Validação
     if (!statusFormData.status) {
-      showToast('Selecione um status', 'error');
+      toast.error('Selecione um status');
       return;
     }
 
@@ -1269,7 +1195,7 @@ ${limitReachedMessage}`);
       setStatusFormData({ status: '', retornoObtido: '' });
     } catch (error) {
       console.error('Erro ao atualizar status:', error);
-      showToast('Erro ao atualizar status. Tente novamente.', 'error');
+      toast.error('Erro ao atualizar status. Tente novamente.');
     } finally {
       setUpdatingStatus(false);
     }
@@ -1687,7 +1613,7 @@ ${limitReachedMessage}`);
                         className={cn(
                           betStatusPillBaseClass,
                           'text-xs',
-                          betStatusPillVariants[aposta.status] ?? betStatusPillVariants.default
+                          resolveBetStatusClass(aposta.status)
                         )}
                       >
                         {getBetStatusIcon(aposta.status)}
@@ -1967,10 +1893,8 @@ ${limitReachedMessage}`);
                   }));
                 };
                 const isSelected = statusFormData.status === status;
-                const variantClass =
-                  betStatusPillVariants[status as keyof typeof betStatusPillVariants] ??
-                  betStatusPillVariants.default;
-                const selectedGlowClass = statusGlowClassMap[status] ?? statusGlowClassMap.default;
+                const variantClass = resolveBetStatusClass(status);
+                const selectedGlowClass = resolveStatusGlowClass(status);
 
                 return (
                   <button

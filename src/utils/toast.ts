@@ -11,7 +11,7 @@ type ToastListener = (toasts: ToastMessage[]) => void;
 
 class ToastManager {
     private toasts: ToastMessage[] = [];
-    private listeners: Set<ToastListener> = new Set();
+    private listeners: Set<ToastListener> = new Set<ToastListener>();
     private idCounter = 0;
 
     subscribe(listener: ToastListener) {

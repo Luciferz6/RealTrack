@@ -42,14 +42,16 @@ export interface Aposta {
   };
 }
 
-export type ApostaStatus = 
-  | 'Pendente' 
-  | 'Green' 
-  | 'Red' 
-  | 'Reembolso' 
-  | 'Meio Green' 
-  | 'Meio Red' 
-  | 'Cashout';
+export type ApostaStatus =
+  | 'Pendente'
+  | 'Ganha'
+  | 'Perdida'
+  | 'Meio Ganha'
+  | 'Meio Perdida'
+  | 'Cashout'
+  | 'Reembolso'
+  | 'Reembolsada'
+  | 'Void';
 
 export interface CreateApostaPayload {
   bancaId: string;
@@ -66,6 +68,7 @@ export interface CreateApostaPayload {
   tipster?: string;
   status?: ApostaStatus;
   casaDeAposta: string;
+  retornoObtido?: number;
 }
 
 export interface UpdateApostaPayload extends Partial<CreateApostaPayload> {

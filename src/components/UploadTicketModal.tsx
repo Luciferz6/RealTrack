@@ -8,6 +8,7 @@ import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { Upload, RefreshCw } from 'lucide-react';
 import Modal from './Modal';
 import { cn } from './ui/utils';
+import { toast } from '../utils/toast';
 
 // ============================================
 // Tipos
@@ -90,11 +91,11 @@ function UploadTicketModalContent({
     const file = e.target.files?.[0];
     if (file) {
       if (!file.type.startsWith('image/')) {
-        showToast('Por favor, selecione uma imagem válida (PNG, JPG ou JPEG)', 'error');
+        toast.error('Por favor, selecione uma imagem válida (PNG, JPG ou JPEG)');
         return;
       }
       if (file.size > 10 * 1024 * 1024) {
-        showToast('A imagem deve ter no máximo 10MB', 'error');
+        toast.error('A imagem deve ter no máximo 10MB');
         return;
       }
       setSelectedFile(file);
@@ -103,7 +104,7 @@ function UploadTicketModalContent({
 
   const handleProcess = async () => {
     if (!selectedFile) {
-      showToast('Por favor, selecione uma imagem', 'error');
+      toast.error('Por favor, selecione uma imagem');
       return;
     }
     await onProcess(selectedFile, ocrText.trim() || undefined);

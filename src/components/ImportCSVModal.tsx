@@ -3,7 +3,7 @@ import Papa from 'papaparse';
 import { Upload, FileText, AlertCircle, CheckCircle2, Loader2, Download } from 'lucide-react';
 import Modal from './Modal';
 import { cn } from './ui/utils';
-import type { CreateApostaPayload } from '../services/api/apostaService';
+import type { CreateApostaPayload, ApostaStatus } from '../services/api/apostaService';
 import { toast } from '../utils/toast';
 
 interface Banca {
@@ -20,15 +20,15 @@ interface ImportCSVModalProps {
 }
 
 interface CSVRow {
-    Date: string;
-    Type: string;
-    Sport: string;
-    Label: string;
-    Odds: string;
-    Stake: string;
-    State: string;
-    Bookmaker: string;
-    Tipster: string;
+    Date?: string;
+    Type?: string;
+    Sport?: string;
+    Label?: string;
+    Odds?: string;
+    Stake?: string;
+    State?: string;
+    Bookmaker?: string;
+    Tipster?: string;
 }
 
 interface ValidationResult {
@@ -38,16 +38,53 @@ interface ValidationResult {
 
 interface ParsedBet {
     row: number;
-    data: CreateApostaPayload;
+    data: CreateApostaPayload | null;
     valid: boolean;
     errors: string[];
 }
 
-const STATUS_MAP: Record<string, string> = {
-    'W': 'Ganha',     // Win -> Ganha
-    'L': 'Perdida',   // Loss -> Perdida
-    'R': 'Reembolso', // Refund -> Reembolso
-    'V': 'Void',      // Void -> Void
+interface ParsedBetWithData extends ParsedBet {
+    data: CreateApostaPayload;
+}
+
+interface CompleteCSVRow extends CSVRow {
+    Date: string;
+    Sport: string;
+    Label: string;
+    Odds: string;
+    Stake: string;
+    State: string;
+    Bookmaker: string;
+}
+
+interface SettledRequestError {
+    response?: {
+        data?: unknown;
+        status?: number;
+    };
+}
+
+const assertCompleteRow = (row: CSVRow): asserts row is CompleteCSVRow => {
+    if (!row.Date || !row.Sport || !row.Label || !row.Odds || !row.Stake || !row.State || !row.Bookmaker) {
+        throw new Error('Linha CSV inválida, dados obrigatórios ausentes.');
+    }
+};
+
+const STATUS_MAP: Record<string, ApostaStatus> = {
+    W: 'Ganha',
+    L: 'Perdida',
+    R: 'Reembolso',
+    V: 'Void',
+};
+
+const normalizeNumericInput = (value?: string): string => (typeof value === 'string' ? value.replace(',', '.') : '');
+const parseNumericValue = (value?: string): number => parseFloat(normalizeNumericInput(value));
+
+const toSettledRequestError = (value: unknown): SettledRequestError => {
+    if (value && typeof value === 'object') {
+        return value as SettledRequestError;
+    }
+    return {};
 };
 
 export default function ImportCSVModal({
@@ -57,7 +94,7 @@ export default function ImportCSVModal({
     defaultBancaId,
     onImportSuccess,
 }: ImportCSVModalProps) {
-    const [selectedBancaId, setSelectedBancaId] = useState(defaultBancaId || '');
+    const [selectedBancaId, setSelectedBancaId] = useState(defaultBancaId ?? '');
     const [file, setFile] = useState<File | null>(null);
     const [parsedData, setParsedData] = useState<ParsedBet[]>([]);
     const [isImporting, setIsImporting] = useState(false);
@@ -85,8 +122,10 @@ export default function ImportCSVModal({
         }
 
         // Validar valores numéricos
-        const odd = parseFloat(row.Odds?.replace(',', '.'));
-        const stake = parseFloat(row.Stake?.replace(',', '.'));
+        const oddsInput = typeof row.Odds === 'string' ? row.Odds : '';
+        const stakeInput = typeof row.Stake === 'string' ? row.Stake : '';
+        const odd = parseNumericValue(oddsInput);
+        const stake = parseNumericValue(stakeInput);
 
         if (isNaN(odd) || odd <= 0) {
             errors.push(`Linha ${rowNumber}: Odd deve ser um número positivo`);
@@ -99,9 +138,12 @@ export default function ImportCSVModal({
     };
 
     const mapCSVToAposta = (row: CSVRow, bancaId: string): CreateApostaPayload => {
-        const odd = parseFloat(row.Odds.replace(',', '.'));
-        const stake = parseFloat(row.Stake.replace(',', '.'));
-        const status = STATUS_MAP[row.State] || 'Pendente';
+        assertCompleteRow(row);
+        const completeRow: CompleteCSVRow = row;
+        const { Date: dateValue, Sport, Label, Odds, Stake, State, Bookmaker } = completeRow;
+        const odd = parseNumericValue(Odds);
+        const stake = parseNumericValue(Stake);
+        const status = STATUS_MAP[State] ?? 'Pendente';
 
         // Calcular retorno obtido baseado no status
         let retornoObtido: number | undefined;
@@ -115,26 +157,32 @@ export default function ImportCSVModal({
 
         // Converter data do formato "YYYY-MM-DD HH:mm" para ISO 8601 UTC
         // Zod espera formato datetime completo: YYYY-MM-DDTHH:mm:ss.sssZ
-        const [datePart, timePart] = row.Date.split(' ');
+        const [datePart, timePart] = dateValue.split(' ');
         const isoDate = `${datePart}T${timePart}:00.000Z`;
 
-        return {
+        const tipoApostaValue = (row.Type ?? '').trim();
+        const payload: CreateApostaPayload = {
             bancaId,
-            esporte: row.Sport.trim(),
-            jogo: row.Label.trim(),
+            esporte: Sport.trim(),
+            jogo: Label.trim(),
             torneio: '',
             pais: '',
-            mercado: row.Label.trim(), // Usar label como mercado por padrão
-            tipoAposta: row.Type || 'Simple',
+            mercado: Label.trim(), // Usar label como mercado por padrão
+            tipoAposta: tipoApostaValue || 'Simple',
             valorApostado: stake,
             odd,
             bonus: 0,
             dataJogo: isoDate,
-            tipster: row.Tipster?.trim() || '',
-            status: status as any, // Cast necessário pois status pode ter valores diferentes do enum
-            casaDeAposta: row.Bookmaker.trim(),
-            retornoObtido,
-        } as any; // Cast para permitir retornoObtido
+            tipster: row.Tipster?.trim() ?? '',
+            status,
+            casaDeAposta: Bookmaker.trim(),
+        };
+
+        if (retornoObtido !== undefined) {
+            payload.retornoObtido = retornoObtido;
+        }
+
+        return payload;
     };
 
     const handleFileChange = useCallback((selectedFile: File | null) => {
@@ -165,14 +213,14 @@ export default function ImportCSVModal({
                     if (!validation.valid) {
                         return {
                             row: rowNumber,
-                            data: {} as CreateApostaPayload,
+                            data: null,
                             valid: false,
                             errors: validation.errors,
                         };
                     }
 
                     // Use selectedBancaId current value at parse time
-                    const currentBancaId = selectedBancaId || '';
+                    const currentBancaId = selectedBancaId;
                     return {
                         row: rowNumber,
                         data: mapCSVToAposta(row, currentBancaId),
@@ -205,9 +253,11 @@ export default function ImportCSVModal({
         e.stopPropagation();
         setDragActive(false);
 
-        if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-            handleFileChange(e.dataTransfer.files[0]);
+        const { files } = e.dataTransfer;
+        if (files.length === 0) {
+            return;
         }
+        handleFileChange(files[0]);
     }, [handleFileChange]);
 
     const handleImport = async () => {
@@ -216,7 +266,7 @@ export default function ImportCSVModal({
             return;
         }
 
-        const validBets = parsedData.filter(bet => bet.valid);
+        const validBets = parsedData.filter((bet): bet is ParsedBetWithData => bet.valid && bet.data !== null);
         if (validBets.length === 0) {
             toast.warning('Nenhuma aposta válida para importar.');
             return;
@@ -253,11 +303,12 @@ export default function ImportCSVModal({
                     } else {
                         errorCount++;
                         const betData = batch[index].data;
+                        const requestError = toSettledRequestError(result.reason);
                         console.error('===== ERRO AO IMPORTAR APOSTA =====');
                         console.error('Dados enviados:', JSON.stringify({ ...betData, bancaId: selectedBancaId }, null, 2));
                         console.error('Erro retornado:', result.reason);
-                        console.error('Resposta do servidor:', result.reason?.response?.data);
-                        console.error('Status HTTP:', result.reason?.response?.status);
+                        console.error('Resposta do servidor:', requestError.response?.data);
+                        console.error('Status HTTP:', requestError.response?.status);
                         console.error('===================================');
                     }
                 });
@@ -283,8 +334,16 @@ export default function ImportCSVModal({
         }
     };
 
-    const validCount = parsedData.filter(bet => bet.valid).length;
-    const invalidCount = parsedData.filter(bet => !bet.valid).length;
+    const validEntries = parsedData.filter(bet => bet.valid);
+    const invalidEntries = parsedData.filter(bet => !bet.valid);
+    const validCount = validEntries.length;
+    const invalidCount = invalidEntries.length;
+    const invalidErrors = invalidEntries.flatMap((bet) =>
+        bet.errors.map((message, errorIndex) => ({
+            key: `${bet.row}-${errorIndex}`,
+            message,
+        }))
+    );
 
     return (
         <Modal isOpen={isOpen} onClose={onClose} title="Importar Dados CSV" size="lg">
@@ -332,7 +391,7 @@ export default function ImportCSVModal({
                     <input
                         type="file"
                         accept=".csv"
-                        onChange={(e) => handleFileChange(e.target.files?.[0] || null)}
+                        onChange={(e) => handleFileChange(e.target.files?.[0] ?? null)}
                         className="absolute inset-0 cursor-pointer opacity-0"
                         disabled={isImporting}
                     />
@@ -388,16 +447,12 @@ export default function ImportCSVModal({
                             Erros encontrados
                         </div>
                         <ul className="space-y-1 text-xs text-rose-300">
-                            {parsedData
-                                .filter(bet => !bet.valid)
-                                .flatMap(bet => bet.errors)
-                                .slice(0, 10)
-                                .map((error, index) => (
-                                    <li key={index}>• {error}</li>
-                                ))}
-                            {parsedData.filter(bet => !bet.valid).flatMap(bet => bet.errors).length > 10 && (
+                            {invalidErrors.slice(0, 10).map(({ key, message }) => (
+                                <li key={key}>• {message}</li>
+                            ))}
+                            {invalidErrors.length > 10 && (
                                 <li className="italic text-rose-300/70">
-                                    ... e mais {parsedData.filter(bet => !bet.valid).flatMap(bet => bet.errors).length - 10} erros
+                                    ... e mais {invalidErrors.length - 10} erros
                                 </li>
                             )}
                         </ul>
