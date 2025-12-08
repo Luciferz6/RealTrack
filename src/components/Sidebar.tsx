@@ -40,6 +40,9 @@ const CREATE_BANCA_DEFAULT: CreateBancaFormState = {
   saldoInicial: '',
 };
 
+const CONSUMO_MAX_RETRIES = 2;
+const CONSUMO_RETRY_BASE_DELAY = 1200;
+
 const navLinkClasses = (isActive: boolean, collapsed: boolean) =>
   `flex items-center gap-3 py-3 rounded-lg transition-all ${
     collapsed ? 'justify-center px-0' : 'px-3'
@@ -98,22 +101,46 @@ const Sidebar = ({ collapsed, onToggle }: SidebarProps) => {
   const [creatingBanca, setCreatingBanca] = useState(false);
   const navigate = useNavigate();
   const bancaDropdownRef = useRef<HTMLDivElement | null>(null);
+  const isMountedRef = useRef(true);
   const sectionPadding = collapsed ? 'px-2' : 'px-4';
 
   const fetchConsumo = useCallback(async () => {
-    if (!perfil) return;
+    if (!perfil || !isMountedRef.current) return;
+
     setConsumoLoading(true);
     setConsumoError(null);
-    try {
-      const response = await perfilService.getConsumo();
-      setConsumoPlano(response);
-    } catch (error) {
-      console.error('Erro ao carregar consumo do plano:', error);
-      setConsumoError('Não foi possível carregar o limite diário.');
-    } finally {
+
+    const attemptFetch = async (attempt: number): Promise<void> => {
+      try {
+        const response = await perfilService.getConsumo();
+        if (!isMountedRef.current) return;
+        setConsumoPlano(response);
+      } catch (error) {
+        if (attempt < CONSUMO_MAX_RETRIES) {
+          const delay = CONSUMO_RETRY_BASE_DELAY * (attempt + 1);
+          await new Promise((resolve) => setTimeout(resolve, delay));
+          if (!isMountedRef.current) return;
+          return attemptFetch(attempt + 1);
+        }
+
+        if (!isMountedRef.current) return;
+        console.error('Erro ao carregar consumo do plano:', error);
+        setConsumoError('Não foi possível carregar o limite diário.');
+      }
+    };
+
+    await attemptFetch(0);
+
+    if (isMountedRef.current) {
       setConsumoLoading(false);
     }
   }, [perfil]);
+
+  useEffect(() => {
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
 
   useEffect(() => {
     if (!perfil) return;
@@ -198,6 +225,10 @@ const Sidebar = ({ collapsed, onToggle }: SidebarProps) => {
   const toggleBancaDropdown = () => {
     setIsBancaDropdownOpen((prev) => !prev);
   };
+
+  const handleRefreshConsumo = useCallback(() => {
+    void fetchConsumo();
+  }, [fetchConsumo]);
 
   const handleSelectBanca = async (bancaId: string) => {
     const selected = bancas.find((banca) => banca.id === bancaId);
@@ -459,11 +490,22 @@ const Sidebar = ({ collapsed, onToggle }: SidebarProps) => {
         {!collapsed && (
           <div className={`mb-6 ${sectionPadding}`}>
             <div className="rounded-lg border border-[#14b8a6]/20 bg-[#0f3d38] p-4">
-              <div className="mb-3 flex items-center gap-2">
-                <div className={`flex h-7 w-7 items-center justify-center rounded-lg ${planVisual.badgeClass}`}>
-                  <PlanIcon className={`h-4 w-4 ${planVisual.iconClass}`} strokeWidth={2.5} />
+              <div className="mb-3 flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <div className={`flex h-7 w-7 items-center justify-center rounded-lg ${planVisual.badgeClass}`}>
+                    <PlanIcon className={`h-4 w-4 ${planVisual.iconClass}`} strokeWidth={2.5} />
+                  </div>
+                  <span className="text-white">{planoNome}</span>
                 </div>
-                <span className="text-white">{planoNome}</span>
+                <button
+                  type="button"
+                  className="rounded-full p-2 text-[#6b9692] transition-colors hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+                  onClick={handleRefreshConsumo}
+                  aria-label="Atualizar consumo"
+                  disabled={consumoLoading}
+                >
+                  <RefreshCw className={`h-4 w-4 ${consumoLoading ? 'animate-spin' : ''}`} strokeWidth={2} />
+                </button>
               </div>
 
               <div className="mb-3">
@@ -481,7 +523,19 @@ const Sidebar = ({ collapsed, onToggle }: SidebarProps) => {
                     />
                   )}
                 </div>
-                {consumoError && <p className="mt-2 text-xs text-red-400">{consumoError}</p>}
+                {consumoError && (
+                  <div className="mt-2 flex items-center justify-between text-xs text-red-400">
+                    <span>{consumoError}</span>
+                    <button
+                      type="button"
+                      className="font-semibold text-red-200 underline-offset-2 transition-opacity hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-40"
+                      onClick={handleRefreshConsumo}
+                      disabled={consumoLoading}
+                    >
+                      Tentar novamente
+                    </button>
+                  </div>
+                )}
               </div>
 
               <p className="text-xs text-[#6b9692]">Renova {isLoading ? '...' : resetTime}</p>
