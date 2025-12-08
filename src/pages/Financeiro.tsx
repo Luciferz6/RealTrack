@@ -466,8 +466,8 @@ export default function Financeiro() {
               </div>
             </div>
 
-            <div className={dashboardCardShellClass}>
-              <div className="flex items-center justify-between gap-4">
+            <div className={`${dashboardCardShellClass} h-full`}>
+              <div className="flex h-full items-center justify-between gap-4">
                 <div className="flex flex-col justify-center">
                   <p className="text-[0.65rem] font-semibold uppercase tracking-[0.35em] text-white/60">Resultado de Apostas</p>
                   <p className="mt-3 text-3xl font-semibold text-white">{formatCurrency(statsData.resultadoApostas)}</p>
@@ -482,8 +482,8 @@ export default function Financeiro() {
               </div>
             </div>
 
-            <div className={dashboardCardShellClass}>
-              <div className="flex items-center justify-between gap-4">
+            <div className={`${dashboardCardShellClass} h-full`}>
+              <div className="flex h-full items-center justify-between gap-4">
                 <div className="flex flex-col justify-center">
                   <p className="text-[0.65rem] font-semibold uppercase tracking-[0.35em] text-white/60">Apostas Pendentes</p>
                   <p className="mt-3 text-3xl font-semibold text-white">{formatCurrency(statsData.valorApostasPendentes)}</p>
