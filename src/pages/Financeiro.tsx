@@ -11,6 +11,7 @@ import {
   formatCurrency,
   formatDate,
   formatDateDisplay,
+  formatPercent,
   getTodayDateISO,
   normalizeDisplayToISO,
   toISODate,
@@ -88,6 +89,19 @@ const emptyStats: ApiFinancialSummary = {
   apostasConcluidas: 0,
   totalTransacoes: 0,
   porCasa: {},
+};
+
+const getCurrencyParts = (value: number) => {
+  const normalized = formatCurrency(Math.abs(value)).replace(/\u00A0/g, ' ').trim();
+  const hasSpace = normalized.includes(' ');
+  const [symbol, numericPartRaw] = hasSpace ? normalized.split(' ') : ['R$', normalized];
+  const numericPart = numericPartRaw ?? '0,00';
+  const [integerPart, decimalPart = '00'] = numericPart.split(',');
+  return {
+    symbol,
+    integerPart,
+    decimalPart,
+  };
 };
 
 export default function Financeiro() {
@@ -392,6 +406,13 @@ export default function Financeiro() {
     }
   };
 
+  const resultadoParts = getCurrencyParts(statsData.resultadoApostas);
+  const pendenteParts = getCurrencyParts(statsData.valorApostasPendentes);
+  const resultadoEhNegativo = statsData.resultadoApostas < 0;
+  const totalApostasConsideradas = statsData.apostasConcluidas + statsData.apostasPendentes;
+  const taxaAcertoPercent = totalApostasConsideradas > 0 ? (statsData.apostasConcluidas / totalApostasConsideradas) * 100 : 0;
+  const retornoPotencial = statsData.valorApostasPendentes;
+
   return (
     <div className="space-y-6 text-foreground">
       <div className="mb-4">
@@ -466,31 +487,60 @@ export default function Financeiro() {
               </div>
             </div>
 
-            <div className={dashboardCardShellClass}>
-              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                <div className="space-y-3">
-                  <p className="text-[0.65rem] font-semibold uppercase tracking-[0.35em] text-white/60">Resultado de Apostas</p>
-                  <p className="mt-3 text-3xl font-semibold text-white">{formatCurrency(statsData.resultadoApostas)}</p>
-                  <p className="mt-4 text-sm text-white/70">Apostas/saldo recebidas</p>
+            <div className={cn(dashboardCardShellClass, 'relative overflow-hidden')}> 
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <span className="inline-flex h-10 w-1 rounded-full bg-rose-400" />
+                  <p className="text-[0.65rem] font-semibold uppercase tracking-[0.35em] text-white/70">Resultado de Apostas</p>
                 </div>
-                <span className="text-xs font-semibold text-brand-emerald sm:self-center">
-                  {statsData.apostasConcluidas}{' '}
-                  {statsData.apostasConcluidas === 1 ? 'aposta' : 'apostas'}
-                </span>
+                <div className="flex items-center gap-2 text-sm font-semibold text-brand-emerald">
+                  <span className="h-2 w-2 rounded-full bg-brand-emerald" />
+                  <span>
+                    {statsData.apostasConcluidas}{' '}
+                    {statsData.apostasConcluidas === 1 ? 'aposta' : 'apostas'}
+                  </span>
+                </div>
+              </div>
+              <div className="mt-5 flex flex-wrap items-baseline gap-2">
+                <span className="text-base font-semibold text-white/70">{resultadoParts.symbol}</span>
+                <div className="flex items-baseline gap-1">
+                  {resultadoEhNegativo && <span className="text-4xl font-semibold text-rose-300">-</span>}
+                  <span className="text-4xl font-semibold text-white">{resultadoParts.integerPart}</span>
+                  <span className="text-2xl font-semibold text-white/60">,{resultadoParts.decimalPart}</span>
+                </div>
+              </div>
+              <p className="mt-2 text-sm text-white/70">Apostas/saldo recebidas</p>
+              <div className="mt-6 flex items-center justify-between border-t border-white/10 pt-4 text-sm">
+                <span className="text-white/60">Taxa de acerto</span>
+                <span className="font-semibold text-rose-300">{formatPercent(taxaAcertoPercent)}</span>
               </div>
             </div>
 
-            <div className={dashboardCardShellClass}>
-              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                <div className="space-y-3">
-                  <p className="text-[0.65rem] font-semibold uppercase tracking-[0.35em] text-white/60">Apostas Pendentes</p>
-                  <p className="mt-3 text-3xl font-semibold text-white">{formatCurrency(statsData.valorApostasPendentes)}</p>
-                  <p className="mt-4 text-sm text-white/70">Aguardando resultado</p>
+            <div className={cn(dashboardCardShellClass, 'relative overflow-hidden')}>
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <span className="inline-flex h-10 w-1 rounded-full bg-amber-400" />
+                  <p className="text-[0.65rem] font-semibold uppercase tracking-[0.35em] text-white/70">Apostas Pendentes</p>
                 </div>
-                <span className="text-xs font-semibold text-amber-300 sm:self-center">
-                  {statsData.apostasPendentes}{' '}
-                  {statsData.apostasPendentes === 1 ? 'aposta' : 'apostas'}
-                </span>
+                <div className="flex items-center gap-2 text-sm font-semibold text-amber-300">
+                  <span className="h-2 w-2 rounded-full bg-amber-300" />
+                  <span>
+                    {statsData.apostasPendentes}{' '}
+                    {statsData.apostasPendentes === 1 ? 'aposta' : 'apostas'}
+                  </span>
+                </div>
+              </div>
+              <div className="mt-5 flex flex-wrap items-baseline gap-2">
+                <span className="text-base font-semibold text-white/70">{pendenteParts.symbol}</span>
+                <div className="flex items-baseline gap-1">
+                  <span className="text-4xl font-semibold text-white">{pendenteParts.integerPart}</span>
+                  <span className="text-2xl font-semibold text-white/60">,{pendenteParts.decimalPart}</span>
+                </div>
+              </div>
+              <p className="mt-2 text-sm text-white/70">Aguardando resultado</p>
+              <div className="mt-6 flex items-center justify-between border-t border-white/10 pt-4 text-sm">
+                <span className="text-white/60">Retorno potencial</span>
+                <span className="font-semibold text-amber-300">{formatCurrency(retornoPotencial)}</span>
               </div>
             </div>
           </>
