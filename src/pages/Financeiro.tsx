@@ -599,18 +599,6 @@ export default function Financeiro() {
                   </div>
                 ))}
               </div>
-              <div className="mt-auto flex flex-wrap gap-4 border-t border-white/10 pt-4 text-sm">
-                <span className="inline-flex items-center gap-2 text-white/70">
-                  <span className="h-2 w-2 rounded-full bg-emerald-300" />
-                  Taxa de acerto
-                  <span className="font-semibold text-white">{formatPercent(taxaAcertoPercent)}</span>
-                </span>
-                <span className="inline-flex items-center gap-2 text-white/70">
-                  <span className="h-2 w-2 rounded-full bg-amber-300" />
-                  Retorno potencial
-                  <span className="font-semibold text-white">{formatCurrency(retornoPotencial)}</span>
-                </span>
-              </div>
             </div>
           </>
         )}
