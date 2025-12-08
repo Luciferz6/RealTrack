@@ -314,9 +314,9 @@ export default function Analise() {
                 Preparando gráfico...
               </div>
             ) : winRatePorEsporte.length > 0 ? (
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart 
-                  data={winRatePorEsporte.slice(0, 10)} 
+              <ResponsiveContainer width="100%" height="100%" minWidth={0}>
+                <BarChart
+                  data={winRatePorEsporte.slice(0, 10)}
                   margin={{ top: 5, right: 20, left: 0, bottom: 5 }}
                 >
                   <defs>
@@ -327,8 +327,8 @@ export default function Analise() {
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke={chartTheme.gridStroke} vertical={false} />
-                  <XAxis 
-                    dataKey="esporte" 
+                  <XAxis
+                    dataKey="esporte"
                     stroke={chartTheme.axisStroke}
                     tick={{ ...chartTheme.axisTick }}
                     angle={-45}
@@ -336,16 +336,16 @@ export default function Analise() {
                     height={80}
                     tickLine={false}
                   />
-                  <YAxis 
+                  <YAxis
                     stroke={chartTheme.axisStroke}
                     tick={{ ...chartTheme.axisTick }}
                     tickLine={false}
                     axisLine={false}
                     label={{ value: 'Win Rate (%)', angle: -90, position: 'insideLeft', style: chartTheme.axisLabel }}
                   />
-                  <Tooltip 
-                    contentStyle={{ 
-                      ...chartTheme.tooltip, 
+                  <Tooltip
+                    contentStyle={{
+                      ...chartTheme.tooltip,
                       border: `1px solid ${chartTheme.colors.borderSuccess}`
                     }}
                     formatter={(value: number, name: string) => {
@@ -357,9 +357,9 @@ export default function Analise() {
                     labelStyle={chartTheme.tooltipLabel}
                     itemStyle={chartTheme.tooltipItem}
                   />
-                  <Bar 
-                    dataKey="winRate" 
-                    fill={`url(#${chartTheme.gradients.winRate.id})`} 
+                  <Bar
+                    dataKey="winRate"
+                    fill={`url(#${chartTheme.gradients.winRate.id})`}
                     radius={chartTheme.barRadius}
                     animationDuration={800}
                     maxBarSize={32}

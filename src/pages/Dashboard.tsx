@@ -469,7 +469,7 @@ export default function Dashboard() {
                 Preparando gráfico...
               </div>
             ) : evolucaoBancaChart.length > 0 ? (
-              <ResponsiveContainer width="100%" height="100%">
+              <ResponsiveContainer width="100%" height="100%" minWidth={0}>
                 <LineChart data={evolucaoBancaChart} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
                   <CartesianGrid stroke="rgba(255,255,255,0.08)" strokeDasharray="3 3" />
                   <XAxis
