@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Eye, EyeOff, ChevronRight } from 'lucide-react';
+import { Eye, EyeOff, ChevronRight, Lock } from 'lucide-react';
 import { authService } from '../services/api';
 import { AuthManager } from '../lib/auth';
 import { type ApiError } from '../types/api';
@@ -12,28 +12,24 @@ const heroStats = [
 ];
 
 const BrandMark = () => (
-  <div
-    className="relative flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500/25 to-emerald-400/40 shadow-[0_15px_35px_rgba(6,78,59,0.35)]"
-    aria-hidden="true"
-  >
-    <span className="pointer-events-none absolute h-12 w-12 rounded-full border-2 border-emerald-200/45" />
-    <span className="pointer-events-none absolute h-8 w-8 rounded-full border-2 border-emerald-200/45" />
-    <span className="pointer-events-none absolute h-5 w-5 rounded-full border-2 border-emerald-400/80" />
-    <span className="pointer-events-none absolute h-3 w-3 rounded-full bg-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.9)]" />
+  <div className="relative flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-500/15 shadow-[0_15px_30px_rgba(0,0,0,0.35)]" aria-hidden="true">
+    <span className="absolute h-9 w-9 rounded-full border-2 border-emerald-300/60" />
+    <span className="absolute h-5 w-5 rounded-full border-2 border-emerald-200/50" />
+    <span className="absolute h-2 w-2 rounded-full bg-emerald-300" />
   </div>
 );
 
 const inputClass =
-  'w-full rounded-2xl border border-white/20 bg-white/95 px-4 py-3 text-sm font-semibold text-slate-900 placeholder:text-slate-500 shadow-[inset_0_1px_0_rgba(255,255,255,0.25)] transition focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/20';
+  'w-full rounded-[28px] border border-white/15 bg-white px-5 py-3 text-sm font-semibold text-slate-900 placeholder:text-slate-500 shadow-[0_4px_18px_rgba(7,15,25,0.12)] transition focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/20';
 
-const fieldLabelClass = 'text-sm font-semibold text-white';
+const fieldLabelClass = 'text-sm font-semibold text-white/80';
 const fieldWrapperClass = 'flex flex-col gap-2';
 const formCardClass =
-  'relative z-10 w-full rounded-[36px] border border-white/10 bg-[#04121a] p-8 shadow-[0_35px_65px_rgba(0,0,0,0.65)] backdrop-blur-xl lg:p-10';
+  'relative z-10 w-full rounded-[40px] border border-white/5 bg-[#031320] p-10 shadow-[0_30px_60px_rgba(0,0,0,0.55)]';
 const primaryButtonClass =
-  'mt-6 flex w-full items-center justify-center gap-2 rounded-2xl bg-emerald-500 py-3 text-base font-semibold text-white shadow-[0_20px_30px_rgba(16,185,129,0.25)] transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-80';
+  'mt-6 flex w-full items-center justify-center gap-2 rounded-[26px] bg-emerald-500 py-3 text-base font-semibold text-white shadow-[0_18px_35px_rgba(16,185,129,0.35)] transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-80';
 const checkboxClass =
-  'h-4 w-4 rounded border border-white/25 bg-transparent text-emerald-400 focus:ring-emerald-400 focus:ring-offset-0';
+  'h-4 w-4 rounded border border-white/30 bg-transparent text-emerald-400 focus:ring-emerald-400 focus:ring-offset-0';
 
 export default function Login() {
   const navigate = useNavigate();
@@ -77,26 +73,26 @@ export default function Login() {
   };
 
   return (
-    <div className="login-page relative flex min-h-screen w-full flex-col overflow-hidden bg-gradient-to-br from-[#041f1f] via-[#043028] to-[#011411] text-slate-100 lg:flex-row">
-      <div className="pointer-events-none absolute -right-24 -top-24 h-[28rem] w-[28rem] rounded-full bg-emerald-500/25 blur-[200px]" aria-hidden="true" />
-      <div className="pointer-events-none absolute -bottom-16 -left-16 h-[26rem] w-[26rem] rounded-full bg-emerald-600/20 blur-[200px]" aria-hidden="true" />
+    <div className="login-page relative flex min-h-screen w-full flex-col overflow-hidden bg-gradient-to-br from-[#01302d] via-[#033831] to-[#011a16] text-slate-100 lg:flex-row">
+      <div className="pointer-events-none absolute -right-24 -top-24 h-[25rem] w-[25rem] rounded-full bg-emerald-500/25 blur-[160px]" aria-hidden="true" />
+      <div className="pointer-events-none absolute -bottom-16 -left-16 h-[24rem] w-[24rem] rounded-full bg-emerald-600/20 blur-[160px]" aria-hidden="true" />
 
       {/* Left Panel - Hero */}
-      <div className="relative z-10 flex flex-col justify-between px-6 py-12 sm:px-10 lg:w-1/2 lg:px-16 lg:py-16">
-        <div className="pt-6 lg:pt-10">
-          <div className="mb-16 flex items-center gap-4">
+      <div className="relative z-10 flex flex-col justify-between px-6 py-12 sm:px-10 lg:w-1/2 lg:px-20 lg:py-20">
+        <div className="pt-4 lg:pt-6">
+          <div className="mb-14 flex items-center gap-3">
             <BrandMark />
             <div>
-              <p className="text-xl font-semibold text-white">Real Comando</p>
-              <p className="text-[0.65rem] uppercase tracking-[0.3em] text-emerald-300">Planilha Esportiva</p>
+              <p className="text-lg font-semibold text-white">Real Comando</p>
+              <p className="text-[0.65rem] uppercase tracking-[0.3em] text-emerald-200">Planilha Esportiva</p>
             </div>
           </div>
 
           <div className="max-w-xl space-y-6">
-            <p className="text-[0.65rem] font-semibold uppercase tracking-[0.4em] text-emerald-300">
+            <p className="text-[0.65rem] font-semibold uppercase tracking-[0.4em] text-emerald-200">
               Plataforma oficial
             </p>
-            <h1 className="text-4xl font-semibold leading-tight text-white lg:text-5xl">
+            <h1 className="text-4xl font-semibold leading-tight text-white lg:text-[3.75rem]">
               Domine o jogo das
               <span className="mt-2 block bg-gradient-to-r from-emerald-300 to-teal-300 bg-clip-text text-transparent">
                 apostas esportivas
@@ -108,11 +104,11 @@ export default function Login() {
           </div>
         </div>
 
-        <div className="hidden gap-8 pt-16 text-slate-200/70 lg:flex">
+        <div className="hidden gap-16 pt-24 text-white/80 lg:flex">
           {heroStats.map((stat) => (
-            <div key={stat.label} className="space-y-1">
-              <p className="text-3xl font-semibold text-white">{stat.value}</p>
-              <p className="text-sm uppercase tracking-[0.2em] text-white/60">{stat.label}</p>
+            <div key={stat.label} className="space-y-2">
+              <p className="text-4xl font-semibold text-white">{stat.value}</p>
+              <p className="text-sm text-white/70">{stat.label}</p>
             </div>
           ))}
         </div>
@@ -122,7 +118,7 @@ export default function Login() {
       <div className="relative z-10 flex w-full items-center justify-center px-6 py-12 sm:px-10 lg:w-1/2 lg:px-16 lg:py-16">
         <div className="relative w-full max-w-md">
           <div
-            className="pointer-events-none absolute -inset-4 rounded-[32px] bg-gradient-to-br from-emerald-400/15 via-transparent to-transparent blur-3xl"
+            className="pointer-events-none absolute -inset-4 rounded-[36px] bg-gradient-to-br from-emerald-400/10 via-transparent to-transparent blur-2xl"
             aria-hidden="true"
           />
 
@@ -203,23 +199,22 @@ export default function Login() {
               </button>
             </form>
 
-            <div className="mt-8 text-center text-sm text-white/70">
+            <div className="mt-6 text-center text-sm text-white/70">
               <span>Não possui uma conta? </span>
               <Link
                 to="/cadastro"
                 className="inline-flex items-center gap-1 font-semibold text-emerald-300 transition hover:text-emerald-200"
               >
-                Criar uma conta gratuita <ChevronRight size={16} />
+                Criar uma conta gratuita
+                <ChevronRight size={16} />
               </Link>
             </div>
-          </div>
 
-          <p className="mt-6 flex items-center justify-center gap-2 text-center text-xs text-white/50">
-            <svg className="h-4 w-4 text-emerald-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-              <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
-            </svg>
-            Seus dados estão protegidos com criptografia de ponta
-          </p>
+            <div className="mt-6 flex items-center justify-center gap-2 border-t border-white/5 pt-4 text-xs text-white/60">
+              <Lock className="h-4 w-4 text-emerald-300" />
+              Seus dados estão protegidos com criptografia de ponta
+            </div>
+          </div>
         </div>
       </div>
     </div>
