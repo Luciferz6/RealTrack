@@ -441,7 +441,7 @@ export default function Financeiro() {
         ) : (
           <>
             <div className={cn(dashboardCardShellClass, 'bg-bank-hero text-white shadow-[0_35px_55px_rgba(0,0,0,0.35)]')}>
-              <div className="flex items-start justify-between gap-4">
+              <div className="flex items-center justify-between gap-4">
                 <div>
                   <p className="text-[0.65rem] font-semibold uppercase tracking-[0.35em] text-white/70">Saldo Atual</p>
                   <p className="mt-3 text-4xl font-semibold text-white">{formatCurrency(statsData.saldoAtual)}</p>
@@ -450,7 +450,7 @@ export default function Financeiro() {
                   <Wallet className="h-5 w-5" />
                 </div>
               </div>
-              <div className="mt-6 grid gap-4 sm:grid-cols-2">
+              <div className="mt-3 grid gap-3 sm:grid-cols-2">
                 <div className="space-y-1 text-sm text-white/80">
                   <p>Total Depositado</p>
                   <p className="text-xl font-semibold text-white">{formatCurrency(statsData.totalDepositado)}</p>
@@ -460,7 +460,7 @@ export default function Financeiro() {
                   <p className="text-xl font-semibold text-white">{formatCurrency(Math.abs(statsData.totalSacado))}</p>
                 </div>
               </div>
-              <div className="mt-4 text-sm text-white/75">
+              <div className="mt-2 text-sm text-white/75">
                 {statsData.totalTransacoes}{' '}
                 {statsData.totalTransacoes === 1 ? 'transação registrada' : 'transações registradas'}
               </div>
