@@ -51,7 +51,7 @@ const BASE_ESPORTES = [
   'Futebol de Areia',
   'Futebol de Salão',
   'Futebol Society',
-  'Futsal',
+  'Futebol',
   'Hóquei no Gelo',
   'Hóquei Subaquático',
   'Judo',
@@ -112,7 +112,7 @@ const EMOJI_MAP_DATA: Array<[string, string]> = [
   ['Futebol de Areia', '⚽'],
   ['Futebol de Salão', '⚽'],
   ['Futebol Society', '⚽'],
-  ['Futsal', '⚽'],
+  ['Futebol', '⚽'],
   ['Hóquei no Gelo', '🏒'],
   ['Judo', '🥋'],
   ['Kabbadi', '🤼'],
@@ -145,8 +145,8 @@ const ESPORTE_EMOJI_MAP = EMOJI_MAP_DATA.reduce((acc, [nome, emoji]) => {
 }, {} as Record<string, string>);
 
 const ALIAS_MAP_DATA: Array<[string, string]> = [
-  ['soccer', 'Futsal'],
-  ['futebol', 'Futsal'],
+  ['soccer', 'Futebol'],
+  ['futebol', 'Futebol'],
   ['football', 'Futebol Americano'],
   ['american football', 'Futebol Americano'],
   ['basketball', 'Basquete'],
