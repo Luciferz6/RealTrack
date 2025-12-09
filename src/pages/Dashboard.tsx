@@ -60,10 +60,18 @@ const SPORT_ICON_MAP: Record<string, string> = {
   volei: '🏐',
   corridas: '🏎️',
 };
+const SPORT_NAME_MAP: Record<string, string> = {
+  basquetebol: 'Basquete',
+};
 const getSportIcon = (name?: string) => {
   if (!name) return '🏅';
   const key = normalizeKey(name);
   return SPORT_ICON_MAP[key] ?? '🏅';
+};
+const getSportDisplayName = (name?: string) => {
+  if (!name) return undefined;
+  const key = normalizeKey(name);
+  return SPORT_NAME_MAP[key] ?? name;
 };
 
 interface BreakdownCardItem {
@@ -190,18 +198,21 @@ export default function Dashboard() {
 
   const casaBreakdown = useMemo<BreakdownCardItem[]>(
     () =>
-      resumoPorCasa.slice(0, 4).map((item, index) => ({
-        id: item.casa || `casa-${index}`,
-        icon: '🏢',
-        name: item.casa || 'Outros',
-        subtitle: `${item.apostas} apostas • ${formatPercent(item.aproveitamento)} de vitórias`,
-        roi: item.roi,
-        lucro: item.lucro,
-        apostas: item.apostas,
-        ganhas: item.ganhas,
-        aproveitamento: item.aproveitamento,
-        stake: item.stakeMedia,
-        extraStats: [
+      resumoPorEsporte.slice(0, 4).map((item, index) => {
+        const sportName = getSportDisplayName(item.esporte);
+        return {
+          id: item.esporte || `esporte-${index}`,
+          icon: getSportIcon(item.esporte),
+          name: sportName || 'Outros',
+          subtitle: `${item.apostas} apostas \u2022 ${formatPercent(item.aproveitamento)} de vit\u00F3rias`,
+          roi: item.roi,
+          lucro: item.lucro,
+          apostas: item.apostas,
+          ganhas: item.ganhas,
+          aproveitamento: item.aproveitamento,
+          stake: item.stakeMedia,
+        };
+      }),
           {
             label: 'Saldo',
             value: formatCurrency(item.saldo),
