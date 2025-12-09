@@ -47,11 +47,9 @@ function App() {
             <Route path="/perfil" element={<Perfil />} />
             <Route path="/tipsters" element={<Tipsters />} />
           </Route>
-          {/* Rotas do Telegram Web App (sem Layout) */}
-          <Route element={<ProtectedRoute><div /></ProtectedRoute>}>
-            <Route path="/telegram/edit" element={<TelegramEdit />} />
-            <Route path="/telegram/status" element={<TelegramStatus />} />
-          </Route>
+          {/* Rotas do Telegram Web App (sem ProtectedRoute, autenticação feita via WebApp) */}
+          <Route path="/telegram/edit" element={<TelegramEdit />} />
+          <Route path="/telegram/status" element={<TelegramStatus />} />
         </Routes>
       </Suspense>
     </PerfilProvider>

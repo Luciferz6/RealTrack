@@ -50,6 +50,21 @@ const timeframeOptions = [
 
 const labelTextClass = 'text-white/65';
 const softLabelTextClass = 'text-white/55';
+const normalizeKey = (value: string) => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+const SPORT_ICON_MAP: Record<string, string> = {
+  basquetebol: '⚽️',
+  'futebol americano': '🏈',
+  basquete: '🏀',
+  futebol: '⚽️',
+  tenis: '🎾',
+  volei: '🏐',
+  corridas: '🏎️',
+};
+const getSportIcon = (name?: string) => {
+  if (!name) return '🏅';
+  const key = normalizeKey(name);
+  return SPORT_ICON_MAP[key] ?? '🏅';
+};
 
 interface BreakdownCardItem {
   id: string;
@@ -160,7 +175,7 @@ export default function Dashboard() {
     () =>
       resumoPorEsporte.slice(0, 4).map((item, index) => ({
         id: item.esporte || `esporte-${index}`,
-        icon: '⚽️',
+        icon: getSportIcon(item.esporte),
         name: item.esporte || 'Outros',
         subtitle: `${item.apostas} apostas • ${formatPercent(item.aproveitamento)} de vitórias`,
         roi: item.roi,
