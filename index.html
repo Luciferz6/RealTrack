@@ -13,6 +13,31 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <!-- Carregar fonte com font-display: swap para não bloquear renderização -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <script>
+      (function () {
+        const suppressedPrefixes = ['[Telegram.WebView]'];
+        if (!window.console) {
+          return;
+        }
+
+        const originalLog = window.console.log?.bind(window.console);
+
+        if (!originalLog) {
+          return;
+        }
+
+        window.console.log = function (...args) {
+          const firstArg = args[0];
+          const shouldSuppress =
+            typeof firstArg === 'string' &&
+            suppressedPrefixes.some((prefix) => firstArg.startsWith(prefix));
+
+          if (!shouldSuppress) {
+            originalLog(...args);
+          }
+        };
+      })();
+    </script>
     <!-- Telegram Web App Script -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
   </head>
