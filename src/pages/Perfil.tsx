@@ -359,10 +359,6 @@ export default function Perfil() {
         <div className="mt-6 flex flex-1 justify-center text-center text-white">
           <div className="flex w-full max-w-3xl items-center justify-between gap-10">
             <div className="space-y-1">
-              <p className="text-xs uppercase tracking-[0.3em] text-white/60">Preço mensal</p>
-              <p className="text-lg font-semibold text-white">{formatCurrency(profile.plano.preco)}</p>
-            </div>
-            <div className="space-y-1">
               <p className="text-xs uppercase tracking-[0.3em] text-white/60">Limite diário</p>
               <p className="text-lg font-semibold text-white">
                 {isUnlimitedPlan ? (
