@@ -463,11 +463,22 @@ export default function TelegramEdit() {
         </div>
 
         <div>
-          <label className="mb-2 block text-sm font-medium">Jogo *</label>
+          <label className="mb-2 block text-sm font-medium">Evento *</label>
           <input
             type="text"
             value={formData.jogo}
             onChange={(e) => setFormData({ ...formData, jogo: e.target.value })}
+            className={inputClasses}
+          />
+        </div>
+
+        {/* Campo Aposta igual ao modal do site */}
+        <div>
+          <label className="mb-2 block text-sm font-medium">Aposta *</label>
+          <input
+            type="text"
+            value={formData.aposta || ''}
+            onChange={(e) => setFormData({ ...formData, aposta: e.target.value })}
             className={inputClasses}
           />
         </div>

@@ -158,7 +158,6 @@ export default function ApostaForm({
             type="text" 
             value={formData.evento}
             onChange={(e) => onChange('evento', e.target.value)}
-            placeholder="Ex: Minnesota Timberwolves @ Dallas Mavericks"
             className={inputClass}
           />
           {errors.evento && <span className="text-sm text-danger">{errors.evento}</span>}
@@ -171,7 +170,6 @@ export default function ApostaForm({
             type="text" 
             value={formData.aposta}
             onChange={(e) => onChange('aposta', e.target.value)}
-            placeholder="Ex: Flagg, Cooper 7+ (Ressaltos) / 20+ (Pontos) / 5+ (Assistências)"
             className={inputClass}
           />
           {errors.aposta && <span className="text-sm text-danger">{errors.aposta}</span>}
