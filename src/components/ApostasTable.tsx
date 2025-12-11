@@ -112,7 +112,6 @@ export default function ApostasTable({
                   <th className="px-4 py-3">Stake</th>
                   <th className="px-4 py-3">Status</th>
                   <th className="px-4 py-3">Retorno Obtido</th>
-                  <th className="px-4 py-3">Aposta</th>
                   <th className="px-4 py-3 text-right">Ações</th>
                 </tr>
               </thead>
@@ -179,7 +178,6 @@ function ApostaRow({ aposta, onOpenStatusModal, onEdit, onDelete }: ApostaRowPro
       <td className="px-4 py-4 font-semibold text-white">
         {aposta.retornoObtido != null ? formatCurrency(aposta.retornoObtido) : '-'}
       </td>
-      <td className="px-4 py-4 text-white/80">{aposta.aposta}</td> {/* Coluna aposta à direita */}
       <td className="px-4 py-4">
         <div className="flex justify-end gap-2">
           <button
