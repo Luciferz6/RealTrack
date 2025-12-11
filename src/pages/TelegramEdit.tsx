@@ -34,6 +34,7 @@ declare global {
           isProgressVisible: boolean;
           setText: (text: string) => void;
           onClick: (callback: () => void) => void;
+          offClick?: (callback: () => void) => void;
           show: () => void;
           hide: () => void;
           enable: () => void;
@@ -74,6 +75,7 @@ export default function TelegramEdit() {
   const [authenticated, setAuthenticated] = useState(false);
   const [bancas, setBancas] = useState<{ id: string; nome: string }[]>([]);
   const [tipsters, setTipsters] = useState<{ id: string; nome: string }[]>([]);
+  const isTelegram = typeof window !== 'undefined' && Boolean(window.Telegram?.WebApp);
 
   // Log inicial para debug e garantir que algo apareça
   useEffect(() => {
@@ -257,7 +259,9 @@ export default function TelegramEdit() {
 
 
   const handleSave = useCallback(async () => {
-    if (!betId || !aposta) return;
+    if (!betId || !aposta) {
+      return;
+    }
 
     // Prevenir múltiplas chamadas simultâneas
     if (saving) {
@@ -268,6 +272,11 @@ export default function TelegramEdit() {
     try {
       setSaving(true);
       setError('');
+
+      if (isTelegram) {
+        window.Telegram!.WebApp.MainButton.showProgress(true);
+        window.Telegram!.WebApp.MainButton.disable();
+      }
 
       // Validar campos obrigatórios
       const esporte = formData.esporte.trim();
@@ -377,22 +386,64 @@ export default function TelegramEdit() {
       setError(typeof errorMessage === 'string' ? errorMessage : 'Erro ao salvar aposta');
       if (window.Telegram?.WebApp) {
         window.Telegram.WebApp.MainButton.hideProgress();
+        window.Telegram.WebApp.MainButton.enable();
       }
     } finally {
       setSaving(false);
+      if (window.Telegram?.WebApp) {
+        window.Telegram.WebApp.MainButton.hideProgress();
+        window.Telegram.WebApp.MainButton.enable();
+      }
     }
-  }, [betId, aposta, formData, saving, messageId, chatId]);
+  }, [betId, aposta, formData, saving, messageId, chatId, isTelegram]);
 
   // Configurar Telegram WebApp após handleSave estar definido
   useEffect(() => {
-    if (authenticated && window.Telegram?.WebApp) {
-      window.Telegram.WebApp.ready();
-      window.Telegram.WebApp.expand();
-      window.Telegram.WebApp.MainButton.setText('Salvar Alterações');
-      window.Telegram.WebApp.MainButton.show();
-      window.Telegram.WebApp.MainButton.onClick(() => void handleSave());
+    if (!(authenticated && window.Telegram?.WebApp)) {
+      return;
     }
+
+    const mainButton = window.Telegram.WebApp.MainButton;
+    const onClick = () => { void handleSave(); };
+
+    window.Telegram.WebApp.ready();
+    window.Telegram.WebApp.expand();
+    mainButton.setText('Salvar Alterações');
+    mainButton.show();
+    mainButton.onClick(onClick);
+
+    return () => {
+      if (typeof mainButton.offClick === 'function') {
+        mainButton.offClick(onClick);
+      }
+      mainButton.hideProgress();
+    };
   }, [authenticated, handleSave]);
+
+  useEffect(() => {
+    if (!window.Telegram?.WebApp) {
+      return;
+    }
+
+    const mainButton = window.Telegram.WebApp.MainButton;
+
+    if (saving) {
+      mainButton.showProgress(true);
+      mainButton.disable();
+      return () => {
+        mainButton.hideProgress();
+        mainButton.enable();
+      };
+    }
+
+    if (loading || !aposta) {
+      mainButton.hideProgress();
+      mainButton.disable();
+    } else {
+      mainButton.hideProgress();
+      mainButton.enable();
+    }
+  }, [loading, saving, aposta]);
 
   // SEMPRE renderizar algo - nunca deixar tela preta
   // Mostrar loading ou erro com estilos inline para garantir que apareça
