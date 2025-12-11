@@ -21,6 +21,8 @@ export interface ApiBet {
   bancaId: string;
   esporte: string;
   jogo: string;
+  aposta: string; // novo campo
+  mercados?: string[]; // novo campo array
   torneio?: string | null;
   pais?: string | null;
   mercado: string;
@@ -138,6 +140,8 @@ export interface ApiUploadTicketResponse {
     tipster?: string;
     esporte?: string;
     jogo?: string;
+    aposta?: string;
+    mercados?: string[];
     torneio?: string;
     pais?: string;
     mercado?: string;

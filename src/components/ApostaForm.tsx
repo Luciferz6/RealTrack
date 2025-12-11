@@ -20,7 +20,8 @@ import { cn } from './ui/utils';
 export interface ApostaFormData {
   bancaId: string;
   esporte: string;
-  jogo: string;
+  evento: string; // era jogo
+  aposta: string; // novo campo
   torneio: string;
   pais: string;
   mercado: string;
@@ -38,7 +39,8 @@ export interface ApostaFormData {
 export interface ApostaFormErrors {
   bancaId?: string;
   esporte?: string;
-  jogo?: string;
+  evento?: string;
+  aposta?: string;
   mercado?: string;
   tipoAposta?: string;
   valorApostado?: string;
@@ -149,17 +151,30 @@ export default function ApostaForm({
           {errors.esporte && <span className="text-sm text-danger">{errors.esporte}</span>}
         </div>
 
-        {/* Jogo */}
+        {/* Evento */}
         <div className="flex flex-col gap-2">
-          <label className="text-sm font-semibold text-foreground">Jogo *</label>
+          <label className="text-sm font-semibold text-foreground">Evento *</label>
           <input 
             type="text" 
-            value={formData.jogo}
-            onChange={(e) => onChange('jogo', e.target.value)}
-            placeholder="Digite o jogo"
+            value={formData.evento}
+            onChange={(e) => onChange('evento', e.target.value)}
+            placeholder="Ex: Minnesota Timberwolves @ Dallas Mavericks"
             className={inputClass}
           />
-          {errors.jogo && <span className="text-sm text-danger">{errors.jogo}</span>}
+          {errors.evento && <span className="text-sm text-danger">{errors.evento}</span>}
+        </div>
+
+        {/* Aposta */}
+        <div className="flex flex-col gap-2">
+          <label className="text-sm font-semibold text-foreground">Aposta *</label>
+          <input 
+            type="text" 
+            value={formData.aposta}
+            onChange={(e) => onChange('aposta', e.target.value)}
+            placeholder="Ex: Flagg, Cooper 7+ (Ressaltos) / 20+ (Pontos) / 5+ (Assistências)"
+            className={inputClass}
+          />
+          {errors.aposta && <span className="text-sm text-danger">{errors.aposta}</span>}
         </div>
 
         {/* Torneio removido temporariamente */}

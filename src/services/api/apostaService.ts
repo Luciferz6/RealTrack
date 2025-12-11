@@ -22,6 +22,8 @@ export interface Aposta {
   bancaId: string;
   esporte: string;
   jogo: string;
+  aposta: string; // novo campo
+  mercados?: string[]; // novo campo array
   torneio: string;
   pais: string;
   mercado: string;
@@ -57,6 +59,8 @@ export interface CreateApostaPayload {
   bancaId: string;
   esporte: string;
   jogo: string;
+  aposta: string; // novo campo
+  mercados?: string[];
   torneio?: string;
   pais?: string;
   mercado: string;
@@ -72,6 +76,8 @@ export interface CreateApostaPayload {
 }
 
 export interface UpdateApostaPayload extends Partial<CreateApostaPayload> {
+  aposta?: string;
+  mercados?: string[];
   retornoObtido?: number;
 }
 
@@ -123,6 +129,8 @@ const mapApostaFromApi = (item: ApiBet | ApiBetWithBank): Aposta => ({
   bancaId: item.bancaId,
   esporte: item.esporte,
   jogo: item.jogo,
+  aposta: (item as any).aposta ?? '',
+  mercados: (item as any).mercados ?? [],
   torneio: item.torneio ?? '',
   pais: item.pais ?? '',
   mercado: item.mercado,
